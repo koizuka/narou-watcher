@@ -6,7 +6,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
-	cookiejar "github.com/juju/persistent-cookiejar"
+	cookiejar "github.com/orirawlings/persistent-cookiejar"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
@@ -71,7 +71,8 @@ func (session *Session) LoadCookie() error {
 	filename := fmt.Sprintf("%v%v/cookie", session.FilePrefix, session.Name)
 
 	jar, err := cookiejar.New(&cookiejar.Options{
-		Filename: filename,
+		Filename:              filename,
+		PersistSessionCookies: true,
 	})
 	if err == nil {
 		session.jar = jar

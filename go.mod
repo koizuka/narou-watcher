@@ -8,9 +8,7 @@ require (
 	github.com/chromedp/chromedp v0.6.8
 	github.com/dimchansky/utfbom v1.1.1
 	github.com/frankban/quicktest v1.11.3 // indirect
-	github.com/juju/go4 v0.0.0-20160222163258-40d72ab9641a // indirect
-	github.com/juju/persistent-cookiejar v0.0.0-20171026135701-d5e5a8405ef9
+	github.com/orirawlings/persistent-cookiejar v0.3.0
 	golang.org/x/text v0.3.5
-	gopkg.in/errgo.v1 v1.0.1 // indirect
 	gopkg.in/retry.v1 v1.0.3 // indirect
 )

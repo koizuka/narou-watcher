@@ -71,8 +71,8 @@ func main() {
 	session.FilePrefix = "log/"
 	session.SaveToFile = true
 	//session.NotUseNetwork = true // replay
-	session.ShowRequestHeader = true
-	session.ShowResponseHeader = true
+	//session.ShowRequestHeader = true
+	//session.ShowResponseHeader = true
 
 	err := session.LoadCookie()
 	if err != nil {
@@ -126,7 +126,7 @@ func main() {
 	}
 
 	// cookie を保存
-	err = session.SaveCookie() // TODO 何故か何も保存されない
+	err = session.SaveCookie()
 	if err != nil {
 		log.Fatalf("* SaveCookie error! %v", err)
 	}
@@ -157,4 +157,6 @@ func main() {
 		session.Printf("%v: %v/%v", novel_id, bookmark, latest)
 	}
 
+	// こっちから取るほうがいい?
+	_, _ = session.GetPage("https://syosetu.com/favnovelmain/isnoticelist/")
 }
