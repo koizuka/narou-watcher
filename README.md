@@ -8,7 +8,4 @@ go build && ./narou-watcher < login.txt
 ```
 で実行すると取れる。以後はcookieが永続化する( `log/narou/cookie` というファイル)
 
-## メモ
-https://github.com/juju/persistent-cookiejar は max-age がないクッキーを永続化してくれないので
-https://github.com/orirawlings/persistent-cookiejar を使ったらいけた。神
-
+https://github.com/koizuka/scraper を使ってる
