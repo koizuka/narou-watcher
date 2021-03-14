@@ -68,7 +68,7 @@ func (page *Page) Form(selector string) (*Form, error) {
 	form := page.Find(selector)
 	numForm := form.Length()
 	if numForm != 1 {
-		return nil, fmt.Errorf("selector='%v', found %v items. something went wrong.", selector, numForm)
+		return nil, fmt.Errorf("selector='%v', found %v items. something went wrong", selector, numForm)
 	}
 
 	elements := map[string]*FormElement{}

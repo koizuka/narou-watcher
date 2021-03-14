@@ -1,11 +1,8 @@
 package scraper
 
 import (
-	"context"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"github.com/chromedp/cdproto/page"
-	"github.com/chromedp/chromedp"
 	cookiejar "github.com/orirawlings/persistent-cookiejar"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
@@ -14,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -300,7 +296,7 @@ func (session *Session) FollowSelectionLink(page *Page, selection *goquery.Selec
 	}
 	linkUrl, ok := selection.Attr(attr)
 	if !ok {
-		return nil, fmt.Errorf("'%v': missing %v.", page.Url.String(), attr)
+		return nil, fmt.Errorf("'%v': missing %v", page.Url.String(), attr)
 	}
 
 	reqUrl, err := page.ResolveLink(linkUrl)
@@ -323,7 +319,7 @@ func (session *Session) FollowLink(page *Page, linkSelector string, attr string)
 		return nil, fmt.Errorf("%v '%v': found %v items", page.Url.String(), linkSelector, numLink)
 	}
 	if _, ok := selection.Attr(attr); !ok {
-		return nil, fmt.Errorf("%v '%v': missing %v.", page.Url.String(), linkSelector, attr)
+		return nil, fmt.Errorf("%v '%v': missing %v", page.Url.String(), linkSelector, attr)
 	}
 
 	return session.FollowSelectionLink(page, selection, attr)
@@ -392,50 +388,4 @@ func (session *Session) FollowAnchorTextOptFirst(page *Page, text string, checkA
 
 func (session *Session) FollowAnchorText(page *Page, text string) (*Response, error) {
 	return session.FollowAnchorTextOpt(page, text, true)
-}
-
-func (session *Session) NewChrome() (context.Context, context.CancelFunc, string, error) {
-	chromeUserDataDir, err := filepath.Abs("./chromeUserData")
-	if err != nil {
-		return nil, func() {}, "", err
-	}
-
-	allocCtx, allocCancel := chromedp.NewExecAllocator(
-		context.Background(),
-		chromedp.UserDataDir(chromeUserDataDir),
-	// chromedp.Headless,// headlessにするにはこの2行を有効にするのだが、ちゃんと終わらない...
-	// chromedp.DisableGPU,
-	)
-
-	ctxt, cancel := chromedp.NewContext(allocCtx, chromedp.WithLogf(session.Printf))
-	cancelFunc := func() {
-		cancel()
-		allocCancel()
-	}
-
-	downloadPath, err := filepath.Abs(session.FilePrefix + session.Name + "/chrome")
-	if err != nil {
-		return ctxt, cancelFunc, "", err
-	}
-
-	err = os.MkdirAll(downloadPath, 0777)
-	if err != nil {
-		return ctxt, cancelFunc, "", fmt.Errorf("couldn't create directory: %v", downloadPath)
-	}
-
-	// configure to download behavior
-	err = chromedp.Run(ctxt,
-		chromedp.ActionFunc(func(ctxt context.Context) error {
-			err := page.SetDownloadBehavior("allow").WithDownloadPath(downloadPath).Do(ctxt)
-			if err != nil {
-				return err
-			}
-			return nil
-		}))
-
-	if err != nil {
-		return ctxt, cancelFunc, "", err
-	}
-
-	return ctxt, cancelFunc, downloadPath, nil
 }

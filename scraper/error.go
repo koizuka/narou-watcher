@@ -22,7 +22,7 @@ type UnexpectedContentTypeError struct {
 }
 
 func (error UnexpectedContentTypeError) Error() string {
-	return fmt.Sprintf("Unexpected Content-Type received")
+	return "Unexpected Content-Type received"
 }
 
 type MaintenanceError struct {

@@ -124,11 +124,9 @@ func TestFormPage(t *testing.T) {
 			elem := form.Elements[name]
 			if elem == nil {
 				t.Errorf(fmt.Sprintf("%v: form.Elements[%v] == nil", i, name))
-			}
-			if elem.Value == nil {
+			} else if elem.Value == nil {
 				t.Errorf(fmt.Sprintf("%v: avaiableValue of %v == nil", i, name))
-			}
-			if elem.Value.Value != shouldBe {
+			} else if elem.Value.Value != shouldBe {
 				t.Errorf(fmt.Sprintf("%v: value of %v: %v != %v", i, name, shouldBe, elem.Value.Value))
 			}
 		}
@@ -136,11 +134,9 @@ func TestFormPage(t *testing.T) {
 			elem := form.Elements[name]
 			if elem == nil {
 				t.Errorf(fmt.Sprintf("%v: form.Elements[%v] == nil", i, name))
-			}
-			if elem.Value == nil {
+			} else if elem.Value == nil {
 				t.Errorf(fmt.Sprintf("%v: avaiableValue of %v == nil", i, name))
-			}
-			if elem.Value.Label != shouldBe {
+			} else if elem.Value.Label != shouldBe {
 				t.Errorf(fmt.Sprintf("%v: label of %v: %v != %v", i, name, shouldBe, elem.Value.Value))
 			}
 		}
