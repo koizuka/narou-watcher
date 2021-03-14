@@ -3,8 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"github.com/koizuka/scraper"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -89,23 +89,31 @@ type TopFavItem struct {
 
 // お気に入り新着をパース
 func parseFavNovelList(session *scraper.Session, page *scraper.Page) error {
-	items := page.Find("div.favnovel_list")
-	for i := 0; i < items.Length(); i++ {
-		item := items.Eq(i)
+	var parsed []TopFavItem
+	err := scraper.Unmarshal(
+		&parsed,
+		page.Find("div.favnovel_list"),
+		scraper.UnmarshalOption{},
+	)
+	if err != nil {
+		return fmt.Errorf("favnovel_list: %v", err)
+	}
 
-		var parsed TopFavItem
-		err := scraper.Unmarshal(&parsed, item, scraper.UnmarshalOption{})
-		if err != nil {
-			return fmt.Errorf("favnovel_list %v: %v", i, err)
+	for _, item := range parsed {
+		newMark := ""
+		if item.BookmarkURL.Episode < item.LatestURL.Episode {
+			newMark = "* "
 		}
 
-		session.Printf("title: '%v'", parsed.Title)
-		session.Printf("%v: %v/%v",
-			parsed.NovelURL.NovelID,
-			parsed.BookmarkURL.Episode,
-			parsed.LatestURL.Episode,
+		session.Printf("%v'%v' (%v) %v/%v",
+			newMark,
+			item.Title,
+			item.NovelURL.NovelID,
+			item.BookmarkURL.Episode,
+			item.LatestURL.Episode,
 		)
 	}
+
 	return nil
 }
 
