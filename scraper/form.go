@@ -78,7 +78,7 @@ func (page *Page) Form(selector string) (*Form, error) {
 		name, ok := s.Attr("name")
 		if !ok {
 			t, ok := s.Attr("type")
-			if (!ok || t != "submit") {
+			if !ok || t != "submit" {
 				page.Logger.Printf("an input element without name (%#V) found. ignore.", s)
 			}
 			continue

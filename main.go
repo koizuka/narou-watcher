@@ -47,7 +47,7 @@ func (prompter *Prompter) prompt(prompt string) (string, error) {
 	return line, err
 }
 
-func ExtractNovelURL(url string) (id string, episode uint) {
+func ExtractNovelURL(url string) (id string, episode uint, err error) {
 	id = ""
 	episode = 0
 	re := regexp.MustCompile(`https?://ncode\.syosetu\.com/([^/]*)/([0-9]*)`)
@@ -61,8 +61,52 @@ func ExtractNovelURL(url string) (id string, episode uint) {
 				episode = uint(parsed)
 			}
 		}
+		return id, episode, nil
 	}
-	return id, episode
+	return "", 0, fmt.Errorf("invalid URL: '%v'", url)
+}
+
+type EpisodeURL struct {
+	NovelID string
+	Episode uint
+}
+
+func (decoded *EpisodeURL) Unmarshal(s string) error {
+	id, episode, err := ExtractNovelURL(s)
+	if err == nil {
+		decoded.NovelID = id
+		decoded.Episode = episode
+	}
+	return err
+}
+
+type TopFavItem struct {
+	NovelURL    EpisodeURL `find:"a.favnovel_hover" attr:"href"`
+	Title       string     `find:"span.favnovel_title"`
+	BookmarkURL EpisodeURL `find:"span.no a" attr:"href"`
+	LatestURL   EpisodeURL `find:"span.favnovel_info a" attr:"href"`
+}
+
+// お気に入り新着をパース
+func parseFavNovelList(session *scraper.Session, page *scraper.Page) error {
+	items := page.Find("div.favnovel_list")
+	for i := 0; i < items.Length(); i++ {
+		item := items.Eq(i)
+
+		var parsed TopFavItem
+		err := scraper.Unmarshal(&parsed, item, scraper.UnmarshalOption{})
+		if err != nil {
+			return fmt.Errorf("favnovel_list %v: %v", i, err)
+		}
+
+		session.Printf("title: '%v'", parsed.Title)
+		session.Printf("%v: %v/%v",
+			parsed.NovelURL.NovelID,
+			parsed.BookmarkURL.Episode,
+			parsed.LatestURL.Episode,
+		)
+	}
+	return nil
 }
 
 func main() {
@@ -131,30 +175,9 @@ func main() {
 		log.Fatalf("* SaveCookie error! %v", err)
 	}
 
-	// お気に入り新着をパース
-	items := page.Find("div.favnovel_list")
-	for i := 0; i < items.Length(); i++ {
-		item := items.Eq(i)
-		ch := item.Children()
-		title := ch.Eq(0).Find("span.favnovel_title").Text()
-		session.Printf("title: '%v'", title)
-		var novel_id string
-		if url, ok := ch.Eq(0).Attr("href"); ok {
-			novel_id, _ = ExtractNovelURL(url)
-		}
-
-		var bookmark uint
-		var latest uint
-
-		if url, ok := ch.Find("span.no a").Eq(0).Attr("href"); ok {
-			_, bookmark = ExtractNovelURL(url)
-		}
-
-		if url, ok := ch.Find("span.favnovel_info a").Eq(0).Attr("href"); ok {
-			_, latest = ExtractNovelURL(url)
-		}
-
-		session.Printf("%v: %v/%v", novel_id, bookmark, latest)
+	err = parseFavNovelList(session, page)
+	if err != nil {
+		log.Fatalf("* parseFavNovelList error! %v", err)
 	}
 
 	// こっちから取るほうがいい?
