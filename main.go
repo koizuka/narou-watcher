@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"narou-watcher/scraper"
+	"github.com/koizuka/scraper"
 	"os"
 	"regexp"
 	"strconv"

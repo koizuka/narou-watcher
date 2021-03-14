@@ -3,8 +3,8 @@ github.com/PuerkitoBio/goquery v1.6.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBK
 github.com/andybalholm/cascadia v1.1.0 h1:BuuO6sSfQNFRu1LppgbD25Hr2vLYW25JvxHs5zzsLTo=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/chromedp/cdproto v0.0.0-20210305224431-50b9f457e822/go.mod h1:At5TxYYdxkbQL0TSefRjhLE3Q0lgvqKKMSFUglJ7i1U=
-github.com/chromedp/cdproto v0.0.0-20210311013119-4e41b2544bc6 h1:Nbxi0akw7ZJDo4Zee9QvKyIeOsDgE3XHov+HaR5Dj9E=
-github.com/chromedp/cdproto v0.0.0-20210311013119-4e41b2544bc6/go.mod h1:At5TxYYdxkbQL0TSefRjhLE3Q0lgvqKKMSFUglJ7i1U=
+github.com/chromedp/cdproto v0.0.0-20210313213058-f5c5a7a06834 h1:bAPO7g37Tn5VRqlA5MuPhoN4XtIz0SkrMD2vC6AyXM4=
+github.com/chromedp/cdproto v0.0.0-20210313213058-f5c5a7a06834/go.mod h1:At5TxYYdxkbQL0TSefRjhLE3Q0lgvqKKMSFUglJ7i1U=
 github.com/chromedp/chromedp v0.6.8 h1:hsMFAylK8PxqmpxzoxHkSJAV5qnixG0UJcNL70IRntg=
 github.com/chromedp/chromedp v0.6.8/go.mod h1:4NiJ4rKpkhU1Eor5stea0NvibADXd8drgtzj6+3eXZ4=
 github.com/chromedp/sysutil v1.0.0 h1:+ZxhTpfpZlmchB58ih/LBHX52ky7w2VhQVKQMucy3Ic=
@@ -34,6 +34,8 @@ github.com/juju/retry v0.0.0-20180821225755-9058e192b216/go.mod h1:OohPQGsr4pnxw
 github.com/juju/testing v0.0.0-20190429233213-dfc56b8c09fc/go.mod h1:63prj8cnj0tU0S9OHjGJn+b1h0ZghCndfnbQolrYTwA=
 github.com/juju/utils v0.0.0-20180808125547-9dfc6dbfb02b/go.mod h1:6/KLg8Wz/y2KVGWEpkK9vMNGkOnu4k/cqs8Z1fKjTOk=
 github.com/juju/version v0.0.0-20180108022336-b64dbd566305/go.mod h1:kE8gK5X0CImdr7qpSKl3xB2PmpySSmfj7zVbkZFs81U=
+github.com/koizuka/scraper v0.0.0-20210314140913-0eab964a94b3 h1:dYxk6+PD4G7dYx2aa0801pDdWB8C5HQgoObqsmwLCSs=
+github.com/koizuka/scraper v0.0.0-20210314140913-0eab964a94b3/go.mod h1:5uA8uN3CPWutE4yJk23BQVOaDnVLEJL3ZCamKVPGPVM=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.1 h1:Fmg33tUaq4/8ym9TJN1x7sLJnHVwhP33CNkpYV/7rwI=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
