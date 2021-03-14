@@ -36,6 +36,8 @@ github.com/juju/utils v0.0.0-20180808125547-9dfc6dbfb02b/go.mod h1:6/KLg8Wz/y2KV
 github.com/juju/version v0.0.0-20180108022336-b64dbd566305/go.mod h1:kE8gK5X0CImdr7qpSKl3xB2PmpySSmfj7zVbkZFs81U=
 github.com/koizuka/scraper v0.0.0-20210314140913-0eab964a94b3 h1:dYxk6+PD4G7dYx2aa0801pDdWB8C5HQgoObqsmwLCSs=
 github.com/koizuka/scraper v0.0.0-20210314140913-0eab964a94b3/go.mod h1:5uA8uN3CPWutE4yJk23BQVOaDnVLEJL3ZCamKVPGPVM=
+github.com/koizuka/scraper v0.0.1 h1:4Ti62Ju6tvqVy5gpWzh7avAgdrRHb5ojhpJHTJ8oD0A=
+github.com/koizuka/scraper v0.0.1/go.mod h1:5uA8uN3CPWutE4yJk23BQVOaDnVLEJL3ZCamKVPGPVM=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.1 h1:Fmg33tUaq4/8ym9TJN1x7sLJnHVwhP33CNkpYV/7rwI=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
