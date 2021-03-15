@@ -88,9 +88,14 @@ type TopFavItem struct {
 }
 
 // お気に入り新着をパース
-func parseFavNovelList(session *scraper.Session, page *scraper.Page) error {
+func getFavNovelList(session *scraper.Session) error {
+	page, err := getNarouPage(session, "https://syosetu.com/user/top/")
+	if err != nil {
+		return fmt.Errorf("get user/top error! %v", err)
+	}
+
 	var parsed []TopFavItem
-	err := scraper.Unmarshal(
+	err = scraper.Unmarshal(
 		&parsed,
 		page.Find("div.favnovel_list"),
 		scraper.UnmarshalOption{},
@@ -129,8 +134,7 @@ type IsNoticeListItemEven struct {
 	LatestURL   EpisodeURL `find:"span.no a:nth-of-type(2)" attr:"href"`
 }
 
-// https://syosetu.com/favnovelmain/isnoticelist/
-func parseIsNoticeList(session *scraper.Session, page *scraper.Page) error {
+func getIsNoticeList(session *scraper.Session) error {
 	//
 	// table.favnovel
 	//   tr
@@ -153,9 +157,14 @@ func parseIsNoticeList(session *scraper.Session, page *scraper.Page) error {
 	//         a[@href=リンク]
 	//           設定
 
+	page, err := getNarouPage(session, "https://syosetu.com/favnovelmain/isnoticelist/")
+	if err != nil {
+		log.Fatalf("* get isnoticelist error! %v", err)
+	}
+
 	var odd []IsNoticeListItemOdd
 	var even []IsNoticeListItemEven
-	err := scraper.Unmarshal(
+	err = scraper.Unmarshal(
 		&odd,
 		page.Find("table.favnovel tr:nth-of-type(odd)"),
 		scraper.UnmarshalOption{},
@@ -191,6 +200,62 @@ func parseIsNoticeList(session *scraper.Session, page *scraper.Page) error {
 	return nil
 }
 
+func getNarouPage(session *scraper.Session, url string) (*scraper.Page, error) {
+	page, err := session.GetPage(url)
+	if err != nil {
+		return nil, err
+	}
+
+	LoginFormSelector := "div#login_box>form"
+
+	isLoginPage := func(page *scraper.Page) bool {
+		forms := page.Find(LoginFormSelector)
+		return forms.Length() > 0
+	}
+
+	// ログイン
+	if isLoginPage(page) {
+		form, err := page.Form(LoginFormSelector)
+		if err != nil {
+			return nil, fmt.Errorf("* Form() error! %v", err)
+		}
+
+		var prompter Prompter
+
+		id, err := prompter.prompt("IDまたはメールアドレス")
+		if err != nil {
+			return nil, fmt.Errorf("prompt for id error: %v", err)
+		}
+		password, err := prompter.prompt("パスワード")
+		if err != nil {
+			return nil, fmt.Errorf("prompt for password error: %v", err)
+		}
+
+		_ = form.Set("narouid", id)
+		_ = form.Set("pass", password)
+		resp, err := session.Submit(form)
+		if err != nil {
+			return nil, fmt.Errorf("session.Submit() error: %v", err)
+		}
+		page, err = resp.Page()
+		if err != nil {
+			return nil, fmt.Errorf("resp.Page() error: %v", err)
+		}
+
+		if isLoginPage(page) {
+			return nil, fmt.Errorf("login failed")
+		}
+	}
+
+	// cookie を保存
+	err = session.SaveCookie()
+	if err != nil {
+		return nil, fmt.Errorf("* SaveCookie error! %v", err)
+	}
+
+	return page, nil
+}
+
 func main() {
 	var logger scraper.ConsoleLogger
 	session := scraper.NewSession("narou", logger)
@@ -205,70 +270,13 @@ func main() {
 		log.Fatalf("* LoadCookie error! %v", err)
 	}
 
-	page, err := session.GetPage("https://syosetu.com/user/top/")
-	if err != nil {
-		log.Fatalf("* GetPage (1) error! %v", err)
-	}
-
-	LoginFormSelector := "div#login_box>form"
-
-	isLoginPage := func(page *scraper.Page) bool {
-		forms := page.Find(LoginFormSelector)
-		return forms.Length() > 0
-	}
-
-	// ログイン
-	if isLoginPage(page) {
-		form, err := page.Form(LoginFormSelector)
-		if err != nil {
-			log.Fatalf("* Form() error! %v", err)
-		}
-
-		var prompter Prompter
-
-		id, err := prompter.prompt("IDまたはメールアドレス")
-		if err != nil {
-			log.Fatalf("%v", err)
-		}
-		password, err := prompter.prompt("パスワード")
-		if err != nil {
-			log.Fatalf("%v", err)
-		}
-
-		_ = form.Set("narouid", id)
-		_ = form.Set("pass", password)
-		resp, err := session.Submit(form)
-		if err != nil {
-			log.Fatalf("* session.Submit() error! %v", err)
-		}
-		page, err = resp.Page()
-		if err != nil {
-			log.Fatalf("* resp.Page() error! %v", err)
-		}
-
-		if isLoginPage(page) {
-			log.Fatalf("Login failed.")
-		}
-	}
-
-	// cookie を保存
-	err = session.SaveCookie()
-	if err != nil {
-		log.Fatalf("* SaveCookie error! %v", err)
-	}
-
-	err = parseFavNovelList(session, page)
+	err = getFavNovelList(session)
 	if err != nil {
 		log.Fatalf("* parseFavNovelList error! %v", err)
 	}
 
 	// こっちから取るほうがいい?
-	page, err = session.GetPage("https://syosetu.com/favnovelmain/isnoticelist/")
-	if err != nil {
-		log.Fatalf("* get isnoticelist error! %v", err)
-	}
-
-	err = parseIsNoticeList(session, page)
+	err = getIsNoticeList(session)
 	if err != nil {
 		log.Fatalf("* parseIsNoticeList error! %v", err)
 	}
