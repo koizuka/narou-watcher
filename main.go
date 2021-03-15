@@ -47,38 +47,50 @@ func (prompter *Prompter) prompt(prompt string) (string, error) {
 	return line, err
 }
 
-func ExtractNovelURL(url string) (site string, id string, episode uint, err error) {
-	id = ""
-	episode = 0
-	re := regexp.MustCompile(`https?://(ncode|novel18)\.syosetu\.com/([^/]*)/([0-9]*)`)
-
-	found := re.FindStringSubmatch(url)
-	if len(found) > 2 {
-		site = found[1]
-		id = found[2]
-		if len(found) > 2 {
-			parsed, err := strconv.ParseUint(found[3], 10, 32)
-			if err == nil {
-				episode = uint(parsed)
-			}
-		}
-		return site, id, episode, nil
-	}
-	return "", "", 0, fmt.Errorf("invalid URL: '%v'", url)
-}
-
 type EpisodeURL struct {
 	SiteID  string // "ncode" or "novel18"
 	NovelID string
 	Episode uint
 }
 
+func ParseEpisodeURL(url string) (result EpisodeURL, err error) {
+	result.SiteID = ""
+	result.Episode = 0
+	re := regexp.MustCompile(`https?://(ncode|novel18)\.syosetu\.com/([^/]*)/([0-9]*)`)
+
+	found := re.FindStringSubmatch(url)
+	if len(found) > 2 {
+		result.SiteID = found[1]
+		result.NovelID = found[2]
+		if len(found) > 2 {
+			parsed, err := strconv.ParseUint(found[3], 10, 32)
+			if err == nil {
+				result.Episode = uint(parsed)
+			}
+		}
+		return result, nil
+	}
+	return result, fmt.Errorf("invalid URL: '%v'", url)
+}
+
+func (e EpisodeURL) String() string {
+	siteId := e.SiteID
+	if siteId == "" {
+		siteId = "ncode"
+	}
+
+	return fmt.Sprintf(
+		"https://%v.syosetu.com/%v/%v/",
+		siteId,
+		e.NovelID,
+		e.Episode,
+	)
+}
+
 func (decoded *EpisodeURL) Unmarshal(s string) error {
-	site, id, episode, err := ExtractNovelURL(s)
+	temp, err := ParseEpisodeURL(s)
 	if err == nil {
-		decoded.SiteID = site
-		decoded.NovelID = id
-		decoded.Episode = episode
+		*decoded = temp
 	}
 	return err
 }
@@ -90,6 +102,14 @@ type IsNoticeList struct {
 	UpdateTime      time.Time
 	BookmarkEpisode uint
 	LatestEpisode   uint
+}
+
+func (i IsNoticeList) NextURL() EpisodeURL {
+	return EpisodeURL{
+		SiteID:  i.SiteID,
+		NovelID: i.NovelID,
+		Episode: i.BookmarkEpisode + 1,
+	}
 }
 
 type IsNoticeList_TitleInfo struct {
@@ -221,6 +241,30 @@ func getNarouPage(session *scraper.Session, url string) (*scraper.Page, error) {
 	return page, nil
 }
 
+type DurationUnit struct {
+	Name string
+	Unit time.Duration
+}
+
+func FormatDuration(d time.Duration) string {
+	result := ""
+
+	units := []DurationUnit{
+		{"d", 24 * time.Hour},
+		{"h", time.Hour},
+		{"m", time.Minute},
+	}
+
+	for _, u := range units {
+		if d >= u.Unit {
+			result = result + fmt.Sprintf("%d%s", d/u.Unit, u.Name)
+			d = d % u.Unit
+		}
+	}
+
+	return result
+}
+
 type BookmarkTypes struct {
 	Name            string
 	SiteID          string
@@ -231,12 +275,13 @@ func main() {
 	var logger scraper.ConsoleLogger
 	session := scraper.NewSession("narou", logger)
 	session.FilePrefix = "log/"
-	// session.SaveToFile = true
-	//session.NotUseNetwork = true // replay
-	//session.ShowRequestHeader = true
-	//session.ShowResponseHeader = true
+	// session.SaveToFile = true    // record
+	// session.NotUseNetwork = true // replay
+	// session.ShowRequestHeader = true
+	// session.ShowResponseHeader = true
 
-	loc := time.Local
+	// なろうの時刻表示は日本時間
+	loc, _ := time.LoadLocation("Asia/Tokyo")
 
 	err := session.LoadCookie()
 	if err != nil {
@@ -248,6 +293,8 @@ func main() {
 		{"小説化になろう(R18)", "novel18", "https://syosetu.com/favnovelmain18/isnoticelist/"},
 	}
 
+	durationToIgnore := 30 * 24 * time.Hour // 30日以上前の更新作品は無視する
+
 	for _, bookmark := range bookmarks {
 		session.Printf("")
 		session.Printf("%v(%v)", bookmark.Name, bookmark.SiteID)
@@ -258,19 +305,28 @@ func main() {
 			log.Fatalf("* parseIsNoticeList error! %v", err)
 		}
 
+		count := 0
 		for _, item := range items {
 			if item.BookmarkEpisode == item.LatestEpisode {
 				continue
 			}
+			if time.Since(item.UpdateTime) >= durationToIgnore {
+				continue
+			}
 
-			session.Printf("%v: %v %v/%v(未読%v) '%v'",
+			session.Printf("%v: %v(%v) %v/%v(未読%v) '%v'",
 				item.NovelID,
 				item.UpdateTime.Format("2006/01/02 15:04"),
+				FormatDuration(time.Since(item.UpdateTime)),
 				item.BookmarkEpisode,
 				item.LatestEpisode,
 				item.LatestEpisode-item.BookmarkEpisode,
 				item.Title,
 			)
+			session.Printf(" -> %v", item.NextURL())
+
+			count++
 		}
+		session.Printf("%v items.", count)
 	}
 }
