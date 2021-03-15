@@ -122,16 +122,20 @@ func getFavNovelList(session *scraper.Session) error {
 	return nil
 }
 
-type IsNoticeListItemOdd struct {
+type IsNoticeList_TitleInfo struct {
 	Title      string     `find:"a.title"`
 	NovelURL   EpisodeURL `find:"a.title" attr:"href"`
 	AuthorName string     `find:"span.fn_name"`
 }
-type IsNoticeListItemEven struct {
+type IsNoticeList_UpdateInfo struct {
 	IsNotice    string     `find:"span.isnotice"`
 	UpdateTime  time.Time  `find:"td.info2 p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
 	BookmarkURL EpisodeURL `find:"span.no a:nth-of-type(1)" attr:"href"`
 	LatestURL   EpisodeURL `find:"span.no a:nth-of-type(2)" attr:"href"`
+}
+type IsNoticeList struct {
+	TitleInfo  IsNoticeList_TitleInfo  `find:"tr:nth-of-type(1)"`
+	UpdateInfo IsNoticeList_UpdateInfo `find:"tr:nth-of-type(2)"`
 }
 
 func getIsNoticeList(session *scraper.Session) error {
@@ -162,38 +166,31 @@ func getIsNoticeList(session *scraper.Session) error {
 		log.Fatalf("* get isnoticelist error! %v", err)
 	}
 
-	var odd []IsNoticeListItemOdd
-	var even []IsNoticeListItemEven
+	var parsed []IsNoticeList
 	err = scraper.Unmarshal(
-		&odd,
-		page.Find("table.favnovel tr:nth-of-type(odd)"),
+		&parsed,
+		page.Find("table.favnovel"),
 		scraper.UnmarshalOption{},
 	)
 	if err != nil {
 		return fmt.Errorf("favnovel_list: %v", err)
 	}
 
-	err = scraper.Unmarshal(
-		&even,
-		page.Find("table.favnovel tr:nth-of-type(even)"),
-		scraper.UnmarshalOption{},
-	)
-	if err != nil {
-		return fmt.Errorf("favnovel_list: %v", err)
-	}
+	for _, item := range parsed {
+		titleInfo := item.TitleInfo
+		updateInfo := item.UpdateInfo
 
-	for i, item := range even {
 		newMark := ""
-		if item.BookmarkURL.Episode < item.LatestURL.Episode {
+		if updateInfo.BookmarkURL.Episode < updateInfo.LatestURL.Episode {
 			newMark = "* "
 		}
 
 		session.Printf("%v'%v' (%v) %v/%v",
 			newMark,
-			odd[i].Title,
-			odd[i].NovelURL.NovelID,
-			item.BookmarkURL.Episode,
-			item.LatestURL.Episode,
+			titleInfo.Title,
+			titleInfo.NovelURL.NovelID,
+			updateInfo.BookmarkURL.Episode,
+			updateInfo.LatestURL.Episode,
 		)
 	}
 
