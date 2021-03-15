@@ -102,6 +102,8 @@ github.com/koizuka/scraper v0.0.2 h1:ts+RFZECJljjrGZG/kex+O+DNm9reUp9VXrNXhxD1qs
 github.com/koizuka/scraper v0.0.2/go.mod h1:5uA8uN3CPWutE4yJk23BQVOaDnVLEJL3ZCamKVPGPVM=
 github.com/koizuka/scraper v0.0.3 h1:lCP4fF2rYOGi2iSFfhpPX0udHXgJL9SvhAg6Es/uAoA=
 github.com/koizuka/scraper v0.0.3/go.mod h1:5uA8uN3CPWutE4yJk23BQVOaDnVLEJL3ZCamKVPGPVM=
+github.com/koizuka/scraper v0.0.4 h1:wShUBMcKpEWgbPKBzAW74sQK+JQlMvvDHyiyBkB9mHM=
+github.com/koizuka/scraper v0.0.4/go.mod h1:5uA8uN3CPWutE4yJk23BQVOaDnVLEJL3ZCamKVPGPVM=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.1 h1:Fmg33tUaq4/8ym9TJN1x7sLJnHVwhP33CNkpYV/7rwI=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
