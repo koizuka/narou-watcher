@@ -117,6 +117,80 @@ func parseFavNovelList(session *scraper.Session, page *scraper.Page) error {
 	return nil
 }
 
+type IsNoticeListItemOdd struct {
+	Title      string     `find:"a.title"`
+	NovelURL   EpisodeURL `find:"a.title" attr:"href"`
+	AuthorName string     `find:"span.fn_name"`
+}
+type IsNoticeListItemEven struct {
+	IsNotice    string     `find:"span.isnotice"`
+	UpdateTime  time.Time  `find:"td.info2 p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
+	BookmarkURL EpisodeURL `find:"span.no a:nth-of-type(1)" attr:"href"`
+	LatestURL   EpisodeURL `find:"span.no a:nth-of-type(2)" attr:"href"`
+}
+
+// https://syosetu.com/favnovelmain/isnoticelist/
+func parseIsNoticeList(session *scraper.Session, page *scraper.Page) error {
+	//
+	// table.favnovel
+	//   tr
+	//     td.kyokyo1[@rowspan=2]
+	//     td.title2
+	//       a.title[@href=<link>] タイトル
+	//       span.fn_name 著者名
+	//   tr
+	//     td.info2
+	//       p
+	//         span.isnotice チェック中
+	//         更新日：2021/03/13 13:50
+	//         span.no
+	//           a[@href=リンク]
+	//             img[src=アイコン画像]
+	//             &nbps;207部分
+	//           a[@href=リンク]
+	//             最新208部分
+	//       p.right
+	//         a[@href=リンク]
+	//           設定
+
+	var odd []IsNoticeListItemOdd
+	var even []IsNoticeListItemEven
+	err := scraper.Unmarshal(
+		&odd,
+		page.Find("table.favnovel tr:nth-of-type(odd)"),
+		scraper.UnmarshalOption{},
+	)
+	if err != nil {
+		return fmt.Errorf("favnovel_list: %v", err)
+	}
+
+	err = scraper.Unmarshal(
+		&even,
+		page.Find("table.favnovel tr:nth-of-type(even)"),
+		scraper.UnmarshalOption{},
+	)
+	if err != nil {
+		return fmt.Errorf("favnovel_list: %v", err)
+	}
+
+	for i, item := range even {
+		newMark := ""
+		if item.BookmarkURL.Episode < item.LatestURL.Episode {
+			newMark = "* "
+		}
+
+		session.Printf("%v'%v' (%v) %v/%v",
+			newMark,
+			odd[i].Title,
+			odd[i].NovelURL.NovelID,
+			item.BookmarkURL.Episode,
+			item.LatestURL.Episode,
+		)
+	}
+
+	return nil
+}
+
 func main() {
 	var logger scraper.ConsoleLogger
 	session := scraper.NewSession("narou", logger)
@@ -189,5 +263,13 @@ func main() {
 	}
 
 	// こっちから取るほうがいい?
-	_, _ = session.GetPage("https://syosetu.com/favnovelmain/isnoticelist/")
+	page, err = session.GetPage("https://syosetu.com/favnovelmain/isnoticelist/")
+	if err != nil {
+		log.Fatalf("* get isnoticelist error! %v", err)
+	}
+
+	err = parseIsNoticeList(session, page)
+	if err != nil {
+		log.Fatalf("* parseIsNoticeList error! %v", err)
+	}
 }
