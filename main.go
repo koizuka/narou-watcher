@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/koizuka/scraper"
+	"github.com/skratchdot/open-golang/open"
 	"log"
 	"os"
 	"regexp"
@@ -324,6 +325,7 @@ func main() {
 				item.Title,
 			)
 			session.Printf(" -> %v", item.NextURL())
+			open.Run(item.NextURL().NovelID)
 
 			count++
 		}
