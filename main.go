@@ -281,6 +281,8 @@ func main() {
 	// session.ShowRequestHeader = true
 	// session.ShowResponseHeader = true
 
+	const maxOpen = 3
+
 	// なろうの時刻表示は日本時間
 	loc, _ := time.LoadLocation("Asia/Tokyo")
 
@@ -295,6 +297,8 @@ func main() {
 	}
 
 	durationToIgnore := 30 * 24 * time.Hour // 30日以上前の更新作品は無視する
+
+	openCount := 0
 
 	for _, bookmark := range bookmarks {
 		session.Printf("")
@@ -325,7 +329,10 @@ func main() {
 				item.Title,
 			)
 			session.Printf(" -> %v", item.NextURL())
-			open.Run(item.NextURL().NovelID)
+			if openCount < maxOpen {
+				openCount++
+				open.Run(item.NextURL().NovelID)
+			}
 
 			count++
 		}
