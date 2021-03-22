@@ -74,7 +74,7 @@ func ParseEpisodeURL(url string) (result EpisodeURL, err error) {
 	return result, fmt.Errorf("invalid URL: '%v'", url)
 }
 
-func (e EpisodeURL) String() string {
+func (e EpisodeURL) URL() string {
 	siteId := e.SiteID
 	if siteId == "" {
 		siteId = "ncode"
@@ -331,7 +331,7 @@ func main() {
 			session.Printf(" -> %v", item.NextURL())
 			if openCount < maxOpen {
 				openCount++
-				open.Run(item.NextURL().NovelID)
+				open.Run(item.NextURL().URL())
 			}
 
 			count++
