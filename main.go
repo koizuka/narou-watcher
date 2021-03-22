@@ -88,6 +88,10 @@ func (e EpisodeURL) URL() string {
 	)
 }
 
+func (e EpisodeURL) Strig() string {
+	return e.URL()
+}
+
 func (decoded *EpisodeURL) Unmarshal(s string) error {
 	temp, err := ParseEpisodeURL(s)
 	if err == nil {
@@ -329,7 +333,7 @@ func main() {
 				item.Title,
 			)
 			session.Printf(" -> %v", item.NextURL())
-			if openCount < maxOpen {
+			if openCount < maxOpen && item.NextURL().Episode <= item.LatestEpisode {
 				openCount++
 				open.Run(item.NextURL().URL())
 			}
