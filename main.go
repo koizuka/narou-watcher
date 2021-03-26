@@ -88,7 +88,7 @@ func (e EpisodeURL) URL() string {
 	)
 }
 
-func (e EpisodeURL) Strig() string {
+func (e EpisodeURL) String() string {
 	return e.URL()
 }
 
@@ -285,7 +285,8 @@ func main() {
 	// session.ShowRequestHeader = true
 	// session.ShowResponseHeader = true
 
-	const maxOpen = 3
+	const maxOpen = 3                            // この数まで一度に大でブラウザを開く数
+	const durationToIgnore = 30 * 24 * time.Hour // 30日以上前の更新作品は無視する
 
 	// なろうの時刻表示は日本時間
 	loc, _ := time.LoadLocation("Asia/Tokyo")
@@ -299,8 +300,6 @@ func main() {
 		{"小説化になろう", "ncode", "https://syosetu.com/favnovelmain/isnoticelist/"},
 		{"小説化になろう(R18)", "novel18", "https://syosetu.com/favnovelmain18/isnoticelist/"},
 	}
-
-	durationToIgnore := 30 * 24 * time.Hour // 30日以上前の更新作品は無視する
 
 	openCount := 0
 
