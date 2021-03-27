@@ -48,6 +48,11 @@ type ParsedIsNoticeList struct {
  * @param page 更新チェック中小説一覧ページ(IsNoticeListURL)を取得した結果を与えること
  */
 func ParseIsNoticeList(page *scraper.Page) ([]IsNoticeList, error) {
+	const wantTitle = "更新通知チェック中一覧"
+	title := page.Find("title").Text()
+	if title != wantTitle {
+		return nil, fmt.Errorf("title mismatch: got:'%v', want:'%v'", title, wantTitle)
+	}
 	//
 	// table.favnovel
 	//   tr

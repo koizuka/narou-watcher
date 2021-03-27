@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/koizuka/scraper"
 	"net/url"
@@ -112,39 +113,38 @@ const TestHtml = `<?xml version="1.0" encoding="UTF-8"?>
 </td>
 </tr>
 </table>
-
 <div class="pager_idou"><span>1</span>&nbsp;<a href="index.php?p=2" title="page 2">2</a>&nbsp;<a href="index.php?p=3" title="page 3">3</a>&nbsp;<a href="index.php?p=4" title="page 4">4</a>&nbsp;<a href="index.php?p=5" title="page 5">5</a>&nbsp;<a href="index.php?p=6" title="page 6">6</a>&nbsp;<a href="index.php?p=7" title="page 7">7</a>&nbsp;<a href="index.php?p=8" title="page 8">8</a>&nbsp;<a href="index.php?p=2" title="next page">Next &gt;&gt;</a>&nbsp;</div>
-
 </form>
-
-
 </div><!--main-->
-
 </div><!--contents2-->
-
 </div><!--container-->
-
 </body></html>`
 
 func TestParseIsNoticeList(t *testing.T) {
+	time := func(s string) time.Time {
+		const layout = "2006/01/02 15:04"
+		result, _ := time.ParseInLocation(layout, s, NarouLocation)
+		return result
+	}
 	type args struct {
 		html string
 	}
-	const layout = "2006/01/02 15:04"
-	updateTime1, _ := time.ParseInLocation(layout, "2000/01/02 03:04", NarouLocation)
-	updateTime2, _ := time.ParseInLocation(layout, "2001/02/03 04:05", NarouLocation)
 	tests := []struct {
 		name    string
 		args    args
 		want    []IsNoticeList
-		wantErr bool
+		wantErr error
 	}{
 		{"更新チェック中一覧テスト", args{TestHtml},
 			[]IsNoticeList{
-				{"ncode", "作品1", "タイトル1", updateTime1, 1, 2},
-				{"ncode", "作品2", "タイトル2", updateTime2, 3, 4},
+				{"ncode", "作品1", "タイトル1", time("2000/01/02 03:04"), 1, 2},
+				{"ncode", "作品2", "タイトル2", time("2001/02/03 04:05"), 3, 4},
 			},
-			false,
+			nil,
+		},
+		{"タイトルエラー", args{"<html><head><title>invalid title</title></head></html>"},
+			nil,
+			errors.New("title mismatch: got:'invalid title', want:'更新通知チェック中一覧'"),
 		},
 	}
 	for _, tt := range tests {
@@ -154,8 +154,8 @@ func TestParseIsNoticeList(t *testing.T) {
 				t.Errorf("ParseIsNoticeList() html error = %v", err)
 			}
 			got, err := ParseIsNoticeList(page)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseIsNoticeList() error = %v, wantErr %v", err, tt.wantErr)
+			if !reflect.DeepEqual(err, tt.wantErr) {
+				t.Errorf("ParseIsNoticeList()\n error = %v,\n wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
