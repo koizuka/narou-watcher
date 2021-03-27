@@ -12,6 +12,11 @@ import (
 	"github.com/skratchdot/open-golang/open"
 )
 
+const (
+	maxOpen          = 2                   // この数まで一度に大でブラウザを開く
+	durationToIgnore = 30 * 24 * time.Hour // 30日以上前の更新作品は無視する
+)
+
 type Prompter struct {
 	reader *bufio.Reader
 }
@@ -54,10 +59,21 @@ func FormatDuration(d time.Duration) string {
 	return result
 }
 
-func main() {
-	const maxOpen = 2                            // この数まで一度に大でブラウザを開く数
-	const durationToIgnore = 30 * 24 * time.Hour // 30日以上前の更新作品は無視する
+func filterUpdates(from []IsNoticeList) []IsNoticeList {
+	var result []IsNoticeList
+	for _, item := range from {
+		if item.BookmarkEpisode == item.LatestEpisode {
+			continue
+		}
+		if time.Since(item.UpdateTime) >= durationToIgnore {
+			continue
+		}
+		result = append(result, item)
+	}
+	return result
+}
 
+func main() {
 	var console scraper.ConsoleLogger
 	logger := scraper.BufferedLogger{}
 	defer logger.Flush(console)
@@ -102,20 +118,6 @@ func main() {
 		if err != nil {
 			narou.Flush(&logger)
 			log.Fatal(err)
-		}
-
-		filterUpdates := func(from []IsNoticeList) []IsNoticeList {
-			result := []IsNoticeList{}
-			for _, item := range from {
-				if item.BookmarkEpisode == item.LatestEpisode {
-					continue
-				}
-				if time.Since(item.UpdateTime) >= durationToIgnore {
-					continue
-				}
-				result = append(result, item)
-			}
-			return result
 		}
 
 		updates := filterUpdates(results)
