@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	maxOpen          = 2                   // この数まで一度に大でブラウザを開く
+	maxOpen          = 2                   // この数まで一度に最大でブラウザを開く
 	durationToIgnore = 30 * 24 * time.Hour // 30日以上前の更新作品は無視する
 )
 
