@@ -19,7 +19,7 @@ type Options struct {
 type NarouWatcher struct {
 	session  *scraper.Session
 	log      *scraper.BufferedLogger
-	location *time.Location
+	Location *time.Location
 	options  Options
 }
 
@@ -59,7 +59,7 @@ func NewNarouWatcher(opt Options) (*NarouWatcher, error) {
 	return &NarouWatcher{
 		session:  session,
 		log:      log,
-		location: loc,
+		Location: loc,
 		options:  opt,
 	}, nil
 }

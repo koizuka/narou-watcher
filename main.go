@@ -119,7 +119,7 @@ func main() {
 			log.Fatalf("GetPage(%v) failed: %v", site.IsNoticeListURL, err)
 		}
 
-		results, err := narou.ParseIsNoticeList(page)
+		results, err := ParseIsNoticeList(page, narou.Location)
 		if err != nil {
 			narou.Flush(&logger)
 			log.Fatal(err)

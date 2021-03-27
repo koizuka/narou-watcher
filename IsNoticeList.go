@@ -45,8 +45,10 @@ type ParsedIsNoticeList struct {
 }
 
 /** 更新通知チェック中一覧の先頭ページの内容を解読して返す
+ * @param page 更新チェック中小説一覧ページを取得した結果を与えること
+ * @param location NarouWatcher.Location を与えること
  */
-func (narou *NarouWatcher) ParseIsNoticeList(page *scraper.Page) ([]IsNoticeList, error) {
+func ParseIsNoticeList(page *scraper.Page, location *time.Location) ([]IsNoticeList, error) {
 	//
 	// table.favnovel
 	//   tr
@@ -74,7 +76,7 @@ func (narou *NarouWatcher) ParseIsNoticeList(page *scraper.Page) ([]IsNoticeList
 	err := scraper.Unmarshal(
 		&parsed,
 		page.Find("table.favnovel"),
-		scraper.UnmarshalOption{Loc: narou.location},
+		scraper.UnmarshalOption{Loc: location},
 	)
 	if err != nil {
 		return result, fmt.Errorf("unmarshal failed: %v", err)
