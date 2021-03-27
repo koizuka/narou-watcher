@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+const (
+	IsNoticeListURL    = "https://syosetu.com/favnovelmain/isnoticelist/"
+	IsNoticeListR18URL = "https://syosetu.com/favnovelmain18/isnoticelist/"
+)
+
 type IsNoticeList struct {
 	SiteID          string
 	NovelID         string
@@ -39,9 +44,9 @@ type ParsedIsNoticeList struct {
 	UpdateInfo IsnoticelistUpdateinfo `find:"tr:nth-of-type(2)"`
 }
 
-/** 更新通知チェック中一覧の先頭ページの内容を返す
+/** 更新通知チェック中一覧の先頭ページの内容を解読して返す
  */
-func (narou *NarouWatcher) GetIsNoticeList(url string) ([]IsNoticeList, error) {
+func (narou *NarouWatcher) ParseIsNoticeList(page *scraper.Page) ([]IsNoticeList, error) {
 	//
 	// table.favnovel
 	//   tr
@@ -65,13 +70,8 @@ func (narou *NarouWatcher) GetIsNoticeList(url string) ([]IsNoticeList, error) {
 	//           設定
 	var result []IsNoticeList
 
-	page, err := narou.getPage(url)
-	if err != nil {
-		return result, fmt.Errorf("getPage failed: %v", err)
-	}
-
 	var parsed []ParsedIsNoticeList
-	err = scraper.Unmarshal(
+	err := scraper.Unmarshal(
 		&parsed,
 		page.Find("table.favnovel"),
 		scraper.UnmarshalOption{Loc: narou.location},

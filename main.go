@@ -83,8 +83,8 @@ func main() {
 		IsNoticeListURL string
 	}
 	bookmarks := []Bookmark{
-		{"小説化になろう", "https://syosetu.com/favnovelmain/isnoticelist/"},
-		{"小説化になろう(R18)", "https://syosetu.com/favnovelmain18/isnoticelist/"},
+		{"小説化になろう", IsNoticeListURL},
+		{"小説化になろう(R18)", IsNoticeListR18URL},
 	}
 
 	getLoginInfo := func() (id, password string, err error) {
@@ -114,7 +114,12 @@ func main() {
 	openCount := 0
 
 	for _, bookmark := range bookmarks {
-		results, err := narou.GetIsNoticeList(bookmark.IsNoticeListURL)
+		page, err := narou.GetPage(bookmark.IsNoticeListURL)
+		if err != nil {
+			log.Fatalf("GetPage(%v) failed: %v", bookmark.IsNoticeListURL, err)
+		}
+
+		results, err := narou.ParseIsNoticeList(page)
 		if err != nil {
 			narou.Flush(&logger)
 			log.Fatal(err)

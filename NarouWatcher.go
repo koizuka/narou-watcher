@@ -53,7 +53,7 @@ func NewNarouWatcher(opt Options) (*NarouWatcher, error) {
 
 	err = session.LoadCookie()
 	if err != nil {
-		return nil, fmt.Errorf("* LoadCookie error! %v", err)
+		return nil, fmt.Errorf("LoadCookie failed: %v", err)
 	}
 
 	return &NarouWatcher{
@@ -64,7 +64,10 @@ func NewNarouWatcher(opt Options) (*NarouWatcher, error) {
 	}, nil
 }
 
-func (narou *NarouWatcher) getPage(url string) (*scraper.Page, error) {
+/**
+ * なろうのページを取得する。もしログインが要求されたらログインしてから取得する。
+ */
+func (narou *NarouWatcher) GetPage(url string) (*scraper.Page, error) {
 	page, err := narou.session.GetPage(url)
 	if err != nil {
 		return nil, err
