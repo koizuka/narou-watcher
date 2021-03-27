@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+var NarouLocation, _ = time.LoadLocation("Asia/Tokyo") // なろうの時刻表示は日本時間
+
 type Options struct {
 	SessionName        string
 	FilePrefix         string
@@ -17,10 +19,9 @@ type Options struct {
 }
 
 type NarouWatcher struct {
-	session  *scraper.Session
-	log      *scraper.BufferedLogger
-	Location *time.Location
-	options  Options
+	session *scraper.Session
+	log     *scraper.BufferedLogger
+	options Options
 }
 
 func (narou *NarouWatcher) Printf(format string, a ...interface{}) {
@@ -45,22 +46,15 @@ func NewNarouWatcher(opt Options) (*NarouWatcher, error) {
 	session.ShowRequestHeader = opt.ShowRequestHeader
 	session.ShowResponseHeader = opt.ShowResponseHeader
 
-	// なろうの時刻表示は日本時間
-	loc, err := time.LoadLocation("Asia/Tokyo")
-	if err != nil {
-		return nil, fmt.Errorf("LoadLocation failed: %v", err)
-	}
-
-	err = session.LoadCookie()
+	err := session.LoadCookie()
 	if err != nil {
 		return nil, fmt.Errorf("LoadCookie failed: %v", err)
 	}
 
 	return &NarouWatcher{
-		session:  session,
-		log:      log,
-		Location: loc,
-		options:  opt,
+		session: session,
+		log:     log,
+		options: opt,
 	}, nil
 }
 
