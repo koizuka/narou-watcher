@@ -78,11 +78,11 @@ func main() {
 	logger := scraper.BufferedLogger{}
 	defer logger.Flush(console)
 
-	type Bookmark struct {
+	type Site struct {
 		Name            string
 		IsNoticeListURL string
 	}
-	bookmarks := []Bookmark{
+	sites := []Site{
 		{"小説化になろう", IsNoticeListURL},
 		{"小説化になろう(R18)", IsNoticeListR18URL},
 	}
@@ -113,10 +113,10 @@ func main() {
 
 	openCount := 0
 
-	for _, bookmark := range bookmarks {
-		page, err := narou.GetPage(bookmark.IsNoticeListURL)
+	for _, site := range sites {
+		page, err := narou.GetPage(site.IsNoticeListURL)
 		if err != nil {
-			log.Fatalf("GetPage(%v) failed: %v", bookmark.IsNoticeListURL, err)
+			log.Fatalf("GetPage(%v) failed: %v", site.IsNoticeListURL, err)
 		}
 
 		results, err := narou.ParseIsNoticeList(page)
@@ -131,7 +131,7 @@ func main() {
 		}
 
 		logger.Printf("\n")
-		logger.Printf("%v\n", bookmark.Name)
+		logger.Printf("%v\n", site.Name)
 		logger.Printf("\n")
 
 		for _, item := range updates {
