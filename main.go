@@ -30,152 +30,6 @@ func (prompter *Prompter) prompt(prompt string) (string, error) {
 	return line, err
 }
 
-type IsNoticeList struct {
-	SiteID          string
-	NovelID         string
-	Title           string
-	UpdateTime      time.Time
-	BookmarkEpisode uint
-	LatestEpisode   uint
-}
-
-func (i IsNoticeList) NextURL() EpisodeURL {
-	return EpisodeURL{
-		SiteID:  i.SiteID,
-		NovelID: i.NovelID,
-		Episode: i.BookmarkEpisode + 1,
-	}
-}
-
-type IsNoticeList_TitleInfo struct {
-	Title      string     `find:"a.title"`
-	NovelURL   EpisodeURL `find:"a.title" attr:"href"`
-	AuthorName string     `find:"span.fn_name"`
-}
-type IsNoticeList_UpdateInfo struct {
-	IsNotice    string     `find:"span.isnotice"`
-	UpdateTime  time.Time  `find:"td.info2 p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
-	BookmarkURL EpisodeURL `find:"span.no a:nth-of-type(1)" attr:"href"`
-	LatestURL   EpisodeURL `find:"span.no a:nth-of-type(2)" attr:"href"`
-}
-type ParsedIsNoticeList struct {
-	TitleInfo  IsNoticeList_TitleInfo  `find:"tr:nth-of-type(1)"`
-	UpdateInfo IsNoticeList_UpdateInfo `find:"tr:nth-of-type(2)"`
-}
-
-// 更新通知チェック中一覧
-func getIsNoticeList(session *scraper.Session, url string, loc *time.Location) ([]IsNoticeList, error) {
-	//
-	// table.favnovel
-	//   tr
-	//     td.kyokyo1[@rowspan=2]
-	//     td.title2
-	//       a.title[@href=<link>] タイトル
-	//       span.fn_name 著者名
-	//   tr
-	//     td.info2
-	//       p
-	//         span.isnotice チェック中
-	//         更新日：2021/03/13 13:50
-	//         span.no
-	//           a[@href=リンク]
-	//             img[src=アイコン画像]
-	//             &nbps;207部分
-	//           a[@href=リンク]
-	//             最新208部分
-	//       p.right
-	//         a[@href=リンク]
-	//           設定
-	var result []IsNoticeList
-
-	page, err := getNarouPage(session, url)
-	if err != nil {
-		return result, fmt.Errorf("getNarouPage failed: %v", err)
-	}
-
-	var parsed []ParsedIsNoticeList
-	err = scraper.Unmarshal(
-		&parsed,
-		page.Find("table.favnovel"),
-		scraper.UnmarshalOption{Loc: loc},
-	)
-	if err != nil {
-		return result, fmt.Errorf("unmarshal failed: %v", err)
-	}
-
-	for _, item := range parsed {
-		titleInfo := item.TitleInfo
-		updateInfo := item.UpdateInfo
-
-		result = append(result, IsNoticeList{
-			Title:           titleInfo.Title,
-			SiteID:          titleInfo.NovelURL.SiteID,
-			NovelID:         titleInfo.NovelURL.NovelID,
-			UpdateTime:      updateInfo.UpdateTime,
-			BookmarkEpisode: updateInfo.BookmarkURL.Episode,
-			LatestEpisode:   updateInfo.LatestURL.Episode,
-		})
-	}
-
-	return result, nil
-}
-
-func getNarouPage(session *scraper.Session, url string) (*scraper.Page, error) {
-	page, err := session.GetPage(url)
-	if err != nil {
-		return nil, err
-	}
-
-	LoginFormSelector := "div#login_box>form"
-
-	isLoginPage := func(page *scraper.Page) bool {
-		forms := page.Find(LoginFormSelector)
-		return forms.Length() > 0
-	}
-
-	// ログイン
-	if isLoginPage(page) {
-		form, err := page.Form(LoginFormSelector)
-		if err != nil {
-			return nil, fmt.Errorf("login form not found: %v", err)
-		}
-
-		var prompter Prompter
-
-		id, err := prompter.prompt("IDまたはメールアドレス")
-		if err != nil {
-			return nil, fmt.Errorf("prompt for id error: %v", err)
-		}
-		password, err := prompter.prompt("パスワード")
-		if err != nil {
-			return nil, fmt.Errorf("prompt for password error: %v", err)
-		}
-
-		_ = form.Set("narouid", id)
-		_ = form.Set("pass", password)
-		resp, err := session.Submit(form)
-		if err != nil {
-			return nil, fmt.Errorf("session.Submit() failed: %v", err)
-		}
-		page, err = resp.Page()
-		if err != nil {
-			return nil, fmt.Errorf("resp.Page() failed: %v", err)
-		}
-
-		if isLoginPage(page) {
-			return nil, fmt.Errorf("login failed")
-		}
-	}
-
-	// cookie を保存
-	err = session.SaveCookie()
-	if err != nil {
-		return nil, fmt.Errorf("SaveCookie failed: %v", err)
-	}
-
-	return page, nil
-}
-
 type DurationUnit struct {
 	Name string
 	Unit time.Duration
@@ -200,59 +54,81 @@ func FormatDuration(d time.Duration) string {
 	return result
 }
 
-type BookmarkTypes struct {
-	Name            string
-	SiteID          string
-	IsNoticeListURL string
-}
-
 func main() {
-	var logger scraper.ConsoleLogger
-	session := scraper.NewSession("narou", logger)
-	session.FilePrefix = "log/"
-	// session.SaveToFile = true    // record
-	// session.NotUseNetwork = true // replay
-	// session.ShowRequestHeader = true
-	// session.ShowResponseHeader = true
-
-	const maxOpen = 3                            // この数まで一度に大でブラウザを開く数
+	const maxOpen = 2                            // この数まで一度に大でブラウザを開く数
 	const durationToIgnore = 30 * 24 * time.Hour // 30日以上前の更新作品は無視する
 
-	// なろうの時刻表示は日本時間
-	loc, _ := time.LoadLocation("Asia/Tokyo")
+	var console scraper.ConsoleLogger
+	logger := scraper.BufferedLogger{}
+	defer logger.Flush(console)
 
-	err := session.LoadCookie()
-	if err != nil {
-		log.Fatalf("* LoadCookie error! %v", err)
+	type Bookmark struct {
+		Name            string
+		IsNoticeListURL string
+	}
+	bookmarks := []Bookmark{
+		{"小説化になろう", "https://syosetu.com/favnovelmain/isnoticelist/"},
+		{"小説化になろう(R18)", "https://syosetu.com/favnovelmain18/isnoticelist/"},
 	}
 
-	bookmarks := []BookmarkTypes{
-		{"小説化になろう", "ncode", "https://syosetu.com/favnovelmain/isnoticelist/"},
-		{"小説化になろう(R18)", "novel18", "https://syosetu.com/favnovelmain18/isnoticelist/"},
+	getLoginInfo := func() (id, password string, err error) {
+		var prompter Prompter
+
+		id, err = prompter.prompt("IDまたはメールアドレス")
+		if err != nil {
+			return "", "", fmt.Errorf("prompt for id error: %v", err)
+		}
+		password, err = prompter.prompt("パスワード")
+		if err != nil {
+			return "", "", fmt.Errorf("prompt for password error: %v", err)
+		}
+		return id, password, nil
+	}
+
+	narou, err := NewNarouWatcher(Options{
+		SessionName:    "narou",
+		FilePrefix:     "log/",
+		GetCredentials: getLoginInfo,
+	})
+	if err != nil {
+		narou.Flush(&logger)
+		log.Fatal(err)
 	}
 
 	openCount := 0
 
 	for _, bookmark := range bookmarks {
-		session.Printf("")
-		session.Printf("%v(%v)", bookmark.Name, bookmark.SiteID)
-		session.Printf("")
-
-		items, err := getIsNoticeList(session, bookmark.IsNoticeListURL, loc)
+		results, err := narou.GetIsNoticeList(bookmark.IsNoticeListURL)
 		if err != nil {
-			log.Fatalf("* parseIsNoticeList error! %v", err)
+			narou.Flush(&logger)
+			log.Fatal(err)
 		}
 
-		count := 0
-		for _, item := range items {
-			if item.BookmarkEpisode == item.LatestEpisode {
-				continue
+		filterUpdates := func(from []IsNoticeList) []IsNoticeList {
+			result := []IsNoticeList{}
+			for _, item := range from {
+				if item.BookmarkEpisode == item.LatestEpisode {
+					continue
+				}
+				if time.Since(item.UpdateTime) >= durationToIgnore {
+					continue
+				}
+				result = append(result, item)
 			}
-			if time.Since(item.UpdateTime) >= durationToIgnore {
-				continue
-			}
+			return result
+		}
 
-			session.Printf("%v: %v(%v) %v/%v(未読%v) '%v'",
+		updates := filterUpdates(results)
+		if len(updates) == 0 {
+			continue
+		}
+
+		logger.Printf("\n")
+		logger.Printf("%v\n", bookmark.Name)
+		logger.Printf("\n")
+
+		for _, item := range updates {
+			logger.Printf("%v: %v(%v) %v/%v(未読%v) '%v'\n",
 				item.NovelID,
 				item.UpdateTime.Format("2006/01/02 15:04"),
 				FormatDuration(time.Since(item.UpdateTime)),
@@ -261,14 +137,12 @@ func main() {
 				item.LatestEpisode-item.BookmarkEpisode,
 				item.Title,
 			)
-			session.Printf(" -> %v", item.NextURL())
-			if openCount < maxOpen && item.NextURL().Episode <= item.LatestEpisode {
+			logger.Printf(" -> %v\n", item.NextEpisode())
+			if openCount < maxOpen && item.NextEpisode().Episode <= item.LatestEpisode {
 				openCount++
-				open.Run(item.NextURL().URL())
+				open.Run(item.NextEpisode().URL())
 			}
-
-			count++
 		}
-		session.Printf("%v items.", count)
+		logger.Printf("%v items.\n", len(updates))
 	}
 }
