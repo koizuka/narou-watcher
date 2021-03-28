@@ -6,6 +6,7 @@ import { DateTime, Duration } from 'luxon';
 import { Book } from '@material-ui/icons';
 
 const IgnoreDuration = Duration.fromObject({ days: 30 });
+const PollingInterval = 5 * 60 * 1000; // 5分ごとにポーリング
 
 type IsNoticeListRecord = {
   base_url: string;
@@ -75,7 +76,7 @@ function NarouUpdates() {
   return (
     <Box m={2} display="flex" flexDirection="column" bgcolor="background.paper">
       {unreads?.map((item, i) =>
-        <Button variant="contained" color={!i ? "primary" : undefined} href={nextLink(item)} target="_blank">
+        <Button key={item.base_url} variant="contained" color={!i ? "primary" : undefined} href={nextLink(item)} target="_blank">
           {`${item.title}(${item.bookmark + 1}部分)を開く`}
         </Button>
       )}
@@ -111,6 +112,7 @@ function App() {
   return (
     <div className="App">
       <SWRConfig value={{
+        refreshInterval: PollingInterval,
         fetcher: (args) => fetch(args).then(res => res.json())
       }}>
         <NarouUpdates />
