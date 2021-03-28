@@ -102,12 +102,16 @@ func getProjectDirectory() string {
 
 func main() {
 	const ListenPort = 7676
+
 	projectDir := getProjectDirectory()
 	fmt.Printf("project directory: '%v'\n", projectDir)
-	narouReactDir := path.Join(projectDir, "cmd", "narou-react", "build")
+
+	narouReactDir := path.Join(projectDir, "narou-react", "build")
 	fmt.Printf("narou-react directory: '%v'\n", narouReactDir)
+
 	logDir := path.Join(projectDir, "log")
 	fmt.Printf("log directory: '%v'\n", logDir)
+
 	sessionName := "narou"
 	fmt.Printf("session name: '%v'\n", sessionName)
 
