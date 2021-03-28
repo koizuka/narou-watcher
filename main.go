@@ -88,18 +88,18 @@ func main() {
 		{"小説化になろう(R18)", narou.IsNoticeListR18URL},
 	}
 
-	getLoginInfo := func() (id, password string, err error) {
+	getLoginInfo := func() (*narou.Credentials, error) {
 		var prompter Prompter
 
-		id, err = prompter.prompt("IDまたはメールアドレス")
+		id, err := prompter.prompt("IDまたはメールアドレス")
 		if err != nil {
-			return "", "", fmt.Errorf("prompt for id error: %v", err)
+			return nil, fmt.Errorf("prompt for id error: %v", err)
 		}
-		password, err = prompter.prompt("パスワード")
+		password, err := prompter.prompt("パスワード")
 		if err != nil {
-			return "", "", fmt.Errorf("prompt for password error: %v", err)
+			return nil, fmt.Errorf("prompt for password error: %v", err)
 		}
-		return id, password, nil
+		return &narou.Credentials{Id: id, Password: password}, nil
 	}
 
 	narouSession, err := narou.NewNarouWatcher(narou.Options{

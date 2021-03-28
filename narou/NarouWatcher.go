@@ -8,6 +8,11 @@ import (
 
 var NarouLocation, _ = time.LoadLocation("Asia/Tokyo") // なろうの時刻表示は日本時間
 
+type Credentials struct {
+	Id       string
+	Password string
+}
+
 type Options struct {
 	SessionName        string
 	FilePrefix         string
@@ -15,7 +20,7 @@ type Options struct {
 	NotUseNetwork      bool
 	ShowRequestHeader  bool
 	ShowResponseHeader bool
-	GetCredentials     func() (id, password string, err error)
+	GetCredentials     func() (params *Credentials, err error)
 }
 
 type NarouWatcher struct {
@@ -81,13 +86,16 @@ func (narou *NarouWatcher) GetPage(url string) (*scraper.Page, error) {
 			return nil, fmt.Errorf("login form not found: %v", err)
 		}
 
-		id, password, err := narou.options.GetCredentials()
+		credentials, err := narou.options.GetCredentials()
 		if err != nil {
 			return nil, fmt.Errorf("GetCredentials failed: %v", err)
 		}
+		if credentials == nil {
+			return nil, fmt.Errorf("GetCredentials returned nil")
+		}
 
-		_ = form.Set("narouid", id)
-		_ = form.Set("pass", password)
+		_ = form.Set("narouid", credentials.Id)
+		_ = form.Set("pass", credentials.Password)
 		resp, err := narou.session.Submit(form)
 		if err != nil {
 			return nil, fmt.Errorf("session.Submit() failed: %v", err)
