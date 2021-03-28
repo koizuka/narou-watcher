@@ -4,11 +4,14 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/rs/cors"
 	"log"
 	"narou-watcher/cmd/model"
 	"narou-watcher/narou"
 	"net/http"
 	"os"
+	"os/exec"
+	"path"
 	"strings"
 )
 
@@ -34,8 +37,7 @@ func (prompter *Prompter) prompt(prompt string) (string, error) {
 	return line, err
 }
 
-func NewNarouWatcherService() NarouWatcherService {
-
+func NewNarouWatcherService(logDir string, sessionName string) NarouWatcherService {
 	getLoginInfo := func() (*narou.Credentials, error) {
 		var prompter Prompter
 
@@ -51,8 +53,8 @@ func NewNarouWatcherService() NarouWatcherService {
 	}
 
 	session, err := narou.NewNarouWatcher(narou.Options{
-		SessionName:    "narou",
-		FilePrefix:     "log/",
+		SessionName:    sessionName,
+		FilePrefix:     logDir,
 		GetCredentials: getLoginInfo,
 	})
 	if err != nil {
@@ -88,10 +90,26 @@ func (service *NarouWatcherService) GetIsNoticeList(url string) ([]model.IsNotic
 	return result, nil
 }
 
+func getProjectDirectory() string {
+	out, err := exec.Command("git","rev-parse","--show-toplevel").Output()
+	if err != nil {
+		log.Fatalf("git failed: %v", err)
+	}
+	return strings.TrimSpace(string(out))
+}
+
 func main() {
 	const ListenPort = 7676
+	projectDir := getProjectDirectory()
+	fmt.Printf("project directory: '%v'\n", projectDir)
+	narouReactDir := path.Join(projectDir, "cmd", "narou-react", "build")
+	fmt.Printf("narou-react directory: '%v'\n", narouReactDir)
+	logDir := path.Join(projectDir, "log")
+	fmt.Printf("log directory: '%v'\n", logDir)
+	sessionName := "narou"
+	fmt.Printf("session name: '%v'\n", sessionName)
 
-	service := NewNarouWatcherService()
+	service := NewNarouWatcherService(logDir + "/", sessionName)
 
 	handler := func(w http.ResponseWriter, r *http.Request, url string) {
 		results, err := service.GetIsNoticeList(url)
@@ -110,12 +128,16 @@ func main() {
 		_, _ = w.Write(bin)
 	}
 
-	http.HandleFunc("/narou/isnoticelist", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/narou/isnoticelist", func(w http.ResponseWriter, r *http.Request) {
 		handler(w, r, narou.IsNoticeListURL)
 	})
-	http.HandleFunc("/r18/isnoticelist", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/r18/isnoticelist", func(w http.ResponseWriter, r *http.Request) {
 		handler(w, r, narou.IsNoticeListR18URL)
 	})
+	mux.Handle("/", http.FileServer(http.Dir(narouReactDir)))
 	fmt.Printf("Listening port %v...\n", ListenPort)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", ListenPort), nil))
+
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", ListenPort), cors.Default().Handler(mux)))
 }
