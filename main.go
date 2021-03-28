@@ -2,21 +2,24 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
-	"log"
-	"narou-watcher/narou"
-	"os"
-	"strings"
-	"time"
-
-	"github.com/koizuka/scraper"
+	"github.com/rs/cors"
 	"github.com/skratchdot/open-golang/open"
+	"log"
+	"narou-watcher/cmd/model"
+	"narou-watcher/narou"
+	"net"
+	"net/http"
+	"os"
+	"os/exec"
+	"path"
+	"strings"
 )
 
-const (
-	maxOpen          = 2                   // この数まで一度に最大でブラウザを開く
-	durationToIgnore = 30 * 24 * time.Hour // 30日以上前の更新作品は無視する
-)
+type NarouWatcherService struct {
+	session *narou.NarouWatcher
+}
 
 type Prompter struct {
 	reader *bufio.Reader
@@ -36,58 +39,7 @@ func (prompter *Prompter) prompt(prompt string) (string, error) {
 	return line, err
 }
 
-type DurationUnit struct {
-	Name string
-	Unit time.Duration
-}
-
-func FormatDuration(d time.Duration) string {
-	result := ""
-
-	units := []DurationUnit{
-		{"d", 24 * time.Hour},
-		{"h", time.Hour},
-		{"m", time.Minute},
-	}
-
-	for _, u := range units {
-		if d >= u.Unit {
-			result = result + fmt.Sprintf("%d%s", d/u.Unit, u.Name)
-			d = d % u.Unit
-		}
-	}
-
-	return result
-}
-
-func filterUpdates(from []narou.IsNoticeList) []narou.IsNoticeList {
-	var result []narou.IsNoticeList
-	for _, item := range from {
-		if item.BookmarkEpisode == item.LatestEpisode {
-			continue
-		}
-		if time.Since(item.UpdateTime) >= durationToIgnore {
-			continue
-		}
-		result = append(result, item)
-	}
-	return result
-}
-
-func main() {
-	var console scraper.ConsoleLogger
-	logger := scraper.BufferedLogger{}
-	defer logger.Flush(console)
-
-	type Site struct {
-		Name            string
-		IsNoticeListURL string
-	}
-	sites := []Site{
-		{"小説化になろう", narou.IsNoticeListURL},
-		{"小説化になろう(R18)", narou.IsNoticeListR18URL},
-	}
-
+func NewNarouWatcherService(logDir string, sessionName string) NarouWatcherService {
 	getLoginInfo := func() (*narou.Credentials, error) {
 		var prompter Prompter
 
@@ -102,54 +54,101 @@ func main() {
 		return &narou.Credentials{Id: id, Password: password}, nil
 	}
 
-	narouSession, err := narou.NewNarouWatcher(narou.Options{
-		SessionName:    "narou",
-		FilePrefix:     "log/",
+	session, err := narou.NewNarouWatcher(narou.Options{
+		SessionName:    sessionName,
+		FilePrefix:     logDir,
 		GetCredentials: getLoginInfo,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	openCount := 0
-
-	for _, site := range sites {
-		page, err := narouSession.GetPage(site.IsNoticeListURL)
-		if err != nil {
-			log.Fatalf("GetPage(%v) failed: %v", site.IsNoticeListURL, err)
-		}
-
-		results, err := narou.ParseIsNoticeList(page)
-		if err != nil {
-			narouSession.Flush(&logger)
-			log.Fatal(err)
-		}
-
-		updates := filterUpdates(results)
-		if len(updates) == 0 {
-			continue
-		}
-
-		logger.Printf("\n")
-		logger.Printf("%v\n", site.Name)
-		logger.Printf("\n")
-
-		for _, item := range updates {
-			logger.Printf("%v: %v(%v) %v/%v(未読%v) '%v'\n",
-				item.NovelID,
-				item.UpdateTime.Format("2006/01/02 15:04"),
-				FormatDuration(time.Since(item.UpdateTime)),
-				item.BookmarkEpisode,
-				item.LatestEpisode,
-				item.LatestEpisode-item.BookmarkEpisode,
-				item.Title,
-			)
-			logger.Printf(" -> %v\n", item.NextEpisode())
-			if openCount < maxOpen && item.NextEpisode().Episode <= item.LatestEpisode {
-				openCount++
-				_ = open.Run(item.NextEpisode().URL())
-			}
-		}
-		logger.Printf("%v items.\n", len(updates))
+	return NarouWatcherService{
+		session: session,
 	}
+}
+
+func (service *NarouWatcherService) GetIsNoticeList(url string) ([]model.IsNoticeListRecord, error) {
+	page, err := service.session.GetPage(url)
+	if err != nil {
+		return nil, fmt.Errorf("GetPage(%v) failed: %v", url, err)
+	}
+
+	items, err := narou.ParseIsNoticeList(page)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []model.IsNoticeListRecord
+	for _, item := range items {
+		result = append(result, model.IsNoticeListRecord{
+			BaseURL:         fmt.Sprintf("https://%v.syosetu.com/%v/", item.SiteID, item.NovelID),
+			UpdateTime:      item.UpdateTime,
+			BookmarkEpisode: item.BookmarkEpisode,
+			LatestEpisode:   item.LatestEpisode,
+			Title:           item.Title,
+		})
+	}
+	return result, nil
+}
+
+func getProjectDirectory() string {
+	out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
+	if err != nil {
+		log.Fatalf("git failed: %v", err)
+	}
+	return strings.TrimSpace(string(out))
+}
+
+func main() {
+	const ListenPort = 7676
+	projectDir := getProjectDirectory()
+	fmt.Printf("project directory: '%v'\n", projectDir)
+	narouReactDir := path.Join(projectDir, "cmd", "narou-react", "build")
+	fmt.Printf("narou-react directory: '%v'\n", narouReactDir)
+	logDir := path.Join(projectDir, "log")
+	fmt.Printf("log directory: '%v'\n", logDir)
+	sessionName := "narou"
+	fmt.Printf("session name: '%v'\n", sessionName)
+
+	service := NewNarouWatcherService(logDir+"/", sessionName)
+
+	handler := func(w http.ResponseWriter, r *http.Request, url string) {
+		results, err := service.GetIsNoticeList(url)
+		if err != nil {
+			w.WriteHeader(503)
+			return
+		}
+
+		bin, err := json.Marshal(results)
+		if err != nil {
+			w.WriteHeader(503)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write(bin)
+	}
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/narou/isnoticelist", func(w http.ResponseWriter, r *http.Request) {
+		handler(w, r, narou.IsNoticeListURL)
+	})
+	mux.HandleFunc("/r18/isnoticelist", func(w http.ResponseWriter, r *http.Request) {
+		handler(w, r, narou.IsNoticeListR18URL)
+	})
+	mux.Handle("/", http.FileServer(http.Dir(narouReactDir)))
+	fmt.Printf("Listening port %v...\n", ListenPort)
+
+	l, err := net.Listen("tcp", fmt.Sprintf(":%v", ListenPort))
+	if err != nil {
+		log.Fatalf("Listen Error: %v", err)
+	}
+
+	openAddress := fmt.Sprintf("http://localhost:%v", ListenPort)
+	fmt.Printf("open in brouser: %v\n", openAddress)
+	_ = open.Run(openAddress)
+
+	log.Fatal(http.Serve(l, cors.Default().Handler(mux)))
 }
