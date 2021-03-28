@@ -1,4 +1,4 @@
-package main
+package narou
 
 import (
 	"bytes"
@@ -121,7 +121,7 @@ const TestHtml = `<?xml version="1.0" encoding="UTF-8"?>
 </body></html>`
 
 func TestParseIsNoticeList(t *testing.T) {
-	time := func(s string) time.Time {
+	datetime := func(s string) time.Time {
 		const layout = "2006/01/02 15:04"
 		result, _ := time.ParseInLocation(layout, s, NarouLocation)
 		return result
@@ -137,8 +137,8 @@ func TestParseIsNoticeList(t *testing.T) {
 	}{
 		{"更新チェック中一覧テスト", args{TestHtml},
 			[]IsNoticeList{
-				{"ncode", "作品1", "タイトル1", time("2000/01/02 03:04"), 1, 2},
-				{"ncode", "作品2", "タイトル2", time("2001/02/03 04:05"), 3, 4},
+				{"ncode", "作品1", "タイトル1", datetime("2000/01/02 03:04"), 1, 2},
+				{"ncode", "作品2", "タイトル2", datetime("2001/02/03 04:05"), 3, 4},
 			},
 			nil,
 		},

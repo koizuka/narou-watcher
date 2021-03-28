@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"narou-watcher/narou"
 	"os"
 	"strings"
 	"time"
@@ -59,8 +60,8 @@ func FormatDuration(d time.Duration) string {
 	return result
 }
 
-func filterUpdates(from []IsNoticeList) []IsNoticeList {
-	var result []IsNoticeList
+func filterUpdates(from []narou.IsNoticeList) []narou.IsNoticeList {
+	var result []narou.IsNoticeList
 	for _, item := range from {
 		if item.BookmarkEpisode == item.LatestEpisode {
 			continue
@@ -83,8 +84,8 @@ func main() {
 		IsNoticeListURL string
 	}
 	sites := []Site{
-		{"小説化になろう", IsNoticeListURL},
-		{"小説化になろう(R18)", IsNoticeListR18URL},
+		{"小説化になろう", narou.IsNoticeListURL},
+		{"小説化になろう(R18)", narou.IsNoticeListR18URL},
 	}
 
 	getLoginInfo := func() (id, password string, err error) {
@@ -101,27 +102,26 @@ func main() {
 		return id, password, nil
 	}
 
-	narou, err := NewNarouWatcher(Options{
+	narouSession, err := narou.NewNarouWatcher(narou.Options{
 		SessionName:    "narou",
 		FilePrefix:     "log/",
 		GetCredentials: getLoginInfo,
 	})
 	if err != nil {
-		narou.Flush(&logger)
 		log.Fatal(err)
 	}
 
 	openCount := 0
 
 	for _, site := range sites {
-		page, err := narou.GetPage(site.IsNoticeListURL)
+		page, err := narouSession.GetPage(site.IsNoticeListURL)
 		if err != nil {
 			log.Fatalf("GetPage(%v) failed: %v", site.IsNoticeListURL, err)
 		}
 
-		results, err := ParseIsNoticeList(page)
+		results, err := narou.ParseIsNoticeList(page)
 		if err != nil {
-			narou.Flush(&logger)
+			narouSession.Flush(&logger)
 			log.Fatal(err)
 		}
 
@@ -147,7 +147,7 @@ func main() {
 			logger.Printf(" -> %v\n", item.NextEpisode())
 			if openCount < maxOpen && item.NextEpisode().Episode <= item.LatestEpisode {
 				openCount++
-				open.Run(item.NextEpisode().URL())
+				_ = open.Run(item.NextEpisode().URL())
 			}
 		}
 		logger.Printf("%v items.\n", len(updates))

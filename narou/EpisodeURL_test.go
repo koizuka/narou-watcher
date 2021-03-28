@@ -1,4 +1,4 @@
-package main
+package narou
 
 import (
 	"fmt"
