@@ -8,6 +8,14 @@ Go言語がビルドできる環境で
 
 で `narou-watcher` のバイナリができます。
 
+あと、 `cd cmd/narou-react` して、
+
+```bash
+yarn install
+yarn build
+```
+でフロントエンドもビルドする必要があります。
+
 ## 実行
 `./narou-watcher` で実行します。
 
