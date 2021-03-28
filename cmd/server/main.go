@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/rs/cors"
+	"github.com/skratchdot/open-golang/open"
 	"log"
 	"narou-watcher/cmd/model"
 	"narou-watcher/narou"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -91,7 +93,7 @@ func (service *NarouWatcherService) GetIsNoticeList(url string) ([]model.IsNotic
 }
 
 func getProjectDirectory() string {
-	out, err := exec.Command("git","rev-parse","--show-toplevel").Output()
+	out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
 	if err != nil {
 		log.Fatalf("git failed: %v", err)
 	}
@@ -109,7 +111,7 @@ func main() {
 	sessionName := "narou"
 	fmt.Printf("session name: '%v'\n", sessionName)
 
-	service := NewNarouWatcherService(logDir + "/", sessionName)
+	service := NewNarouWatcherService(logDir+"/", sessionName)
 
 	handler := func(w http.ResponseWriter, r *http.Request, url string) {
 		results, err := service.GetIsNoticeList(url)
@@ -139,5 +141,14 @@ func main() {
 	mux.Handle("/", http.FileServer(http.Dir(narouReactDir)))
 	fmt.Printf("Listening port %v...\n", ListenPort)
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", ListenPort), cors.Default().Handler(mux)))
+	l, err := net.Listen("tcp", fmt.Sprintf(":%v", ListenPort))
+	if err != nil {
+		log.Fatal("Listen Error: %v", err)
+	}
+
+	openAddress := fmt.Sprintf("http://localhost:%v", ListenPort)
+	fmt.Printf("open in brouser: %v\n", openAddress)
+	_ = open.Run(openAddress)
+
+	log.Fatal(http.Serve(l, cors.Default().Handler(mux)))
 }
