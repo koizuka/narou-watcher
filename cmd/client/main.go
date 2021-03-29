@@ -64,8 +64,8 @@ func main() {
 		IsNoticeListURL string
 	}
 	sites := []Site{
-		{"小説化になろう", "http://localhost:7676/narou/isnoticelist"},
-		{"小説化になろう(R18)", "http://localhost:7676/r18/isnoticelist"},
+		{"小説家になろう", "http://localhost:7676/narou/isnoticelist"},
+		{"小説家になろう(R18)", "http://localhost:7676/r18/isnoticelist"},
 	}
 
 	openCount := 0

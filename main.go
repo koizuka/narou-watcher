@@ -123,7 +123,7 @@ func main() {
 		if err != nil {
 			switch err.(type) {
 			case narou.LoginError:
-				w.Header().Add("WWW-Authenticate", `Basic realm="小説化になろうのログイン情報"`)
+				w.Header().Add("WWW-Authenticate", `Basic realm="小説家になろうのログイン情報"`)
 				http.Error(w, "Unauthorized", 401)
 			default:
 				http.Error(w, fmt.Sprintf("Internal Server Error: %v", err), 503)

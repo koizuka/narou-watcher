@@ -84,8 +84,8 @@ func main() {
 		IsNoticeListURL string
 	}
 	sites := []Site{
-		{"小説化になろう", narou.IsNoticeListURL},
-		{"小説化になろう(R18)", narou.IsNoticeListR18URL},
+		{"小説家になろう", narou.IsNoticeListURL},
+		{"小説家になろう(R18)", narou.IsNoticeListR18URL},
 	}
 
 	getLoginInfo := func() (*narou.Credentials, error) {
