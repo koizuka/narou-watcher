@@ -3,14 +3,18 @@ name: Go
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-    - README.md
-    - narou-react/**
+    paths:
+    - '**.go'
+    - 'go.sub'
+    - 'go.mod'
+    - '.github/workflows/go.yml'
   pull_request:
     branches: [ main ]
-    paths-ignore:
-    - README.md
-    - narou-react/**
+    paths:
+    - '**.go'
+    - 'go.sub'
+    - 'go.mod'
+    - '.github/workflows/go.yml'
 
 jobs:
 
