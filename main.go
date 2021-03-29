@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"github.com/rs/cors"
@@ -18,40 +17,24 @@ import (
 )
 
 type NarouWatcherService struct {
-	session *narou.NarouWatcher
+	session     *narou.NarouWatcher
+	credentials *narou.Credentials
 }
 
-type Prompter struct {
-	reader *bufio.Reader
-}
-
-func (prompter *Prompter) prompt(prompt string) (string, error) {
-	fmt.Printf("%s: ", prompt)
-	if prompter.reader == nil {
-		prompter.reader = bufio.NewReader(os.Stdin)
-	}
-	line, err := prompter.reader.ReadString('\n')
-	// fmt.Println(line)
-	if err == nil {
-		line = strings.TrimSuffix(line, "\n")
-		line = strings.TrimSuffix(line, "\r")
-	}
-	return line, err
+func (narou *NarouWatcherService) SetCredentials(id, password string) {
+	narou.credentials.Id = id
+	narou.credentials.Password = password
 }
 
 func NewNarouWatcherService(logDir string, sessionName string) NarouWatcherService {
-	getLoginInfo := func() (*narou.Credentials, error) {
-		var prompter Prompter
+	credentials := &narou.Credentials{}
 
-		id, err := prompter.prompt("IDまたはメールアドレス")
-		if err != nil {
-			return nil, fmt.Errorf("prompt for id error: %v", err)
+	getLoginInfo := func() (*narou.Credentials, error) {
+		if credentials.Id == "" || credentials.Password == "" {
+			return nil, nil
+		} else {
+			return credentials, nil
 		}
-		password, err := prompter.prompt("パスワード")
-		if err != nil {
-			return nil, fmt.Errorf("prompt for password error: %v", err)
-		}
-		return &narou.Credentials{Id: id, Password: password}, nil
 	}
 
 	session, err := narou.NewNarouWatcher(narou.Options{
@@ -64,14 +47,20 @@ func NewNarouWatcherService(logDir string, sessionName string) NarouWatcherServi
 	}
 
 	return NarouWatcherService{
-		session: session,
+		session:     session,
+		credentials: credentials,
 	}
 }
 
 func (service *NarouWatcherService) GetIsNoticeList(url string) ([]model.IsNoticeListRecord, error) {
 	page, err := service.session.GetPage(url)
 	if err != nil {
-		return nil, fmt.Errorf("GetPage(%v) failed: %v", url, err)
+		switch err.(type) {
+		case narou.LoginError:
+			return nil, err
+		default:
+			return nil, fmt.Errorf("GetPage(%v) failed: %v", url, err)
+		}
 	}
 
 	items, err := narou.ParseIsNoticeList(page)
@@ -115,12 +104,30 @@ func main() {
 	sessionName := "narou"
 	fmt.Printf("session name: '%v'\n", sessionName)
 
+	dirName := path.Join(logDir, sessionName)
+	if _, err := os.Stat(dirName); os.IsNotExist(err) {
+		fmt.Printf("creating directory: %v¥n", dirName)
+		err = os.Mkdir(dirName, 0700)
+		if err != nil {
+			log.Fatalf("Mkdir failed: %v", err)
+		}
+	}
+
 	service := NewNarouWatcherService(logDir+"/", sessionName)
 
 	handler := func(w http.ResponseWriter, r *http.Request, url string) {
+		if id, password, ok := r.BasicAuth(); ok {
+			service.SetCredentials(id, password)
+		}
 		results, err := service.GetIsNoticeList(url)
 		if err != nil {
-			w.WriteHeader(503)
+			switch err.(type) {
+			case narou.LoginError:
+				w.Header().Add("WWW-Authenticate", `Basic realm="小説化になろうのログイン情報"`)
+				http.Error(w, "Unauthorized", 401)
+			default:
+				http.Error(w, fmt.Sprintf("Internal Server Error: %v", err), 503)
+			}
 			return
 		}
 

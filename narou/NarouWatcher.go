@@ -13,6 +13,14 @@ type Credentials struct {
 	Password string
 }
 
+type LoginError struct {
+	LoginErrorMessage string
+}
+
+func (e LoginError) Error() string {
+	return fmt.Sprintf("Login Error: %v", e.LoginErrorMessage)
+}
+
 type Options struct {
 	SessionName        string
 	FilePrefix         string
@@ -91,7 +99,7 @@ func (narou *NarouWatcher) GetPage(url string) (*scraper.Page, error) {
 			return nil, fmt.Errorf("GetCredentials failed: %v", err)
 		}
 		if credentials == nil {
-			return nil, fmt.Errorf("GetCredentials returned nil")
+			return nil, LoginError{"GetCredentials returned nil"}
 		}
 
 		_ = form.Set("narouid", credentials.Id)
@@ -106,7 +114,7 @@ func (narou *NarouWatcher) GetPage(url string) (*scraper.Page, error) {
 		}
 
 		if isLoginPage(page) {
-			return nil, fmt.Errorf("login failed")
+			return nil, LoginError{"login failed"}
 		}
 	}
 
