@@ -1,7 +1,7 @@
 //import './App.css';
 import useSWR, { SWRConfig } from 'swr';
-import { useEffect, useMemo } from 'react';
-import { Avatar, Badge, Box, Button, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core';
+import { useEffect, useMemo, useState } from 'react';
+import { Avatar, Badge, Box, Button, FormControlLabel, ListItem, ListItemAvatar, ListItemText, Switch } from '@material-ui/core';
 import { DateTime, Duration } from 'luxon';
 import { Book } from '@material-ui/icons';
 
@@ -32,11 +32,11 @@ function nextLink(item: IsNoticeListItem): string {
   return `${item.base_url}${item.bookmark + 1}/`;
 }
 
-function useIsNoticeList() {
+function useIsNoticeList(enableR18: boolean) {
   const host = 'http://localhost:7676';
 
   const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>(`${host}/narou/isnoticelist`);
-  const { data: raw_items18, error: error18 } = useSWR<IsNoticeListRecord[]>(!error ? `${host}/r18/isnoticelist` : null);
+  const { data: raw_items18, error: error18 } = useSWR<IsNoticeListRecord[]>((!error && enableR18) ? `${host}/r18/isnoticelist` : null);
 
   const items: IsNoticeListItem[] | undefined = useMemo(
     () => {
@@ -65,7 +65,8 @@ function useIsNoticeList() {
 }
 
 function NarouUpdates() {
-  const { data: items, error } = useIsNoticeList();
+  const [enableR18, setEnableR18] = useState(false);
+  const { data: items, error } = useIsNoticeList(enableR18);
 
   const unreads = useMemo(() => items?.filter(i => i.bookmark < i.latest), [items]);
 
@@ -87,6 +88,9 @@ function NarouUpdates() {
           {`${item.title}(${item.bookmark + 1}部分)を開く`}
         </Button>
       )}
+      <p><FormControlLabel label="R18を含める" control={
+        <Switch checked={enableR18} onChange={(event) => setEnableR18(event.target.checked)} />
+      } /></p>
       <p>{`未読: ${unreads?.length} 作品.`}</p>
       {items?.map(item =>
         <Box key={item.base_url} width="100%">
