@@ -10,6 +10,8 @@ import (
 	"narou-watcher/narou"
 	"net"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -95,9 +97,6 @@ func main() {
 	projectDir := getProjectDirectory()
 	fmt.Printf("project directory: '%v'\n", projectDir)
 
-	narouReactDir := path.Join(projectDir, "narou-react", "build")
-	fmt.Printf("narou-react directory: '%v'\n", narouReactDir)
-
 	logDir := path.Join(projectDir, "log")
 	fmt.Printf("log directory: '%v'\n", logDir)
 
@@ -149,9 +148,18 @@ func main() {
 	mux.HandleFunc("/r18/isnoticelist", func(w http.ResponseWriter, r *http.Request) {
 		handler(w, r, narou.IsNoticeListR18URL)
 	})
-	mux.Handle("/", http.FileServer(http.Dir(narouReactDir)))
-	fmt.Printf("Listening port %v...\n", ListenPort)
 
+	remote, err := url.Parse("https://koizuka.github.io/narou-watcher/")
+	if err != nil {
+		log.Fatalf("proxy URL parse error: %v", err)
+	}
+
+	proxy := NewReverseProxyReplacingHost(remote)
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		proxy.ServeHTTP(w, r)
+	})
+
+	fmt.Printf("Listening port %v...\n", ListenPort)
 	l, err := net.Listen("tcp", fmt.Sprintf(":%v", ListenPort))
 	if err != nil {
 		log.Fatalf("Listen Error: %v", err)
@@ -162,4 +170,14 @@ func main() {
 	_ = open.Run(openAddress)
 
 	log.Fatal(http.Serve(l, cors.Default().Handler(mux)))
+}
+
+func NewReverseProxyReplacingHost(target *url.URL) *httputil.ReverseProxy {
+	proxyDirector := httputil.NewSingleHostReverseProxy(target).Director
+	return &httputil.ReverseProxy{
+		Director: func(req *http.Request) {
+			proxyDirector(req)
+			req.Host = target.Host // <--------- ここがポイント
+		},
+	}
 }

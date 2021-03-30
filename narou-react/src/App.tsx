@@ -75,7 +75,7 @@ function NarouUpdates() {
   }, [unreads])
 
   if (error) {
-    return <div>Error! {error}</div>
+    return <div>Server is not working...?</div>
   }
   if (!items) {
     return <div>Loading...</div>
