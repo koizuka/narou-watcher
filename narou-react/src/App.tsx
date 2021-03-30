@@ -40,11 +40,15 @@ function useIsNoticeList() {
 
   const items: IsNoticeListItem[] | undefined = useMemo(
     () => {
+      if (raw_items === undefined) {
+        return undefined;
+      }
+
       const tooOld = DateTime.now().minus(IgnoreDuration);
 
       // なろう、R18のアイテムを混ぜて、古いアイテムを捨てて、更新日時降順にする
       const n = [
-        ...(raw_items || []).map(i => ({ ...i, isR18: false })),
+        ...raw_items.map(i => ({ ...i, isR18: false })),
         ...(raw_items18 || []).map(i => ({ ...i, isR18: true }))
       ].map(i => ({ ...i, update_time: DateTime.fromISO(i.update_time) }))
         .filter(i => i.update_time > tooOld)
@@ -71,6 +75,9 @@ function NarouUpdates() {
 
   if (error) {
     return <div>Error! {error}</div>
+  }
+  if (!items) {
+    return <div>Loading...</div>
   }
 
   return (
