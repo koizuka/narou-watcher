@@ -1,7 +1,9 @@
+/.idea/
+/log/narou/*
 narou-watcher
 narou-watcher.exe
-/log/narou/*
-login.txt
-/.idea/
-/cmd/server/server
 /cmd/client/client
+/cmd/client/client.exe
+/cmd/standalone/standalone
+/cmd/standalone/standalone.exe
+login.txt
