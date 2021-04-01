@@ -72,7 +72,19 @@ function NarouUpdates() {
 
   useEffect(() => {
     document.title = `なろう 未読:${unreads?.length}`
-  }, [unreads])
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (unreads && unreads.length > 0) {
+        if (event.key === 'Enter') {
+          window.open(nextLink(unreads[0]), '_blank');
+        }
+      }
+    };
+    document.addEventListener('keydown', onKeyDown, false);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    }
+  }, [unreads]);
 
   if (error) {
     return <div>Server is not working...?</div>
@@ -85,7 +97,7 @@ function NarouUpdates() {
     <Box m={2} display="flex" flexDirection="column" bgcolor="background.paper">
       {unreads?.map((item, i) =>
         <Button key={item.base_url} variant="contained" color={!i ? "primary" : undefined} href={nextLink(item)} target="_blank">
-          {`${item.title}(${item.bookmark + 1}部分)を開く`}
+          {`${item.title}(${item.bookmark + 1}部分)を開く${!i && ' [Enter]'}`}
         </Button>
       )}
       <p><FormControlLabel label="R18を含める" control={
