@@ -69,22 +69,25 @@ function NarouUpdates() {
   const { data: items, error } = useIsNoticeList(enableR18);
 
   const unreads = useMemo(() => items?.filter(i => i.bookmark < i.latest), [items]);
+  const headLink = useMemo(() => (unreads && unreads.length > 0) ? nextLink(unreads[0]) : undefined, [unreads]);
 
   useEffect(() => {
-    document.title = `なろう 未読:${unreads?.length}`
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (unreads && unreads.length > 0) {
-        if (event.key === 'Enter') {
-          window.open(nextLink(unreads[0]), '_blank');
-        }
-      }
-    };
-    document.addEventListener('keydown', onKeyDown, false);
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-    }
+    document.title = `なろう 未読:${unreads?.length}`;
   }, [unreads]);
+
+  useEffect(() => {
+    if (headLink !== undefined) {
+      const onKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Enter') {
+          window.open(headLink, '_blank');
+        }
+      };
+      document.addEventListener('keydown', onKeyDown, false);
+      return () => {
+        document.removeEventListener('keydown', onKeyDown);
+      }
+    }
+  }, [headLink]);
 
   if (error) {
     return <div>Server is not working...?</div>
