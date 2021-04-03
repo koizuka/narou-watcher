@@ -14,6 +14,7 @@ type IsNoticeListRecord = {
   bookmark: number;
   latest: number;
   title: string;
+  author_name: string;
 };
 
 type IsNoticeListItem = {
@@ -22,6 +23,7 @@ type IsNoticeListItem = {
   bookmark: number;
   latest: number;
   title: string;
+  author_name: string;
   isR18: boolean;
 };
 
@@ -126,7 +128,7 @@ function NarouUpdates() {
                     :
                     `${item.title} (${item.latest})`
                 }
-                secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新`} />
+                secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
             </ListItem>
           </Button>
         </Box>

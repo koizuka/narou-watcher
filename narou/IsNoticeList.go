@@ -15,6 +15,7 @@ type IsNoticeList struct {
 	SiteID          string
 	NovelID         string
 	Title           string
+	AuthorName      string
 	UpdateTime      time.Time
 	BookmarkEpisode uint
 	LatestEpisode   uint
@@ -31,7 +32,7 @@ func (i *IsNoticeList) NextEpisode() EpisodeURL {
 type IsnoticelistTitleinfo struct {
 	Title      string     `find:"a.title"`
 	NovelURL   EpisodeURL `find:"a.title" attr:"href"`
-	AuthorName string     `find:"span.fn_name"`
+	AuthorName string     `find:"span.fn_name" re:".*（(.*)）.*"`
 }
 type IsnoticelistUpdateinfo struct {
 	IsNotice    string     `find:"span.isnotice"`
@@ -94,6 +95,7 @@ func ParseIsNoticeList(page *scraper.Page) ([]IsNoticeList, error) {
 			Title:           titleInfo.Title,
 			SiteID:          titleInfo.NovelURL.SiteID,
 			NovelID:         titleInfo.NovelURL.NovelID,
+			AuthorName:      titleInfo.AuthorName,
 			UpdateTime:      updateInfo.UpdateTime,
 			BookmarkEpisode: updateInfo.BookmarkURL.Episode,
 			LatestEpisode:   updateInfo.LatestURL.Episode,

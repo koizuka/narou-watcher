@@ -12,6 +12,7 @@ type IsNoticeListRecord struct {
 	BookmarkEpisode uint      `json:"bookmark"`
 	LatestEpisode   uint      `json:"latest"`
 	Title           string    `json:"title"`
+	AuthorName      string    `json:"author_name"`
 }
 
 func (rec *IsNoticeListRecord) NextEpisode() narou.EpisodeURL {

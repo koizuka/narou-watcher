@@ -78,6 +78,7 @@ func (service *NarouWatcherService) GetIsNoticeList(url string) ([]model.IsNotic
 			BookmarkEpisode: item.BookmarkEpisode,
 			LatestEpisode:   item.LatestEpisode,
 			Title:           item.Title,
+			AuthorName:      item.AuthorName,
 		})
 	}
 	return result, nil
