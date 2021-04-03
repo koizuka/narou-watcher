@@ -32,9 +32,7 @@ function nextLink(item: IsNoticeListItem): string {
   return `${item.base_url}${item.bookmark + 1}/`;
 }
 
-function useIsNoticeList(enableR18: boolean) {
-  const host = 'http://localhost:7676';
-
+function useIsNoticeList(host: string, enableR18: boolean) {
   const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>(`${host}/narou/isnoticelist`);
   const { data: raw_items18, error: error18 } = useSWR<IsNoticeListRecord[]>((!error && enableR18) ? `${host}/r18/isnoticelist` : null);
 
@@ -65,8 +63,11 @@ function useIsNoticeList(enableR18: boolean) {
 }
 
 function NarouUpdates() {
+  const host = new URLSearchParams(window.location.search).get('server') || 'http://localhost:7676';
+  console.log('host', host);
+
   const [enableR18, setEnableR18] = useState(false);
-  const { data: items, error } = useIsNoticeList(enableR18);
+  const { data: items, error } = useIsNoticeList(host, enableR18);
 
   const unreads = useMemo(() => items?.filter(i => i.bookmark < i.latest), [items]);
   const headLink = useMemo(() => (unreads && unreads.length > 0) ? nextLink(unreads[0]) : undefined, [unreads]);
@@ -90,7 +91,7 @@ function NarouUpdates() {
   }, [headLink]);
 
   if (error) {
-    return <div>Server is not working...?</div>
+    return <div>Server({JSON.stringify(host)}) is not working...?</div>
   }
   if (!items) {
     return <div>Loading...</div>

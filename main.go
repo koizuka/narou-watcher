@@ -165,9 +165,17 @@ func main() {
 		log.Fatalf("Listen Error: %v", err)
 	}
 
-	openAddress := fmt.Sprintf("http://localhost:%v", ListenPort)
+	host := fmt.Sprintf("http://localhost:%v", ListenPort)
+	openAddress, err := url.Parse(host)
+	if err != nil {
+		log.Fatalf("URL Parse error: '%v' -> %v", host, err)
+	}
+	q := openAddress.Query()
+	q.Add("server", host)
+	openAddress.RawQuery = q.Encode()
+
 	fmt.Printf("open in brouser: %v\n", openAddress)
-	_ = open.Run(openAddress)
+	_ = open.Run(openAddress.String())
 
 	log.Fatal(http.Serve(l, cors.Default().Handler(mux)))
 }
