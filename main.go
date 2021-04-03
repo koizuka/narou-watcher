@@ -173,7 +173,7 @@ func main() {
 	}
 	openAddress.RawQuery = url.Values{"server": {host}}.Encode()
 
-	fmt.Printf("open in brouser: %v\n", openAddress)
+	fmt.Printf("open in browser: %v\n", openAddress)
 	_ = open.Run(openAddress.String())
 
 	log.Fatal(http.Serve(l, cors.Default().Handler(mux)))
