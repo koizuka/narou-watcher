@@ -170,9 +170,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("URL Parse error: '%v' -> %v", host, err)
 	}
-	q := openAddress.Query()
-	q.Add("server", host)
-	openAddress.RawQuery = q.Encode()
+	openAddress.RawQuery = url.Values{"server": {host}}.Encode()
 
 	fmt.Printf("open in brouser: %v\n", openAddress)
 	_ = open.Run(openAddress.String())
