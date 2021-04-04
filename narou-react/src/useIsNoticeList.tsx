@@ -47,7 +47,7 @@ export function useIsNoticeList(
         );
       return n;
     },
-    [raw_items, raw_items18]
+    [raw_items, raw_items18, ignoreDuration]
   );
 
   return { data: error ? undefined : items, error: error || error18 };
