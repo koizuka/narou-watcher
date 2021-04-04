@@ -3,6 +3,7 @@ import { Avatar, Badge, Box, Button, FormControlLabel, ListItem, ListItemAvatar,
 import { Book } from '@material-ui/icons';
 import { IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
 import { Duration } from 'luxon';
+import { useWebSocket } from './useWebSocket';
 
 function nextLink(item: IsNoticeListItem): string {
   if (item.bookmark >= item.latest) {
@@ -12,8 +13,10 @@ function nextLink(item: IsNoticeListItem): string {
 }
 
 export function NarouUpdates({ ignoreDuration }: { ignoreDuration: Duration }) {
-  const host = new URLSearchParams(window.location.search).get('server') || 'http://localhost:7676';
-  console.log('host', host);
+  const searchParams = new URLSearchParams(window.location.search)
+  const host = searchParams.get('server') || 'http://localhost:7676';
+
+  const { connected } = useWebSocket(searchParams.get('ws') /* || 'ws://localhost:7676/ws' */);
 
   const [enableR18, setEnableR18] = useState(false);
   const { data: items, error } = useIsNoticeList(host, { ignoreDuration, enableR18 });
@@ -22,8 +25,8 @@ export function NarouUpdates({ ignoreDuration }: { ignoreDuration: Duration }) {
   const headLink = useMemo(() => (unreads && unreads.length > 0) ? nextLink(unreads[0]) : undefined, [unreads]);
 
   useEffect(() => {
-    document.title = `なろう 未読:${unreads?.length}`;
-  }, [unreads]);
+    document.title = `なろう 未読:${unreads?.length}${connected ? ' ws' : ''}`;
+  }, [unreads, connected]);
 
   useEffect(() => {
     if (headLink !== undefined) {
