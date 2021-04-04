@@ -6,6 +6,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.6.1
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/frankban/quicktest v1.11.3 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/koizuka/scraper v0.0.5
 	github.com/rs/cors v1.7.0
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966

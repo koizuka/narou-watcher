@@ -27,9 +27,9 @@ type NarouWatcherService struct {
 	credentials *narou.Credentials
 }
 
-func (narou *NarouWatcherService) SetCredentials(id, password string) {
-	narou.credentials.Id = id
-	narou.credentials.Password = password
+func (service *NarouWatcherService) SetCredentials(id, password string) {
+	service.credentials.Id = id
+	service.credentials.Password = password
 }
 
 func NewNarouWatcherService(logDir string, sessionName string) NarouWatcherService {
@@ -154,6 +154,9 @@ func main() {
 		handler(w, r, narou.IsNoticeListR18URL)
 	})
 
+	ws := NewWebSocketService()
+	mux.HandleFunc("/ws", ws.Handler)
+
 	remote, err := url.Parse("https://koizuka.github.io/narou-watcher/")
 	if err != nil {
 		log.Fatalf("proxy URL parse error: %v", err)
@@ -189,6 +192,7 @@ func main() {
 		if err != nil {
 			log.Print(err)
 		}
+		ws.CloseAll()
 	}()
 
 	// ^C で終了する
@@ -201,6 +205,8 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Print(err)
 	}
+
+	ws.Wait()
 	log.Print("shutdown.")
 }
 
