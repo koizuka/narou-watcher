@@ -4,9 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { Avatar, Badge, Box, Button, FormControlLabel, ListItem, ListItemAvatar, ListItemText, Switch } from '@material-ui/core';
 import { DateTime, Duration } from 'luxon';
 import { Book } from '@material-ui/icons';
+import preval from 'preval.macro'
 
 const IgnoreDuration = Duration.fromObject({ days: 30 });
 const PollingInterval = 5 * 60 * 1000; // 5分ごとにポーリング
+
+const buildDate: string = preval`module.exports = new Date().toISOString();`
 
 type IsNoticeListRecord = {
   base_url: string;
@@ -146,6 +149,14 @@ function App() {
       }}>
         <NarouUpdates />
       </SWRConfig>
+      <div style={{
+        display: "inline-block",
+        position: "fixed",
+        bottom: 0,
+        right: 0,
+        fontSize: "small",
+        fontStyle: "italic"
+      }}>Build date: {DateTime.fromISO(buildDate).toISO()}</div>
     </div>
   );
 }
