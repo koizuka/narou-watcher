@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/rs/cors"
@@ -14,8 +15,11 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path"
 	"strings"
+	"syscall"
+	"time"
 )
 
 type NarouWatcherService struct {
@@ -176,7 +180,28 @@ func main() {
 	fmt.Printf("open in browser: %v\n", openAddress)
 	_ = open.Run(openAddress.String())
 
-	log.Fatal(http.Serve(l, cors.Default().Handler(mux)))
+	srv := &http.Server{Handler: cors.Default().Handler(mux)}
+
+	log.Print("^C to shutdown.")
+
+	go func() {
+		err := srv.Serve(l)
+		if err != nil {
+			log.Print(err)
+		}
+	}()
+
+	// ^C で終了する
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT)
+	<-sigCh
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Print(err)
+	}
+	log.Print("shutdown.")
 }
 
 func NewReverseProxyReplacingHost(target *url.URL) *httputil.ReverseProxy {
