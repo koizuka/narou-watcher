@@ -16,7 +16,7 @@ Go言語がビルドできる環境で
 (このファイルを消すとログアウトw)
 
 未読があったら上に出るのでクリックで別タブで開いて1作品読めます。読んだらブックマークを更新して、そのタブを閉じる、という使い方を想定しています。
-![image](https://user-images.githubusercontent.com/864587/112756827-d7932f80-9021-11eb-99d1-6eda063df264.png)
+![image](https://user-images.githubusercontent.com/864587/113502734-2df3f700-9569-11eb-86ac-3976bcfdb22d.png)
 
 サーバー終了は ctrl+C で(雑)。
 残ったブラウザのページも閉じましょう。
