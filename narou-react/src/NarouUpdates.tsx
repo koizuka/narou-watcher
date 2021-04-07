@@ -11,6 +11,14 @@ function nextLink(item: IsNoticeListItem): string {
   return `${item.base_url}${item.bookmark + 1}/`;
 }
 
+function hasUnread(item: IsNoticeListItem): boolean {
+  return item.latest > item.bookmark;
+}
+
+function unread(item: IsNoticeListItem): number {
+  return Math.max(item.latest - item.bookmark, 0);
+}
+
 export function NarouUpdates({ ignoreDuration }: { ignoreDuration: Duration }) {
   const host = new URLSearchParams(window.location.search).get('server') || 'http://localhost:7676';
   console.log('host', host);
@@ -46,26 +54,31 @@ export function NarouUpdates({ ignoreDuration }: { ignoreDuration: Duration }) {
     return <div>Loading...</div>;
   }
 
+  const isDefaultOpen = function (item: IsNoticeListItem): boolean {
+    if (!unreads) {
+      return false;
+    }
+    return unreads.length > 0 && item.base_url === unreads[0].base_url;
+  }
+
   return (
     <Box m={2} display="flex" flexDirection="column" bgcolor="background.paper">
-      {unreads?.map((item, i) => <Button key={item.base_url} variant="contained" color={!i ? "primary" : undefined} href={nextLink(item)} target="_blank">
-        {`${item.title}(${item.bookmark + 1}部分)を開く${!i ? ' [Enter]' : ''}`}
-      </Button>
-      )}
       <p><FormControlLabel label="R18を含める" control={<Switch checked={enableR18} onChange={(event) => setEnableR18(event.target.checked)} />} /></p>
       <p>{`未読: ${unreads?.length} 作品.`}</p>
       {items?.map(item => <Box key={item.base_url} width="100%">
-        <Button variant="outlined" href={nextLink(item)} target="_blank">
+        <Button
+          variant={isDefaultOpen(item) ? 'contained' : 'outlined'}
+          href={nextLink(item)} target="_blank">
           <ListItem>
             <ListItemAvatar>
-              <Badge color="primary" badgeContent={Math.max(item.latest - item.bookmark, 0)}>
+              <Badge color="primary" badgeContent={unread(item)}>
                 <Avatar>
                   <Book color={item.isR18 ? "secondary" : undefined} />
                 </Avatar>
               </Badge>
             </ListItemAvatar>
             <ListItemText
-              primary={item.bookmark < item.latest ?
+              primary={hasUnread(item) ?
                 `${item.title} (${item.bookmark}/${item.latest})`
                 :
                 `${item.title} (${item.latest})`}
