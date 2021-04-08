@@ -71,7 +71,7 @@ const TestHtml = `<?xml version="1.0" encoding="UTF-8"?>
 更新日：2000/01/02 03:04
 
 <span class="no">
-<a href="https://ncode.syosetu.com/作品1/1/"><img src="" />&nbsp;1部分</a>&nbsp;-
+<a href="//ncode.syosetu.com/作品1/1/"><img src="" />&nbsp;1部分</a>&nbsp;-
 
 <a href="https://ncode.syosetu.com/作品1/2/">
 最新2部分</a></span>
@@ -101,7 +101,7 @@ const TestHtml = `<?xml version="1.0" encoding="UTF-8"?>
 更新日：2001/02/03 04:05
 
 <span class="no">
-<a href="https://ncode.syosetu.com/作品2/3/"><img src="" />&nbsp;3部分</a>&nbsp;-
+<a href="//ncode.syosetu.com/作品2/3/"><img src="" />&nbsp;3部分</a>&nbsp;-
 
 <a href="https://ncode.syosetu.com/作品2/4/">
 最終4部分</a>〔完結済〕</span>

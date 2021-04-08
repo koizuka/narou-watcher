@@ -15,14 +15,14 @@ type EpisodeURL struct {
 func ParseEpisodeURL(url string) (result EpisodeURL, err error) {
 	result.SiteID = ""
 	result.Episode = 0
-	re := regexp.MustCompile(`https?://(ncode|novel18)\.syosetu\.com/([^/]*)/([0-9]*)`)
+	re := regexp.MustCompile(`(https?:)?//(ncode|novel18)\.syosetu\.com/([^/]*)/([0-9]*)`)
 
 	found := re.FindStringSubmatch(url)
-	if len(found) > 2 {
-		result.SiteID = found[1]
-		result.NovelID = found[2]
-		if len(found) > 2 {
-			parsed, err := strconv.ParseUint(found[3], 10, 32)
+	if len(found) > 3 {
+		result.SiteID = found[2]
+		result.NovelID = found[3]
+		if len(found) > 3 {
+			parsed, err := strconv.ParseUint(found[4], 10, 32)
 			if err == nil {
 				result.Episode = uint(parsed)
 			}
