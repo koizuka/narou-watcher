@@ -27,9 +27,9 @@ type NarouWatcherService struct {
 	credentials *narou.Credentials
 }
 
-func (narou *NarouWatcherService) SetCredentials(id, password string) {
-	narou.credentials.Id = id
-	narou.credentials.Password = password
+func (service *NarouWatcherService) SetCredentials(id, password string) {
+	service.credentials.Id = id
+	service.credentials.Password = password
 }
 
 func NewNarouWatcherService(logDir string, sessionName string) NarouWatcherService {
@@ -130,6 +130,7 @@ func main() {
 				w.Header().Add("WWW-Authenticate", `Basic realm="小説家になろうのログイン情報"`)
 				http.Error(w, "Unauthorized", 401)
 			default:
+				log.Printf("%v %v: error %v: %v", r.Method, r.URL, 503, err)
 				http.Error(w, fmt.Sprintf("Internal Server Error: %v", err), 503)
 			}
 			return
