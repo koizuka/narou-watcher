@@ -22,46 +22,8 @@ import (
 	"time"
 )
 
-type NarouWatcherService struct {
-	session     *narou.NarouWatcher
-	credentials *narou.Credentials
-}
-
-func (service *NarouWatcherService) SetCredentials(id, password string) {
-	service.credentials.Id = id
-	service.credentials.Password = password
-}
-
-func NewNarouWatcherService(logDir string, sessionName string) NarouWatcherService {
-	credentials := &narou.Credentials{}
-
-	getLoginInfo := func() (*narou.Credentials, error) {
-		log.Print("LOGIN REQUIRED")
-		if credentials.Id == "" || credentials.Password == "" {
-			return nil, nil
-		} else {
-			return credentials, nil
-		}
-	}
-
-	session, err := narou.NewNarouWatcher(narou.Options{
-		SessionName:         sessionName,
-		FilePrefix:          logDir,
-		GetCredentials:      getLoginInfo,
-		NotSaveCookieToFile: true,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return NarouWatcherService{
-		session:     session,
-		credentials: credentials,
-	}
-}
-
-func (service *NarouWatcherService) GetIsNoticeList(url string) ([]model.IsNoticeListRecord, error) {
-	page, err := service.session.GetPage(url)
+func GetIsNoticeList(watcher *narou.NarouWatcher, url string) ([]model.IsNoticeListRecord, error) {
+	page, err := watcher.GetPage(url)
 	if err != nil {
 		switch err.(type) {
 		case narou.LoginError:
@@ -88,6 +50,116 @@ func (service *NarouWatcherService) GetIsNoticeList(url string) ([]model.IsNotic
 		})
 	}
 	return result, nil
+}
+
+type NarouApiHandlerType = func(w http.Header, service *narou.NarouWatcher) ([]byte, error)
+
+type NarouApiService struct {
+	logDir       string
+	sessionName  string
+	cookiePrefix string
+	cookieDomain *url.URL
+}
+
+func NewNarouApiService(logDir, sessionName string) NarouApiService {
+	cookiePrefix := "narou-"
+	narouUrl, _ := url.Parse("https://syosetu.com")
+
+	return NarouApiService{
+		logDir,
+		sessionName,
+		cookiePrefix,
+		narouUrl,
+	}
+}
+
+func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		credentials := &narou.Credentials{}
+
+		getLoginInfo := func() (*narou.Credentials, error) {
+			log.Print("LOGIN REQUIRED")
+			if credentials.Id == "" || credentials.Password == "" {
+				return nil, nil
+			} else {
+				return credentials, nil
+			}
+		}
+
+		watcher, err := narou.NewNarouWatcher(narou.Options{
+			SessionName:         apiService.sessionName,
+			FilePrefix:          apiService.logDir + "/",
+			GetCredentials:      getLoginInfo,
+			NotSaveCookieToFile: true,
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if id, password, ok := r.BasicAuth(); ok {
+			credentials.Id = id
+			credentials.Password = password
+		}
+
+		// リクエストのcookieを session に中継
+		var cookies []*http.Cookie
+		for _, cookie := range r.Cookies() {
+			if strings.HasPrefix(cookie.Name, apiService.cookiePrefix) {
+				cookies = append(cookies, &http.Cookie{Name: cookie.Name[len(apiService.cookiePrefix):], Value: cookie.Value})
+			}
+		}
+		watcher.SetCookies(apiService.cookieDomain, cookies)
+
+		body, err := handler(w.Header(), watcher)
+		if err != nil {
+			switch err.(type) {
+			case narou.LoginError:
+				w.Header().Add("WWW-Authenticate", `Basic realm="小説家になろうのログイン情報"`)
+				http.Error(w, "Unauthorized", 401)
+			default:
+				log.Printf("%v %v: error %v: %v", r.Method, r.URL, 503, err)
+				http.Error(w, fmt.Sprintf("Internal Server Error: %v", err), 503)
+			}
+			return
+		}
+
+		// session で設定されたcookieを返却する(削除されたものは削除)
+		deleteCookies := make(map[string]string)
+		for _, cookie := range r.Cookies() {
+			if strings.HasPrefix(cookie.Name, apiService.cookiePrefix) {
+				deleteCookies[cookie.Name] = cookie.Value
+			}
+		}
+		for _, cookie := range watcher.Cookies(apiService.cookieDomain) {
+			name := apiService.cookiePrefix + cookie.Name
+			http.SetCookie(w, &http.Cookie{Name: name, Value: cookie.Value})
+			if _, ok := deleteCookies[name]; ok {
+				delete(deleteCookies, name)
+			}
+		}
+		for name, value := range deleteCookies {
+			http.SetCookie(w, &http.Cookie{Name: name, Value: value, MaxAge: -1})
+		}
+
+		_, _ = w.Write(body)
+	}
+}
+
+func isNoticeListHandler(url string) NarouApiHandlerType {
+	return func(w http.Header, watcher *narou.NarouWatcher) ([]byte, error) {
+		results, err := GetIsNoticeList(watcher, url)
+		if err != nil {
+			return nil, err
+		}
+
+		bin, err := json.Marshal(results)
+		if err != nil {
+			return nil, err
+		}
+
+		w.Set("Content-Type", "application/json")
+		return bin, nil
+	}
 }
 
 func getProjectDirectory() string {
@@ -118,74 +190,12 @@ func main() {
 			log.Fatalf("Mkdir failed: %v", err)
 		}
 	}
-
-	type NarouApiHandlerType = func(w http.Header, service *NarouWatcherService) ([]byte, error)
-
-	isNoticeListHandler := func(url string) NarouApiHandlerType {
-		return func(w http.Header, service *NarouWatcherService) ([]byte, error) {
-			results, err := service.GetIsNoticeList(url)
-			if err != nil {
-				return nil, err
-			}
-
-			bin, err := json.Marshal(results)
-			if err != nil {
-				return nil, err
-			}
-
-			w.Set("Content-Type", "application/json")
-			return bin, nil
-		}
-	}
-
-	NarouPrefix := "narou-"
-	narouUrl, _ := url.Parse("https://syosetu.com")
-
-	narouApiHandler := func(w http.ResponseWriter, r *http.Request, handler NarouApiHandlerType) {
-		service := NewNarouWatcherService(logDir+"/", sessionName)
-
-		if id, password, ok := r.BasicAuth(); ok {
-			service.SetCredentials(id, password)
-		}
-
-		// リクエストのcookieを session に中継
-		var cookies []*http.Cookie
-		for _, cookie := range r.Cookies() {
-			if strings.HasPrefix(cookie.Name, NarouPrefix) {
-				cookies = append(cookies, &http.Cookie{Name: cookie.Name[len(NarouPrefix):], Value: cookie.Value})
-			}
-		}
-		service.session.SetCookies(narouUrl, cookies)
-
-		body, err := handler(w.Header(), &service)
-		if err != nil {
-			switch err.(type) {
-			case narou.LoginError:
-				w.Header().Add("WWW-Authenticate", `Basic realm="小説家になろうのログイン情報"`)
-				http.Error(w, "Unauthorized", 401)
-			default:
-				log.Printf("%v %v: error %v: %v", r.Method, r.URL, 503, err)
-				http.Error(w, fmt.Sprintf("Internal Server Error: %v", err), 503)
-			}
-			return
-		}
-
-		// session で設定されたcookieを返却する
-		for _, cookie := range service.session.Cookies(narouUrl) {
-			http.SetCookie(w, &http.Cookie{Name: NarouPrefix + cookie.Name, Value: cookie.Value})
-		}
-
-		_, _ = w.Write(body)
-	}
+	narouApiService := NewNarouApiService(logDir, sessionName)
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/narou/isnoticelist", func(w http.ResponseWriter, r *http.Request) {
-		narouApiHandler(w, r, isNoticeListHandler(narou.IsNoticeListURL))
-	})
-	mux.HandleFunc("/r18/isnoticelist", func(w http.ResponseWriter, r *http.Request) {
-		narouApiHandler(w, r, isNoticeListHandler(narou.IsNoticeListR18URL))
-	})
+	mux.HandleFunc("/narou/isnoticelist", narouApiService.HandlerFunc(isNoticeListHandler(narou.IsNoticeListURL)))
+	mux.HandleFunc("/r18/isnoticelist", narouApiService.HandlerFunc(isNoticeListHandler(narou.IsNoticeListR18URL)))
 
 	remote, err := url.Parse("https://koizuka.github.io/narou-watcher/")
 	if err != nil {
