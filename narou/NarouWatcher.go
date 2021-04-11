@@ -3,6 +3,8 @@ package narou
 import (
 	"fmt"
 	"github.com/koizuka/scraper"
+	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -22,19 +24,28 @@ func (e LoginError) Error() string {
 }
 
 type Options struct {
-	SessionName        string
-	FilePrefix         string
-	SaveToFile         bool
-	NotUseNetwork      bool
-	ShowRequestHeader  bool
-	ShowResponseHeader bool
-	GetCredentials     func() (params *Credentials, err error)
+	SessionName         string
+	FilePrefix          string
+	SaveToFile          bool
+	NotUseNetwork       bool
+	ShowRequestHeader   bool
+	ShowResponseHeader  bool
+	GetCredentials      func() (params *Credentials, err error)
+	NotSaveCookieToFile bool
 }
 
 type NarouWatcher struct {
 	session *scraper.Session
 	log     *scraper.BufferedLogger
 	options Options
+}
+
+func (narou *NarouWatcher) Cookies(u *url.URL) []*http.Cookie {
+	return narou.session.Cookies(u)
+}
+
+func (narou *NarouWatcher) SetCookies(u *url.URL, cookies []*http.Cookie) {
+	narou.session.SetCookies(u, cookies)
 }
 
 func (narou *NarouWatcher) Printf(format string, a ...interface{}) {
@@ -59,9 +70,11 @@ func NewNarouWatcher(opt Options) (*NarouWatcher, error) {
 	session.ShowRequestHeader = opt.ShowRequestHeader
 	session.ShowResponseHeader = opt.ShowResponseHeader
 
-	err := session.LoadCookie()
-	if err != nil {
-		return nil, fmt.Errorf("LoadCookie failed: %v", err)
+	if !opt.NotSaveCookieToFile {
+		err := session.LoadCookie()
+		if err != nil {
+			return nil, fmt.Errorf("LoadCookie failed: %v", err)
+		}
 	}
 
 	return &NarouWatcher{
@@ -71,9 +84,7 @@ func NewNarouWatcher(opt Options) (*NarouWatcher, error) {
 	}, nil
 }
 
-/**
- * なろうのページを取得する。もしログインが要求されたらログインしてから取得する。
- */
+// GetPage retrieves narou's page. try login when login is required.
 func (narou *NarouWatcher) GetPage(url string) (*scraper.Page, error) {
 	page, err := narou.session.GetPage(url)
 	if err != nil {

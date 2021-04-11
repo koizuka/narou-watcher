@@ -36,6 +36,7 @@ func NewNarouWatcherService(logDir string, sessionName string) NarouWatcherServi
 	credentials := &narou.Credentials{}
 
 	getLoginInfo := func() (*narou.Credentials, error) {
+		log.Print("LOGIN REQUIRED")
 		if credentials.Id == "" || credentials.Password == "" {
 			return nil, nil
 		} else {
@@ -44,9 +45,10 @@ func NewNarouWatcherService(logDir string, sessionName string) NarouWatcherServi
 	}
 
 	session, err := narou.NewNarouWatcher(narou.Options{
-		SessionName:    sessionName,
-		FilePrefix:     logDir,
-		GetCredentials: getLoginInfo,
+		SessionName:         sessionName,
+		FilePrefix:          logDir,
+		GetCredentials:      getLoginInfo,
+		NotSaveCookieToFile: true,
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -117,13 +119,45 @@ func main() {
 		}
 	}
 
-	service := NewNarouWatcherService(logDir+"/", sessionName)
+	type NarouApiHandlerType = func(w http.Header, service *NarouWatcherService) ([]byte, error)
 
-	handler := func(w http.ResponseWriter, r *http.Request, url string) {
+	isNoticeListHandler := func(url string) NarouApiHandlerType {
+		return func(w http.Header, service *NarouWatcherService) ([]byte, error) {
+			results, err := service.GetIsNoticeList(url)
+			if err != nil {
+				return nil, err
+			}
+
+			bin, err := json.Marshal(results)
+			if err != nil {
+				return nil, err
+			}
+
+			w.Set("Content-Type", "application/json")
+			return bin, nil
+		}
+	}
+
+	NarouPrefix := "narou-"
+	narouUrl, _ := url.Parse("https://syosetu.com")
+
+	narouApiHandler := func(w http.ResponseWriter, r *http.Request, handler NarouApiHandlerType) {
+		service := NewNarouWatcherService(logDir+"/", sessionName)
+
 		if id, password, ok := r.BasicAuth(); ok {
 			service.SetCredentials(id, password)
 		}
-		results, err := service.GetIsNoticeList(url)
+
+		// リクエストのcookieを session に中継
+		var cookies []*http.Cookie
+		for _, cookie := range r.Cookies() {
+			if strings.HasPrefix(cookie.Name, NarouPrefix) {
+				cookies = append(cookies, &http.Cookie{Name: cookie.Name[len(NarouPrefix):], Value: cookie.Value})
+			}
+		}
+		service.session.SetCookies(narouUrl, cookies)
+
+		body, err := handler(w.Header(), &service)
 		if err != nil {
 			switch err.(type) {
 			case narou.LoginError:
@@ -136,23 +170,21 @@ func main() {
 			return
 		}
 
-		bin, err := json.Marshal(results)
-		if err != nil {
-			w.WriteHeader(503)
-			return
+		// session で設定されたcookieを返却する
+		for _, cookie := range service.session.Cookies(narouUrl) {
+			http.SetCookie(w, &http.Cookie{Name: NarouPrefix + cookie.Name, Value: cookie.Value})
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write(bin)
+		_, _ = w.Write(body)
 	}
 
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/narou/isnoticelist", func(w http.ResponseWriter, r *http.Request) {
-		handler(w, r, narou.IsNoticeListURL)
+		narouApiHandler(w, r, isNoticeListHandler(narou.IsNoticeListURL))
 	})
 	mux.HandleFunc("/r18/isnoticelist", func(w http.ResponseWriter, r *http.Request) {
-		handler(w, r, narou.IsNoticeListR18URL)
+		narouApiHandler(w, r, isNoticeListHandler(narou.IsNoticeListR18URL))
 	})
 
 	remote, err := url.Parse("https://koizuka.github.io/narou-watcher/")
