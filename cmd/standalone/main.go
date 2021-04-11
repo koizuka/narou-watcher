@@ -6,6 +6,8 @@ import (
 	"log"
 	"narou-watcher/narou"
 	"os"
+	"os/exec"
+	"path"
 	"strings"
 	"time"
 
@@ -74,6 +76,14 @@ func filterUpdates(from []narou.IsNoticeList) []narou.IsNoticeList {
 	return result
 }
 
+func getProjectDirectory() string {
+	out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
+	if err != nil {
+		log.Fatalf("git failed: %v", err)
+	}
+	return strings.TrimSpace(string(out))
+}
+
 func main() {
 	var console scraper.ConsoleLogger
 	logger := scraper.BufferedLogger{}
@@ -102,9 +112,23 @@ func main() {
 		return &narou.Credentials{Id: id, Password: password}, nil
 	}
 
+	projectDir := getProjectDirectory()
+	logDir := path.Join(projectDir, "log")
+	sessionName := "narou"
+	fmt.Printf("log directory: '%v/%v'\n", logDir, sessionName)
+
+	dirName := path.Join(logDir, sessionName)
+	if _, err := os.Stat(dirName); os.IsNotExist(err) {
+		fmt.Printf("creating directory: %v¥n", dirName)
+		err = os.Mkdir(dirName, 0700)
+		if err != nil {
+			log.Fatalf("Mkdir failed: %v", err)
+		}
+	}
+
 	narouSession, err := narou.NewNarouWatcher(narou.Options{
-		SessionName:    "narou",
-		FilePrefix:     "log/",
+		SessionName:    sessionName,
+		FilePrefix:     logDir + "/",
 		GetCredentials: getLoginInfo,
 	})
 	if err != nil {
