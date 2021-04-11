@@ -20,7 +20,7 @@ type LoginError struct {
 }
 
 func (e LoginError) Error() string {
-	return fmt.Sprintf("Login Error: %v", e.LoginErrorMessage)
+	return fmt.Sprintf("login Error: %v", e.LoginErrorMessage)
 }
 
 type Options struct {
@@ -84,6 +84,83 @@ func NewNarouWatcher(opt Options) (*NarouWatcher, error) {
 	}, nil
 }
 
+const NarouLoginFormSelector = "div#login_box>form"
+
+func isNarouLoginPage(page *scraper.Page) bool {
+	forms := page.Find(NarouLoginFormSelector)
+	return forms.Length() > 0
+}
+
+func (narou *NarouWatcher) login(page *scraper.Page, credentials *Credentials) (*scraper.Page, error) {
+	form, err := page.Form(NarouLoginFormSelector)
+	if err != nil {
+		return nil, err
+	}
+
+	_ = form.Set("narouid", credentials.Id)
+	_ = form.Set("pass", credentials.Password)
+	resp, err := narou.session.Submit(form)
+	if err != nil {
+		return nil, fmt.Errorf("session.Submit() failed: %v", err)
+	}
+	page, err = resp.Page()
+	if err != nil {
+		return nil, fmt.Errorf("resp.Page() failed: %v", err)
+	}
+
+	return page, nil
+}
+
+func (narou *NarouWatcher) Login(credentials *Credentials) error {
+	page, err := narou.session.GetPage("https://ssl.syosetu.com/login/input/")
+	if err != nil {
+		return err
+	}
+	if !isNarouLoginPage(page) {
+		return fmt.Errorf("login page not recognized: %v", err)
+	}
+
+	page, err = narou.login(page, credentials)
+	if err != nil {
+		return err
+	}
+
+	if isNarouLoginPage(page) {
+		return LoginError{"login failed"}
+	}
+
+	// cookie を保存
+	err = narou.session.SaveCookie()
+	if err != nil {
+		return fmt.Errorf("SaveCookie failed: %v", err)
+	}
+
+	return nil
+}
+
+func (narou *NarouWatcher) Logout() error {
+	page, err := narou.session.GetPage("https://ssl.syosetu.com/user/top/")
+	if err != nil {
+		return err
+	}
+	if isNarouLoginPage(page) {
+		return nil // already logged out
+	}
+
+	_, err = narou.session.FollowLink(page, "a#logout", "href")
+	if err != nil {
+		return err
+	}
+
+	// cookie を保存
+	err = narou.session.SaveCookie()
+	if err != nil {
+		return fmt.Errorf("SaveCookie failed: %v", err)
+	}
+
+	return nil
+}
+
 // GetPage retrieves narou's page. try login when login is required.
 func (narou *NarouWatcher) GetPage(url string) (*scraper.Page, error) {
 	page, err := narou.session.GetPage(url)
@@ -91,20 +168,11 @@ func (narou *NarouWatcher) GetPage(url string) (*scraper.Page, error) {
 		return nil, err
 	}
 
-	LoginFormSelector := "div#login_box>form"
-
-	isLoginPage := func(page *scraper.Page) bool {
-		forms := page.Find(LoginFormSelector)
-		return forms.Length() > 0
-	}
-
 	// ログイン
-	if isLoginPage(page) {
-		form, err := page.Form(LoginFormSelector)
-		if err != nil {
-			return nil, fmt.Errorf("login form not found: %v", err)
+	if isNarouLoginPage(page) {
+		if narou.options.GetCredentials == nil {
+			return nil, LoginError{"login is required"}
 		}
-
 		credentials, err := narou.options.GetCredentials()
 		if err != nil {
 			return nil, fmt.Errorf("GetCredentials failed: %v", err)
@@ -113,19 +181,9 @@ func (narou *NarouWatcher) GetPage(url string) (*scraper.Page, error) {
 			return nil, LoginError{"GetCredentials returned nil"}
 		}
 
-		_ = form.Set("narouid", credentials.Id)
-		_ = form.Set("pass", credentials.Password)
-		resp, err := narou.session.Submit(form)
+		page, err = narou.login(page, credentials)
 		if err != nil {
-			return nil, fmt.Errorf("session.Submit() failed: %v", err)
-		}
-		page, err = resp.Page()
-		if err != nil {
-			return nil, fmt.Errorf("resp.Page() failed: %v", err)
-		}
-
-		if isLoginPage(page) {
-			return nil, LoginError{"login failed"}
+			return nil, err
 		}
 	}
 

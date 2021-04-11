@@ -52,7 +52,7 @@ func GetIsNoticeList(watcher *narou.NarouWatcher, url string) ([]model.IsNoticeL
 	return result, nil
 }
 
-type NarouApiHandlerType = func(w http.Header, service *narou.NarouWatcher) ([]byte, error)
+type NarouApiHandlerType = func(w http.Header, r *http.Request, service *narou.NarouWatcher) ([]byte, error)
 
 type NarouApiService struct {
 	logDir       string
@@ -110,10 +110,11 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 		}
 		watcher.SetCookies(apiService.cookieDomain, cookies)
 
-		body, err := handler(w.Header(), watcher)
+		body, err := handler(w.Header(), r, watcher)
 		if err != nil {
 			switch err.(type) {
 			case narou.LoginError:
+				// TODO BASIC認証ではなく login api に切り替える
 				w.Header().Add("WWW-Authenticate", `Basic realm="小説家になろうのログイン情報"`)
 				http.Error(w, "Unauthorized", 401)
 			default:
@@ -145,20 +146,45 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 	}
 }
 
+func ReturnJson(w http.Header, body interface{}) ([]byte, error) {
+	bin, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	w.Set("Content-Type", "application/json")
+	return bin, nil
+}
+
+func NarouLoginHandler(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+	credentials := narou.Credentials{
+		Id:       r.PostFormValue("id"),
+		Password: r.PostFormValue("password"),
+	}
+	err := watcher.Login(&credentials)
+	if err != nil {
+		return nil, err
+	}
+
+	return ReturnJson(w, true)
+}
+
+func NarouLogoutHandler(w http.Header, _ *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+	err := watcher.Logout()
+	if err != nil {
+		return nil, err
+	}
+
+	return ReturnJson(w, true)
+}
+
 func isNoticeListHandler(url string) NarouApiHandlerType {
-	return func(w http.Header, watcher *narou.NarouWatcher) ([]byte, error) {
+	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
 		results, err := GetIsNoticeList(watcher, url)
 		if err != nil {
 			return nil, err
 		}
-
-		bin, err := json.Marshal(results)
-		if err != nil {
-			return nil, err
-		}
-
-		w.Set("Content-Type", "application/json")
-		return bin, nil
+		return ReturnJson(w, results)
 	}
 }
 
@@ -188,6 +214,9 @@ func main() {
 
 	mux.HandleFunc("/narou/isnoticelist", narouApiService.HandlerFunc(isNoticeListHandler(narou.IsNoticeListURL)))
 	mux.HandleFunc("/r18/isnoticelist", narouApiService.HandlerFunc(isNoticeListHandler(narou.IsNoticeListR18URL)))
+
+	mux.HandleFunc("/narou/login", narouApiService.HandlerFunc(NarouLoginHandler))
+	mux.HandleFunc("/narou/logout", narouApiService.HandlerFunc(NarouLogoutHandler))
 
 	remote, err := url.Parse("https://koizuka.github.io/narou-watcher/")
 	if err != nil {
