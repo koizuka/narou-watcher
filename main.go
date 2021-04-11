@@ -62,6 +62,16 @@ type NarouApiService struct {
 }
 
 func NewNarouApiService(logDir, sessionName string) NarouApiService {
+	dirName := path.Join(logDir, sessionName)
+
+	if _, err := os.Stat(dirName); os.IsNotExist(err) {
+		fmt.Printf("creating directory: %v¥n", dirName)
+		err = os.Mkdir(dirName, 0700)
+		if err != nil {
+			log.Fatalf("Mkdir failed: %v", err)
+		}
+	}
+
 	cookiePrefix := "narou-"
 	narouUrl, _ := url.Parse("https://syosetu.com")
 
@@ -75,30 +85,20 @@ func NewNarouApiService(logDir, sessionName string) NarouApiService {
 
 func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		credentials := &narou.Credentials{}
-
-		getLoginInfo := func() (*narou.Credentials, error) {
-			log.Print("LOGIN REQUIRED")
-			if credentials.Id == "" || credentials.Password == "" {
-				return nil, nil
-			} else {
-				return credentials, nil
-			}
-		}
-
 		watcher, err := narou.NewNarouWatcher(narou.Options{
-			SessionName:         apiService.sessionName,
-			FilePrefix:          apiService.logDir + "/",
-			GetCredentials:      getLoginInfo,
+			SessionName: apiService.sessionName,
+			FilePrefix:  apiService.logDir + "/",
+			GetCredentials: func() (*narou.Credentials, error) {
+				log.Print("LOGIN REQUIRED")
+				if id, password, ok := r.BasicAuth(); ok {
+					return &narou.Credentials{Id: id, Password: password}, nil
+				}
+				return nil, nil
+			},
 			NotSaveCookieToFile: true,
 		})
 		if err != nil {
 			log.Fatal(err)
-		}
-
-		if id, password, ok := r.BasicAuth(); ok {
-			credentials.Id = id
-			credentials.Password = password
 		}
 
 		// リクエストのcookieを session に中継
@@ -182,14 +182,6 @@ func main() {
 	sessionName := "narou"
 	fmt.Printf("session name: '%v'\n", sessionName)
 
-	dirName := path.Join(logDir, sessionName)
-	if _, err := os.Stat(dirName); os.IsNotExist(err) {
-		fmt.Printf("creating directory: %v¥n", dirName)
-		err = os.Mkdir(dirName, 0700)
-		if err != nil {
-			log.Fatalf("Mkdir failed: %v", err)
-		}
-	}
 	narouApiService := NewNarouApiService(logDir, sessionName)
 
 	mux := http.NewServeMux()
