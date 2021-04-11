@@ -132,13 +132,13 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 		}
 		for _, cookie := range watcher.Cookies(apiService.cookieDomain) {
 			name := apiService.cookiePrefix + cookie.Name
-			http.SetCookie(w, &http.Cookie{Name: name, Value: cookie.Value})
+			http.SetCookie(w, &http.Cookie{Name: name, Value: cookie.Value, Path: "/"})
 			if _, ok := deleteCookies[name]; ok {
 				delete(deleteCookies, name)
 			}
 		}
 		for name, value := range deleteCookies {
-			http.SetCookie(w, &http.Cookie{Name: name, Value: value, MaxAge: -1})
+			http.SetCookie(w, &http.Cookie{Name: name, Value: value, Path: "/", MaxAge: -1})
 		}
 
 		_, _ = w.Write(body)
