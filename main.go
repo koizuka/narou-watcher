@@ -116,8 +116,7 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 		if err != nil {
 			switch err.(type) {
 			case narou.LoginError:
-				// TODO BASIC認証ではなく login api に切り替える
-				w.Header().Add("WWW-Authenticate", `Basic realm="小説家になろうのログイン情報"`)
+				//w.Header().Add("WWW-Authenticate", `Basic realm="narou login info"`)
 				http.Error(w, "Unauthorized", 401)
 			default:
 				log.Printf("%v %v: error %v: %v", r.Method, r.URL, 503, err)
