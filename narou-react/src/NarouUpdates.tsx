@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Avatar, Badge, Box, Button, FormControlLabel, ListItem, ListItemAvatar, ListItemText, Switch } from '@material-ui/core';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Avatar, Badge, Box, Button, FormControlLabel, ListItem, ListItemAvatar, ListItemText, Switch, TextField } from '@material-ui/core';
 import { Book } from '@material-ui/icons';
 import { IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
 import { Duration } from 'luxon';
@@ -19,9 +19,41 @@ function unread(item: IsNoticeListItem): number {
   return Math.max(item.latest - item.bookmark, 0);
 }
 
+function NarouLoginForm(props: { host: string, onLogin: () => void }) {
+  const [userId, setUserId] = useState('');
+  const [password, setPassword] = useState('');
+
+  const postLogin = useCallback(async () => {
+    const formData = new FormData();
+    formData.append('id', userId);
+    formData.append('password', password);
+    console.log(formData);
+    for (const pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
+    const res = await fetch(`${props.host}/narou/login`, {
+      method: 'POST',
+      body: formData,
+    });
+    const json = await res.json();
+    if (json) {
+      props.onLogin();
+    }
+  }, [userId, password, props]);
+
+  return <form id="loginForm">
+    <h2>小説家になろうのログイン情報</h2>
+    <Box><TextField id="id" name="id" label="ID or email" value={userId} onChange={e => setUserId(e.target.value)}></TextField></Box>
+    <Box><TextField id="password" name="password" label="password" type="password" value={password} onChange={e => setPassword(e.target.value)}></TextField></Box>
+    <Button onClick={postLogin}>login</Button>
+  </form>
+}
+
 export function NarouUpdates({ ignoreDuration }: { ignoreDuration: Duration }) {
   const host = new URLSearchParams(window.location.search).get('server') || 'http://localhost:7676';
-  console.log('host', host);
+
+  const [loginMode, setLoginMode] = useState(false);
 
   const [enableR18, setEnableR18] = useState(false);
   const { data: items, error } = useIsNoticeList(host, { ignoreDuration, enableR18 });
@@ -48,7 +80,19 @@ export function NarouUpdates({ ignoreDuration }: { ignoreDuration: Duration }) {
     }
   }, [headLink]);
 
+  const postLogout = useCallback(async () => {
+    await fetch(`${host}/narou/logout`);
+    setLoginMode(true);
+  }, [host]);
+
+  if (loginMode) {
+    return <NarouLoginForm host={host} onLogin={() => setLoginMode(false)} />
+  }
+
   if (error) {
+    if (error.status === 401) {
+      setLoginMode(true);
+    }
     return <div>Server({JSON.stringify(host)}) is not working...?</div>;
   }
   if (!items) {
@@ -88,6 +132,7 @@ export function NarouUpdates({ ignoreDuration }: { ignoreDuration: Duration }) {
         </Button>
       </Box>
       )}
+      <Button onClick={postLogout}>logout</Button>
     </Box>
   );
 }

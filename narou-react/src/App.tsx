@@ -30,7 +30,20 @@ function App() {
       <CssBaseline />
       <SWRConfig value={{
         refreshInterval: PollingInterval,
-        fetcher: (args) => fetch(args).then(res => res.json())
+        fetcher: (args) => fetch(args, {
+          credentials: 'include',
+        }).then(res => {
+          if (!res.ok) {
+            class FetchError extends Error {
+              status: number = 0;
+              name = 'FetchError';
+            }
+            const error = new FetchError(`failed to fetch: status=${res.status}`);
+            error.status = res.status;
+            throw error;
+          }
+          return res.json();
+        })
       }}>
         <NarouUpdates ignoreDuration={IgnoreDuration} />
       </SWRConfig>

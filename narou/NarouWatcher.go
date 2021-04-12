@@ -91,6 +91,10 @@ func isNarouLoginPage(page *scraper.Page) bool {
 	return forms.Length() > 0
 }
 
+func isNarouUserPage(page *scraper.Page) bool {
+	return page.Url.Path == "/user/top/"
+}
+
 func (narou *NarouWatcher) login(page *scraper.Page, credentials *Credentials) (*scraper.Page, error) {
 	form, err := page.Form(NarouLoginFormSelector)
 	if err != nil {
@@ -116,6 +120,11 @@ func (narou *NarouWatcher) Login(credentials *Credentials) error {
 	if err != nil {
 		return err
 	}
+
+	if isNarouUserPage(page) {
+		return nil
+	}
+
 	if !isNarouLoginPage(page) {
 		return fmt.Errorf("login page not recognized: %v", err)
 	}
@@ -125,7 +134,7 @@ func (narou *NarouWatcher) Login(credentials *Credentials) error {
 		return err
 	}
 
-	if isNarouLoginPage(page) {
+	if !isNarouUserPage(page) {
 		return LoginError{"login failed"}
 	}
 

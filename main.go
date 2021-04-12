@@ -96,6 +96,8 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 				return nil, nil
 			},
 			NotSaveCookieToFile: true,
+			// SaveToFile:          true, // DEBUG
+			// ShowResponseHeader:  true, // DEBUG
 		})
 		if err != nil {
 			log.Fatal(err)
@@ -244,7 +246,12 @@ func main() {
 	fmt.Printf("open in browser: %v\n", openAddress)
 	_ = open.Run(openAddress.String())
 
-	srv := &http.Server{Handler: cors.Default().Handler(mux)}
+	srv := &http.Server{Handler: cors.New(cors.Options{
+		AllowOriginFunc: func(_ string) bool {
+			return true
+		},
+		AllowCredentials: true,
+	}).Handler(mux)}
 
 	log.Print("^C to shutdown.")
 
