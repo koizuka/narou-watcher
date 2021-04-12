@@ -27,7 +27,8 @@ export function NarouUpdates({ ignoreDuration }: { ignoreDuration: Duration }) {
   const { data: items, error } = useIsNoticeList(host, { ignoreDuration, enableR18 });
 
   const unreads = useMemo(() => items?.filter(i => i.bookmark < i.latest), [items]);
-  const headLink = useMemo(() => (unreads && unreads.length > 0) ? nextLink(unreads[0]) : undefined, [unreads]);
+  const head = useMemo(() => (unreads && unreads.length > 0) ? unreads[unreads.length - 1] : undefined, [unreads]);
+  const headLink = useMemo(() => head ? nextLink(head) : undefined, [head]);
 
   useEffect(() => {
     document.title = `なろう 未読:${unreads?.length}`;
@@ -55,10 +56,10 @@ export function NarouUpdates({ ignoreDuration }: { ignoreDuration: Duration }) {
   }
 
   const isDefaultOpen = function (item: IsNoticeListItem): boolean {
-    if (!unreads) {
+    if (!head) {
       return false;
     }
-    return unreads.length > 0 && item.base_url === unreads[0].base_url;
+    return item.base_url === head.base_url;
   }
 
   return (
