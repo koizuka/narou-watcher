@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/rs/cors"
 	"github.com/skratchdot/open-golang/open"
@@ -189,21 +190,31 @@ func isNoticeListHandler(url string) NarouApiHandlerType {
 	}
 }
 
-func getProjectDirectory() string {
+func getProjectDirectory() (string, error) {
 	out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
 	if err != nil {
-		log.Fatalf("git failed: %v", err)
+		return "", err
 	}
-	return strings.TrimSpace(string(out))
+	return strings.TrimSpace(string(out)), nil
 }
 
 func main() {
-	const ListenPort = 7676
+	projectDir, err := getProjectDirectory()
+	if err != nil {
+		projectDir, err = os.Getwd()
+		if err != nil {
+			log.Fatal("getwd failed", err)
+		}
+	}
 
-	projectDir := getProjectDirectory()
-	fmt.Printf("project directory: '%v'\n", projectDir)
+	listenPort := flag.Uint("port", 7676, "listen port")
+	openFlag := flag.Bool("open", false, "ブラウザを自動で開く")
+	reverseProxyAddress := flag.String("reverse-proxy", "https://koizuka.github.io/narou-watcher/", "reverse proxy to")
+	logDirectory := flag.String("log-dir", path.Join(projectDir, "log"), "log directory")
+	publicAddress := flag.String("public-url", "", "外から見えるアドレス(http://localhost:7676)の上書き")
+	flag.Parse()
 
-	logDir := path.Join(projectDir, "log")
+	logDir := *logDirectory
 	fmt.Printf("log directory: '%v'\n", logDir)
 
 	sessionName := "narou"
@@ -219,7 +230,7 @@ func main() {
 	mux.HandleFunc("/narou/login", narouApiService.HandlerFunc(NarouLoginHandler))
 	mux.HandleFunc("/narou/logout", narouApiService.HandlerFunc(NarouLogoutHandler))
 
-	remote, err := url.Parse("https://koizuka.github.io/narou-watcher/")
+	remote, err := url.Parse(*reverseProxyAddress)
 	if err != nil {
 		log.Fatalf("proxy URL parse error: %v", err)
 	}
@@ -229,13 +240,18 @@ func main() {
 		proxy.ServeHTTP(w, r)
 	})
 
-	fmt.Printf("Listening port %v...\n", ListenPort)
-	l, err := net.Listen("tcp", fmt.Sprintf(":%v", ListenPort))
+	fmt.Printf("Listening port %v...\n", *listenPort)
+	l, err := net.Listen("tcp", fmt.Sprintf(":%v", *listenPort))
 	if err != nil {
 		log.Fatalf("Listen Error: %v", err)
 	}
 
-	host := fmt.Sprintf("http://localhost:%v", ListenPort)
+	var host string
+	if *publicAddress != "" {
+		host = *publicAddress
+	} else {
+		host = fmt.Sprintf("http://localhost:%v", *listenPort)
+	}
 	openAddress, err := url.Parse(host)
 	if err != nil {
 		log.Fatalf("URL Parse error: '%v' -> %v", host, err)
@@ -243,7 +259,9 @@ func main() {
 	openAddress.RawQuery = url.Values{"server": {host}}.Encode()
 
 	fmt.Printf("open in browser: %v\n", openAddress)
-	_ = open.Run(openAddress.String())
+	if *openFlag {
+		_ = open.Run(openAddress.String())
+	}
 
 	srv := &http.Server{Handler: cors.New(cors.Options{
 		AllowOriginFunc: func(_ string) bool {
