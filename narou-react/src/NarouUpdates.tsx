@@ -19,7 +19,7 @@ function unread(item: IsNoticeListItem): number {
   return Math.max(item.latest - item.bookmark, 0);
 }
 
-function NarouLoginForm(props: { host: string, onLogin: () => void }) {
+function NarouLoginForm(props: { server: string, onLogin: () => void }) {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
 
@@ -32,7 +32,7 @@ function NarouLoginForm(props: { host: string, onLogin: () => void }) {
       console.log(pair[0], pair[1]);
     }
 
-    const res = await fetch(`${props.host}/narou/login`, {
+    const res = await fetch(`${props.server}/narou/login`, {
       method: 'POST',
       body: formData,
     });
@@ -50,13 +50,11 @@ function NarouLoginForm(props: { host: string, onLogin: () => void }) {
   </form>
 }
 
-export function NarouUpdates({ ignoreDuration }: { ignoreDuration: Duration }) {
-  const host = new URLSearchParams(window.location.search).get('server') || 'http://localhost:7676';
-
+export function NarouUpdates({ server, ignoreDuration }: { server: string, ignoreDuration: Duration }) {
   const [loginMode, setLoginMode] = useState(false);
 
   const [enableR18, setEnableR18] = useState(false);
-  const { data: items, error } = useIsNoticeList(host, { ignoreDuration, enableR18 });
+  const { data: items, error } = useIsNoticeList(server, { ignoreDuration, enableR18 });
 
   const unreads = useMemo(() => items?.filter(i => i.bookmark < i.latest), [items]);
   const head = useMemo(() => (unreads && unreads.length > 0) ? unreads[unreads.length - 1] : undefined, [unreads]);
@@ -81,19 +79,19 @@ export function NarouUpdates({ ignoreDuration }: { ignoreDuration: Duration }) {
   }, [headLink]);
 
   const postLogout = useCallback(async () => {
-    await fetch(`${host}/narou/logout`);
+    await fetch(`${server}/narou/logout`);
     setLoginMode(true);
-  }, [host]);
+  }, [server]);
 
   if (loginMode) {
-    return <NarouLoginForm host={host} onLogin={() => setLoginMode(false)} />
+    return <NarouLoginForm server={server} onLogin={() => setLoginMode(false)} />
   }
 
   if (error) {
     if (error.status === 401) {
       setLoginMode(true);
     }
-    return <div>Server({JSON.stringify(host)}) is not working...?</div>;
+    return <div>Server({JSON.stringify(server)}) is not working...?</div>;
   }
   if (!items) {
     return <div>Loading...</div>;
