@@ -25,13 +25,13 @@ export function useIsNoticeList(
   host: string,
   { ignoreDuration, enableR18 }: { ignoreDuration: Duration, enableR18: boolean }
 ) {
-  const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>(`${host}/narou/isnoticelist`,
+  const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>(host ? `${host}/narou/isnoticelist` : null,
     {
       onErrorRetry: (error) => {
         console.log('onErrorRetry:', error, error.status);
       },
     });
-  const { data: raw_items18, error: error18 } = useSWR<IsNoticeListRecord[]>((!error && enableR18) ? `${host}/r18/isnoticelist` : null);
+  const { data: raw_items18, error: error18 } = useSWR<IsNoticeListRecord[]>((host && !error && enableR18) ? `${host}/r18/isnoticelist` : null);
 
   const items: IsNoticeListItem[] | undefined = useMemo(
     () => {
