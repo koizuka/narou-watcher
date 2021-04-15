@@ -20,6 +20,11 @@ function getServerAddress(location: Location): string {
   if (location.protocol === 'http:') {
     return 'http://localhost:7676';
   }
+  // github.io であればAPIは置けないから除外
+  if (!/.*\.github\.io$/.test(location.hostname)) {
+    // 置いてるサイトにAPIがあると期待する
+    return location.protocol + '//' + location.host + location.pathname;
+  }
   return '';
 }
 
