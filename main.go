@@ -53,6 +53,15 @@ func GetIsNoticeList(watcher *narou.NarouWatcher, url string) ([]model.IsNoticeL
 	return result, nil
 }
 
+func parseURLForCookie(url *url.URL) (isHttps bool, cookiePath string) {
+	isHttps = url.Scheme == "https"
+	cookiePath = url.Path
+	if cookiePath == "" {
+		cookiePath = "/"
+	}
+	return isHttps, cookiePath
+}
+
 type NarouApiHandlerType = func(w http.Header, r *http.Request, service *narou.NarouWatcher) ([]byte, error)
 
 type NarouApiService struct {
@@ -60,10 +69,13 @@ type NarouApiService struct {
 	sessionName  string
 	cookiePrefix string
 	cookieDomain *url.URL
+	isHttps      bool
+	cookiePath   string
 }
 
-func NewNarouApiService(logDir, sessionName string) NarouApiService {
+func NewNarouApiService(logDir, sessionName string, openAddress *url.URL) NarouApiService {
 	dirName := path.Join(logDir, sessionName)
+	isHttps, cookiePath := parseURLForCookie(openAddress)
 
 	if _, err := os.Stat(dirName); os.IsNotExist(err) {
 		fmt.Printf("creating directory: %v¥n", dirName)
@@ -81,6 +93,8 @@ func NewNarouApiService(logDir, sessionName string) NarouApiService {
 		sessionName,
 		cookiePrefix,
 		narouUrl,
+		isHttps,
+		cookiePath,
 	}
 }
 
@@ -133,15 +147,29 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 				deleteCookies[cookie.Name] = cookie.Value
 			}
 		}
+
+		setCookie := func(name, value string, delete bool) {
+			cookie := &http.Cookie{Name: name, Value: value, Path: apiService.cookiePath}
+			if delete {
+				cookie.MaxAge = -1
+			}
+			if apiService.isHttps {
+				cookie.Secure = true
+				cookie.SameSite = http.SameSiteNoneMode
+			}
+
+			http.SetCookie(w, cookie)
+		}
+
 		for _, cookie := range watcher.Cookies(apiService.cookieDomain) {
 			name := apiService.cookiePrefix + cookie.Name
-			http.SetCookie(w, &http.Cookie{Name: name, Value: cookie.Value, Path: "/"})
+			setCookie(name, cookie.Value, false)
 			if _, ok := deleteCookies[name]; ok {
 				delete(deleteCookies, name)
 			}
 		}
 		for name, value := range deleteCookies {
-			http.SetCookie(w, &http.Cookie{Name: name, Value: value, Path: "/", MaxAge: -1})
+			setCookie(name, value, true)
 		}
 
 		_, _ = w.Write(body)
@@ -168,6 +196,7 @@ func NarouLoginHandler(w http.Header, r *http.Request, watcher *narou.NarouWatch
 		return nil, err
 	}
 
+	log.Print("LOGIN")
 	return ReturnJson(w, true)
 }
 
@@ -177,6 +206,7 @@ func NarouLogoutHandler(w http.Header, _ *http.Request, watcher *narou.NarouWatc
 		return nil, err
 	}
 
+	log.Print("LOGOUT")
 	return ReturnJson(w, true)
 }
 
@@ -214,13 +244,24 @@ func main() {
 	publicAddress := flag.String("public-url", "", "外から見えるアドレス(http://localhost:7676)の上書き")
 	flag.Parse()
 
+	var host string
+	if *publicAddress != "" {
+		host = *publicAddress
+	} else {
+		host = fmt.Sprintf("http://localhost:%v", *listenPort)
+	}
+	openAddress, err := url.Parse(host)
+	if err != nil {
+		log.Fatalf("URL Parse error: '%v' -> %v", host, err)
+	}
+
 	logDir := *logDirectory
 	fmt.Printf("log directory: '%v'\n", logDir)
 
 	sessionName := "narou"
 	fmt.Printf("session name: '%v'\n", sessionName)
 
-	narouApiService := NewNarouApiService(logDir, sessionName)
+	narouApiService := NewNarouApiService(logDir, sessionName, openAddress)
 
 	mux := http.NewServeMux()
 
@@ -246,16 +287,6 @@ func main() {
 		log.Fatalf("Listen Error: %v", err)
 	}
 
-	var host string
-	if *publicAddress != "" {
-		host = *publicAddress
-	} else {
-		host = fmt.Sprintf("http://localhost:%v", *listenPort)
-	}
-	openAddress, err := url.Parse(host)
-	if err != nil {
-		log.Fatalf("URL Parse error: '%v' -> %v", host, err)
-	}
 	openAddress.RawQuery = url.Values{"server": {host}}.Encode()
 
 	fmt.Printf("open in browser: %v\n", openAddress)
