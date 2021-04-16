@@ -18,6 +18,7 @@ export function NarouLoginForm(props: { server: string; onLogin: () => void; }) 
     const res: Response = await fetch(`${props.server}/narou/login`, {
       method: 'POST',
       body: formData,
+      credentials: 'include',
     });
     if (!res.ok) {
       const text = await res.text();

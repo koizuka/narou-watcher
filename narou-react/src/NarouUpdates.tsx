@@ -109,7 +109,9 @@ export function NarouUpdates({ server, ignoreDuration }: { server: string, ignor
       <NarouUpdateList server={server} ignoreDuration={ignoreDuration}
         onUnauthorized={() => setLoginMode(true)} />
       <Button onClick={async () => {
-        await fetch(`${server}/narou/logout`);
+        await fetch(`${server}/narou/logout`, {
+          credentials: 'include',
+        });
         setLoginMode(true);
       }}>logout</Button>
     </Box>
