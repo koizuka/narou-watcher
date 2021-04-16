@@ -18,7 +18,8 @@
 |-reverse-proxy 文字列|https://koizuka.github.io/narou-watcher/|フロントエンドを読み込むアドレス|
 |-log-dir 文字列|githubの作業ディレクトリのトップ/log/narou|開発ログの保存先|
 |-public-url 文字列|""|公開サーバーからreverse proxyするときの外に見えるアドレス(httpsにするときは必須)。パスは `/` より下も可能。|
-|-open||サーバーが起動したら公開アドレスをブラウザで開く(ローカル起動用)|
+|-open|bool|サーバーが起動したら公開アドレスをブラウザで開く(ローカル起動用)|
+|-debug|bool|-log-dir のディレクトリに通信ログを記録する(ローカル起動用)|
 
 #### API
 * `POST /login`

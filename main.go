@@ -71,9 +71,10 @@ type NarouApiService struct {
 	cookieDomain *url.URL
 	isHttps      bool
 	cookiePath   string
+	debug        bool
 }
 
-func NewNarouApiService(logDir, sessionName string, openAddress *url.URL) NarouApiService {
+func NewNarouApiService(logDir, sessionName string, openAddress *url.URL, debug bool) NarouApiService {
 	dirName := path.Join(logDir, sessionName)
 	isHttps, cookiePath := parseURLForCookie(openAddress)
 
@@ -95,6 +96,7 @@ func NewNarouApiService(logDir, sessionName string, openAddress *url.URL) NarouA
 		narouUrl,
 		isHttps,
 		cookiePath,
+		debug,
 	}
 }
 
@@ -104,15 +106,14 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 			SessionName: apiService.sessionName,
 			FilePrefix:  apiService.logDir + "/",
 			GetCredentials: func() (*narou.Credentials, error) {
-				log.Print("LOGIN REQUIRED")
 				if id, password, ok := r.BasicAuth(); ok {
 					return &narou.Credentials{Id: id, Password: password}, nil
 				}
 				return nil, nil
 			},
 			NotSaveCookieToFile: true,
-			// SaveToFile:          true, // DEBUG
-			// ShowResponseHeader:  true, // DEBUG
+			SaveToFile:          apiService.debug,
+			ShowResponseHeader:  apiService.debug,
 		})
 		if err != nil {
 			log.Fatal(err)
@@ -131,7 +132,6 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 		if err != nil {
 			switch err.(type) {
 			case narou.LoginError:
-				//w.Header().Add("WWW-Authenticate", `Basic realm="narou login info"`)
 				http.Error(w, "Unauthorized", 401)
 			default:
 				log.Printf("%v %v: error %v: %v", r.Method, r.URL, 503, err)
@@ -196,7 +196,6 @@ func NarouLoginHandler(w http.Header, r *http.Request, watcher *narou.NarouWatch
 		return nil, err
 	}
 
-	log.Print("LOGIN")
 	return ReturnJson(w, true)
 }
 
@@ -206,7 +205,6 @@ func NarouLogoutHandler(w http.Header, _ *http.Request, watcher *narou.NarouWatc
 		return nil, err
 	}
 
-	log.Print("LOGOUT")
 	return ReturnJson(w, true)
 }
 
@@ -240,8 +238,9 @@ func main() {
 	listenPort := flag.Uint("port", 7676, "listen port")
 	openFlag := flag.Bool("open", false, "ブラウザを自動で開く")
 	reverseProxyAddress := flag.String("reverse-proxy", "https://koizuka.github.io/narou-watcher/", "reverse proxy to")
-	logDirectory := flag.String("log-dir", path.Join(projectDir, "log"), "log directory")
+	logDirectory := flag.String("log-dir", path.Join(projectDir, "log"), "debug log directory(-debug 指定時)")
 	publicAddress := flag.String("public-url", "", "外から見えるアドレス(http://localhost:7676)の上書き")
+	debugFlag := flag.Bool("debug", false, "log directoryにデバッグ情報を記録する")
 	flag.Parse()
 
 	var host string
@@ -261,7 +260,7 @@ func main() {
 	sessionName := "narou"
 	fmt.Printf("session name: '%v'\n", sessionName)
 
-	narouApiService := NewNarouApiService(logDir, sessionName, openAddress)
+	narouApiService := NewNarouApiService(logDir, sessionName, openAddress, *debugFlag)
 
 	mux := http.NewServeMux()
 
