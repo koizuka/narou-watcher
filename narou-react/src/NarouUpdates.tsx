@@ -47,6 +47,7 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: s
   }, [headLink]);
 
   if (error) {
+    console.log(`error = ${error}`);
     if (error.status === 401) {
       onUnauthorized();
     }
@@ -106,7 +107,7 @@ export function NarouUpdates({ server, ignoreDuration }: { server: string, ignor
   return (
     <Box>
       <NarouUpdateList server={server} ignoreDuration={ignoreDuration}
-        onUnauthorized={() => setLoginMode(false)} />
+        onUnauthorized={() => setLoginMode(true)} />
       <Button onClick={async () => {
         await fetch(`${server}/narou/logout`);
         setLoginMode(true);
