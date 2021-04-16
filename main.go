@@ -79,7 +79,7 @@ func NewNarouApiService(logDir, sessionName string, openAddress *url.URL, debug 
 	isHttps, cookiePath := parseURLForCookie(openAddress)
 
 	if _, err := os.Stat(dirName); os.IsNotExist(err) {
-		fmt.Printf("creating directory: %v¥n", dirName)
+		log.Printf("creating directory: %v", dirName)
 		err = os.Mkdir(dirName, 0700)
 		if err != nil {
 			log.Fatalf("Mkdir failed: %v", err)
@@ -255,10 +255,10 @@ func main() {
 	}
 
 	logDir := *logDirectory
-	fmt.Printf("log directory: '%v'\n", logDir)
+	log.Printf("log directory: '%v'", logDir)
 
 	sessionName := "narou"
-	fmt.Printf("session name: '%v'\n", sessionName)
+	log.Printf("session name: '%v'", sessionName)
 
 	narouApiService := NewNarouApiService(logDir, sessionName, openAddress, *debugFlag)
 
@@ -280,7 +280,7 @@ func main() {
 		proxy.ServeHTTP(w, r)
 	})
 
-	fmt.Printf("Listening port %v...\n", *listenPort)
+	log.Printf("Listening port %v...", *listenPort)
 	l, err := net.Listen("tcp", fmt.Sprintf(":%v", *listenPort))
 	if err != nil {
 		log.Fatalf("Listen Error: %v", err)
@@ -288,7 +288,7 @@ func main() {
 
 	openAddress.RawQuery = url.Values{"server": {host}}.Encode()
 
-	fmt.Printf("open in browser: %v\n", openAddress)
+	log.Printf("open in browser: %v", openAddress)
 	if *openFlag {
 		_ = open.Run(openAddress.String())
 	}
