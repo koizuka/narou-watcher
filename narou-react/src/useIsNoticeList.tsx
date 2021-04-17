@@ -1,4 +1,4 @@
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import { useMemo } from 'react';
 import { DateTime, Duration } from 'luxon';
 import { NarouApi } from './NarouApi';
@@ -22,12 +22,18 @@ export type IsNoticeListItem = {
   isR18: boolean;
 };
 
+// login / logout したらキャッシュをすぐに消す
+export function clearCache() {
+  mutate('/narou/isnoticelist');
+  mutate('/r18/isnoticelist');
+}
+
 export function useIsNoticeList(
   api: NarouApi,
   { ignoreDuration, enableR18 }: { ignoreDuration: Duration, enableR18: boolean }
 ) {
-  const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>(`/narou/isnoticelist/${api.stateChanged}`,
-    async () => api.call('/narou/isnoticelist'),
+  const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>('/narou/isnoticelist',
+    async path => api.call(path),
     {
       onErrorRetry: (error) => {
         console.log('onErrorRetry:', error, error.status);

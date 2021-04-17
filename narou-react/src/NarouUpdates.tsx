@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Avatar, Badge, Box, Button, FormControlLabel, ListItem, ListItemAvatar, ListItemText, Switch } from '@material-ui/core';
 import { Book } from '@material-ui/icons';
-import { IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
+import { clearCache, IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
 import { Duration } from 'luxon';
 import { NarouLoginForm } from './NarouLoginForm';
 import { NarouApi } from './NarouApi';
@@ -97,6 +97,10 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
 
 export function NarouUpdates({ api, ignoreDuration }: { api: NarouApi, ignoreDuration: Duration }) {
   const [loginMode, setLoginMode] = useState(false);
+
+  useEffect(() => {
+    clearCache();
+  }, [loginMode]);
 
   if (loginMode) {
     return <NarouLoginForm api={api} onLogin={() => {

@@ -1,8 +1,6 @@
 type Api = '/narou/login' | '/narou/logout' | '/narou/isnoticelist' | '/r18/isnoticelist';
 
 export class NarouApi {
-    stateChanged: number = 0;
-
     constructor(private server: string) {
     }
 
@@ -21,13 +19,11 @@ export class NarouApi {
             body: formData,
             credentials: 'include',
         });
-        ++this.stateChanged;
         return res;
     }
 
     async logout(): Promise<void> {
         await this.fetch('/narou/logout');
-        ++this.stateChanged;
     }
 
     async call(api: '/narou/isnoticelist' | '/r18/isnoticelist') {

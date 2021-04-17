@@ -13,10 +13,7 @@ export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
       const text = await res.text();
       setError(`${res.status} ${res.statusText}\n${text}`);
     } else {
-      const json = await res.json();
-      if (json) {
-        props.onLogin();
-      }
+      props.onLogin();
     }
   }, [userId, password, props]);
 
