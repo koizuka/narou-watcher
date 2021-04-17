@@ -1,25 +1,14 @@
 import { useCallback, useRef, useState } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@material-ui/core';
+import { NarouApi } from './NarouApi';
 
-export function NarouLoginForm(props: { server: string; onLogin: () => void; }) {
+export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string>('');
 
   const postLogin = useCallback(async () => {
-    const formData = new FormData();
-    formData.append('id', userId);
-    formData.append('password', password);
-    console.log(formData);
-    for (const pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
-
-    const res: Response = await fetch(`${props.server}/narou/login`, {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    });
+    const res: Response = await props.api.login(userId, password);
     if (!res.ok) {
       const text = await res.text();
       setError(`${res.status} ${res.statusText}\n${text}`);

@@ -1,6 +1,7 @@
 import useSWR from 'swr';
 import { useMemo } from 'react';
 import { DateTime, Duration } from 'luxon';
+import { NarouApi } from './NarouApi';
 
 type IsNoticeListRecord = {
   base_url: string;
@@ -22,16 +23,19 @@ export type IsNoticeListItem = {
 };
 
 export function useIsNoticeList(
-  host: string,
+  api: NarouApi,
   { ignoreDuration, enableR18 }: { ignoreDuration: Duration, enableR18: boolean }
 ) {
-  const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>(host ? `${host}/narou/isnoticelist` : null,
+  const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>(`/narou/isnoticelist/${api.stateChanged}`,
+    async () => api.call('/narou/isnoticelist'),
     {
       onErrorRetry: (error) => {
         console.log('onErrorRetry:', error, error.status);
       },
     });
-  const { data: raw_items18, error: error18 } = useSWR<IsNoticeListRecord[]>((host && !error && enableR18) ? `${host}/r18/isnoticelist` : null);
+  const { data: raw_items18, error: error18 } = useSWR<IsNoticeListRecord[]>((!error && enableR18) ? '/r18/isnoticelist' : null,
+    async path => api.call(path),
+  );
 
   const items: IsNoticeListItem[] | undefined = useMemo(
     () => {

@@ -4,6 +4,7 @@ import { Book } from '@material-ui/icons';
 import { IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
 import { Duration } from 'luxon';
 import { NarouLoginForm } from './NarouLoginForm';
+import { NarouApi } from './NarouApi';
 
 function nextLink(item: IsNoticeListItem): string {
   if (item.bookmark >= item.latest) {
@@ -20,7 +21,7 @@ function unread(item: IsNoticeListItem): number {
   return Math.max(item.latest - item.bookmark, 0);
 }
 
-function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: string, ignoreDuration: Duration, onUnauthorized: () => void }) {
+function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: NarouApi, ignoreDuration: Duration, onUnauthorized: () => void }) {
   const [enableR18, setEnableR18] = useState(false);
   const { data: items, error } = useIsNoticeList(server, { ignoreDuration, enableR18 });
 
@@ -47,7 +48,7 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: s
   }, [headLink]);
 
   if (error) {
-    console.log(`error = ${error}`);
+    console.log('error =', error);
     if (error.status === 401) {
       onUnauthorized();
     }
@@ -94,11 +95,11 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: s
   );
 }
 
-export function NarouUpdates({ server, ignoreDuration }: { server: string, ignoreDuration: Duration }) {
+export function NarouUpdates({ api, ignoreDuration }: { api: NarouApi, ignoreDuration: Duration }) {
   const [loginMode, setLoginMode] = useState(false);
 
   if (loginMode) {
-    return <NarouLoginForm server={server} onLogin={() => {
+    return <NarouLoginForm api={api} onLogin={() => {
       console.log('logged in!');
       setLoginMode(false);
     }} />
@@ -106,12 +107,10 @@ export function NarouUpdates({ server, ignoreDuration }: { server: string, ignor
 
   return (
     <Box>
-      <NarouUpdateList server={server} ignoreDuration={ignoreDuration}
+      <NarouUpdateList server={api} ignoreDuration={ignoreDuration}
         onUnauthorized={() => setLoginMode(true)} />
       <Button onClick={async () => {
-        await fetch(`${server}/narou/logout`, {
-          credentials: 'include',
-        });
+        await api.logout();
         setLoginMode(true);
       }}>logout</Button>
     </Box>

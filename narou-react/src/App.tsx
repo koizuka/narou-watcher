@@ -6,6 +6,7 @@ import { NarouUpdates } from './NarouUpdates';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { useEffect, useMemo, useState } from 'react';
 import { CssBaseline, Link, Typography, useMediaQuery } from '@material-ui/core';
+import { NarouApi } from './NarouApi';
 
 const IgnoreDuration = Duration.fromObject({ days: 30 });
 const PollingInterval = 5 * 60 * 1000; // 5分ごとにポーリング
@@ -41,12 +42,13 @@ function App() {
     [prefersDarkMode],
   );
 
-  const [server, setServer] = useState('');
+  const [api, setApi] = useState<NarouApi | null>(null);
   useEffect(() => {
-    setServer(getServerAddress(document.location));
+    const host = getServerAddress(document.location);
+    setApi(host ? new NarouApi(host) : null);
   }, [])
 
-  if (server === '') {
+  if (!api) {
     return (
       <ThemeProvider theme={theme}>
         <Typography>http以外の場合は必ず server クエリパラメータにサーバーアドレスを指定してください</Typography>
@@ -60,22 +62,8 @@ function App() {
       <CssBaseline />
       <SWRConfig value={{
         refreshInterval: PollingInterval,
-        fetcher: (args) => fetch(args, {
-          credentials: 'include',
-        }).then(res => {
-          if (!res.ok) {
-            class FetchError extends Error {
-              status: number = 0;
-              name = 'FetchError';
-            }
-            const error = new FetchError(`failed to fetch: status=${res.status}`);
-            error.status = res.status;
-            throw error;
-          }
-          return res.json();
-        })
       }}>
-        <NarouUpdates server={server} ignoreDuration={IgnoreDuration} />
+        <NarouUpdates api={api} ignoreDuration={IgnoreDuration} />
       </SWRConfig>
       <div style={{
         display: "inline-block",
@@ -83,7 +71,7 @@ function App() {
         bottom: 0,
         right: 0,
         fontSize: "small",
-        fontStyle: "italic"
+        fontStyle: "italic",
       }}>narou-react: {DateTime.fromISO(buildDate).toISO()}</div>
     </ThemeProvider>
   );
