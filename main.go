@@ -152,6 +152,8 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 			cookie := &http.Cookie{Name: name, Value: value, Path: apiService.cookiePath}
 			if delete {
 				cookie.MaxAge = -1
+			} else {
+				cookie.MaxAge = 30 * 24 * 60 * 60 // 30 days to expire
 			}
 			if apiService.isHttps {
 				cookie.Secure = true
