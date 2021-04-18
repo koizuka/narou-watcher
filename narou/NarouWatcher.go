@@ -31,6 +31,7 @@ type Options struct {
 	ShowRequestHeader   bool
 	ShowResponseHeader  bool
 	GetCredentials      func() (params *Credentials, err error)
+	UserAgent           string
 	NotSaveCookieToFile bool
 }
 
@@ -69,6 +70,7 @@ func NewNarouWatcher(opt Options) (*NarouWatcher, error) {
 	session.NotUseNetwork = opt.NotUseNetwork
 	session.ShowRequestHeader = opt.ShowRequestHeader
 	session.ShowResponseHeader = opt.ShowResponseHeader
+	session.UserAgent = opt.UserAgent
 
 	if !opt.NotSaveCookieToFile {
 		err := session.LoadCookie()

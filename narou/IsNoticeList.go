@@ -35,7 +35,6 @@ type IsnoticelistTitleinfo struct {
 	AuthorName string     `find:"span.fn_name" re:".*（(.*)）.*"`
 }
 type IsnoticelistUpdateinfo struct {
-	IsNotice    string     `find:"span.isnotice"`
 	UpdateTime  time.Time  `find:"td.info2 p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
 	BookmarkURL EpisodeURL `find:"span.no a:nth-of-type(1)" attr:"href"`
 	LatestURL   EpisodeURL `find:"span.no a:nth-of-type(2)" attr:"href"`
@@ -69,7 +68,7 @@ func ParseIsNoticeList(page *scraper.Page) ([]IsNoticeList, error) {
 	//         span.no
 	//           a[@href=リンク]
 	//             img[src=アイコン画像]
-	//             &nbps;207部分
+	//             &nbsp;207部分
 	//           a[@href=リンク]
 	//             最新208部分
 	//       p.right

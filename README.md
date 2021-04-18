@@ -31,19 +31,42 @@
 * `GET /narou/isnoticelist`
     * ログイン状態でなければ HTTP status=401 を返します。
     * ログイン状態で、新着更新チェック中小説一覧の1ページ目を取得して以下のオブジェクトを配列にしてJSONにして返します。
-
-|key|type|説明|
-|---|---|---|
-|base_url|string|小説自体のURL|
-|update_time|ISO8601形式の日時|更新時刻(分解能は分まで)|
-|bookmark|uint|しおりの部分番号|
-|latest|uint|最終更新の部分番号|
-|title|string|小説のタイトル|
-|author_name|string|著者の名前|
+      
+      |key|type|説明|
+      |---|---|---|
+      |base_url|string|小説自体のURL|
+      |update_time|ISO8601形式の日時|更新時刻(分解能は分まで)|
+      |bookmark|uint|しおりの部分番号|
+      |latest|uint|最終更新の部分番号|
+      |title|string|小説のタイトル|
+      |author_name|string|著者の名前|
 
 * `GET /r18/isnoticelist`
     * Xユーザーページ(R18)の側の新着更新チェック中小説を取得します。
 
+* `GET /narou/bookmarks`
+    * ブックマーク名一覧
+      
+      |key|type|説明|
+      |---|---|---|
+      |no|number|1〜10|
+      |name|string|ブックマーク名|
+    
+* `GET /narou/bookmarks/:no`
+    * ブックマークの内容の1ページ
+    * :no は1〜10
+    * クエリパラメータ page をつけるとページング。1が先頭
+    * クエリパラメータ order はソートオーダー。そのまま中継される。 `updated_at` がブックマーク更新順
+      
+      |key|type|説明|
+      |---|---|---|
+      |base_url|string|小説自体のURL|
+      |update_time|ISO8601形式の日時|更新時刻(分解能は分まで)|
+      |bookmark|uint|しおりの部分番号(短篇なら0)|
+      |latest|uint|最終更新の部分番号(短篇なら0|
+      |title|string|小説のタイトル|
+      |author_name|string|著者の名前|
+      |is_notice|boolean|更新チェック中ならtrue|
 #### ログインセッションクッキー
 小説家になろうのサイトが Set-Cookieしてきたものの名前の前に `narou-` をつけてこちらのクッキーとして Set-Cookie にして返し、ブラウザに覚えさせます。
 
