@@ -412,8 +412,6 @@ func main() {
 		log.Fatalf("Listen Error: %v", err)
 	}
 
-	openAddress.RawQuery = url.Values{"server": {host}}.Encode()
-
 	log.Printf("open in browser: %v", openAddress)
 	if *openFlag {
 		_ = open.Run(openAddress.String())
