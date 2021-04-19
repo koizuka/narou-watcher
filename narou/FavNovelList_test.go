@@ -62,7 +62,7 @@ const FavNovelListTestHtml = `
 <a href="https://ncode.syosetu.com/novel2/3/"><img src="//static.syosetu.com/view/images/ui-icon/bookmarker_now.png" />&nbsp;3部分</a>&nbsp;-
 
 <a href="https://ncode.syosetu.com/novel2/4/">
-最新4部分</a></span>
+最終4部分</a>〔完結済〕</span>
 
 </p>
 <p class="right">
@@ -118,9 +118,9 @@ func TestParseFavNovelList(t *testing.T) {
 		wantErr bool
 	}{
 		{"test", args{FavNovelListTestHtml, "ブックマーク"}, []FavNovelList{
-			{"ncode", "novel1", "title1", "author1", datetime("2000/01/02 03:04"), 1, 2, false},
-			{"ncode", "novel2", "title2", "author2", datetime("2001/02/03 04:05"), 3, 4, true},
-			{"ncode", "novel3", "短篇", "author3", datetime("2002/03/04 05:06"), 0, 0, false},
+			{"ncode", "novel1", "title1", "author1", datetime("2000/01/02 03:04"), 1, 2, false, false},
+			{"ncode", "novel2", "title2", "author2", datetime("2001/02/03 04:05"), 3, 4, true, true},
+			{"ncode", "novel3", "短篇", "author3", datetime("2002/03/04 05:06"), 0, 0, false, false},
 		}, false},
 	}
 	for _, tt := range tests {

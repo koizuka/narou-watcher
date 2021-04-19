@@ -63,10 +63,11 @@
       |base_url|string|小説自体のURL|
       |update_time|ISO8601形式の日時|更新時刻(分解能は分まで)|
       |bookmark|uint|しおりの部分番号(短篇なら0)|
-      |latest|uint|最終更新の部分番号(短篇なら0|
+      |latest|uint|最終更新の部分番号(短篇なら0)|
       |title|string|小説のタイトル|
       |author_name|string|著者の名前|
       |is_notice|boolean|更新チェック中ならtrue|
+      |completed|boolean|完結ならtrue|
 #### ログインセッションクッキー
 小説家になろうのサイトが Set-Cookieしてきたものの名前の前に `narou-` をつけてこちらのクッキーとして Set-Cookie にして返し、ブラウザに覚えさせます。
 

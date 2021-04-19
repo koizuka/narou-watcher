@@ -76,6 +76,7 @@ func GetFavNovelList(watcher *narou.NarouWatcher, url, wantTitle string) ([]mode
 			Title:           item.Title,
 			AuthorName:      item.AuthorName,
 			IsNotice:        item.IsNotice,
+			Completed:       item.Completed,
 		})
 	}
 	return result, nil

@@ -22,6 +22,7 @@ type FavNovelList struct {
 	BookmarkEpisode uint
 	LatestEpisode   uint
 	IsNotice        bool
+	Completed       bool
 }
 
 func (i *FavNovelList) NextEpisode() EpisodeURL {
@@ -42,6 +43,7 @@ type FavNovelListUpdateinfo struct {
 	UpdateTime  time.Time   `find:"td.info p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
 	BookmarkURL *EpisodeURL `find:"span.no a:nth-of-type(1)" attr:"href"`
 	LatestURL   *EpisodeURL `find:"span.no a:nth-of-type(2)" attr:"href"`
+	Completed   *string     `find:"span.no a:last-of-type" re:"(最終)"`
 }
 type ParsedFavNovelList struct {
 	TitleInfo  FavNovelListTitleinfo  `find:"tr:nth-of-type(1)"`
@@ -108,6 +110,7 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) ([]FavNovelList, er
 			BookmarkEpisode: bookmarkEpisode,
 			LatestEpisode:   latestEpisode,
 			IsNotice:        updateInfo.IsNotice != nil,
+			Completed:       updateInfo.Completed != nil,
 		})
 	}
 
