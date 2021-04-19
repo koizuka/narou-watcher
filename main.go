@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-func GetFavNovelCategory(watcher *narou.NarouWatcher, url string) ([]model.FavNovelCategory, error) {
+func GetFavNovelCategory(watcher *narou.NarouWatcher, url, wantTitle string) ([]model.FavNovelCategory, error) {
 	page, err := watcher.GetPage(url)
 	if err != nil {
 		switch err.(type) {
@@ -35,7 +35,7 @@ func GetFavNovelCategory(watcher *narou.NarouWatcher, url string) ([]model.FavNo
 		}
 	}
 
-	items, err := narou.ParseFavNovelCategory(page)
+	items, err := narou.ParseFavNovelCategory(page, wantTitle)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func GetFavNovelCategory(watcher *narou.NarouWatcher, url string) ([]model.FavNo
 	return result, nil
 }
 
-func GetFavNovelList(watcher *narou.NarouWatcher, url string) ([]model.FavNovelListRecord, error) {
+func GetFavNovelList(watcher *narou.NarouWatcher, url, wantTitle string) ([]model.FavNovelListRecord, error) {
 	page, err := watcher.GetPage(url)
 	if err != nil {
 		switch err.(type) {
@@ -61,7 +61,7 @@ func GetFavNovelList(watcher *narou.NarouWatcher, url string) ([]model.FavNovelL
 		}
 	}
 
-	items, err := narou.ParseFavNovelList(page)
+	items, err := narou.ParseFavNovelList(page, wantTitle)
 	if err != nil {
 		return nil, err
 	}
@@ -268,9 +268,9 @@ func NarouLogoutHandler(w http.Header, _ *http.Request, watcher *narou.NarouWatc
 	return ReturnJson(w, true)
 }
 
-func favNovelCategoryHandler(url string) NarouApiHandlerType {
+func favNovelCategoryHandler(url, wantTitle string) NarouApiHandlerType {
 	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
-		results, err := GetFavNovelCategory(watcher, url)
+		results, err := GetFavNovelCategory(watcher, url, wantTitle)
 		if err != nil {
 			return nil, err
 		}
@@ -278,7 +278,7 @@ func favNovelCategoryHandler(url string) NarouApiHandlerType {
 	}
 }
 
-func favNovelListHandler(baseUrl string, category uint, order string, page uint) NarouApiHandlerType {
+func favNovelListHandler(baseUrl, title string, category uint, order string, page uint) NarouApiHandlerType {
 	u, _ := url.Parse(baseUrl)
 	query := url.Values{}
 	if category > 1 {
@@ -293,7 +293,7 @@ func favNovelListHandler(baseUrl string, category uint, order string, page uint)
 	u.RawQuery = query.Encode()
 
 	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
-		results, err := GetFavNovelList(watcher, u.String())
+		results, err := GetFavNovelList(watcher, u.String(), title)
 		if err != nil {
 			return nil, err
 		}
@@ -357,44 +357,51 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/narou/bookmarks/", func(w http.ResponseWriter, r *http.Request) {
-		base := path.Clean("/narou/bookmarks")
-		path := path.Clean(path.Clean(r.URL.Path)[len(base):])
-		// log.Printf("bookmarks: path=%v", path)
-		if path == "." {
-			narouApiService.HandlerFunc(favNovelCategoryHandler(narou.FavNovelCategoryURL))(w, r)
-			return
-		} else {
-			category, err := strconv.ParseUint(path[1:], 10, 32)
-			if err != nil {
-				http.NotFound(w, r)
+	setHandler := func(path string, handler NarouApiHandlerType) {
+		mux.HandleFunc(path, narouApiService.HandlerFunc(handler))
+	}
+
+	setBookmarksHandler := func(pattern, getURL, title string) {
+		mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+			base := path.Clean(pattern)
+			subPath := path.Clean(path.Clean(r.URL.Path)[len(base):])
+			// log.Printf("bookmarks: subPath=%v", subPath)
+			if subPath == "." {
+				narouApiService.HandlerFunc(favNovelCategoryHandler(getURL, title))(w, r)
 				return
-			}
-			query := r.URL.Query()
-			var order string
-			if o, ok := query["order"]; ok {
-				order = o[0]
-			}
-			var page uint
-			if p, ok := query["page"]; ok {
-				p, err := strconv.ParseUint(p[0], 10, 32)
+			} else {
+				category, err := strconv.ParseUint(subPath[1:], 10, 32)
 				if err != nil {
 					http.NotFound(w, r)
 					return
 				}
-				page = uint(p)
+				query := r.URL.Query()
+				var order string
+				if o, ok := query["order"]; ok {
+					order = o[0]
+				}
+				var page uint
+				if p, ok := query["page"]; ok {
+					p, err := strconv.ParseUint(p[0], 10, 32)
+					if err != nil {
+						http.NotFound(w, r)
+						return
+					}
+					page = uint(p)
+				}
+				narouApiService.HandlerFunc(favNovelListHandler(getURL, title, uint(category), order, page))(w, r)
+				return
 			}
-			// log.Printf("bookmarks: category=%v, order=%v, page=%v", category, order, page)
-			narouApiService.HandlerFunc(favNovelListHandler(narou.FavNovelListURL, uint(category), order, page))(w, r)
-			return
-		}
-	})
+		})
+	}
+	setBookmarksHandler("/narou/bookmarks/", narou.FavNovelListURL, narou.FavNovelListTitle)
+	setBookmarksHandler("/r18/bookmarks/", narou.FavNovelListR18URL, narou.FavNovelListR18Title)
 
-	mux.HandleFunc("/narou/isnoticelist", narouApiService.HandlerFunc(isNoticeListHandler(narou.IsNoticeListURL)))
-	mux.HandleFunc("/r18/isnoticelist", narouApiService.HandlerFunc(isNoticeListHandler(narou.IsNoticeListR18URL)))
+	setHandler("/narou/isnoticelist", isNoticeListHandler(narou.IsNoticeListURL))
+	setHandler("/r18/isnoticelist", isNoticeListHandler(narou.IsNoticeListR18URL))
 
-	mux.HandleFunc("/narou/login", narouApiService.HandlerFunc(NarouLoginHandler))
-	mux.HandleFunc("/narou/logout", narouApiService.HandlerFunc(NarouLogoutHandler))
+	setHandler("/narou/login", NarouLoginHandler)
+	setHandler("/narou/logout", NarouLogoutHandler)
 
 	remote, err := url.Parse(*reverseProxyAddress)
 	if err != nil {

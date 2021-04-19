@@ -5,18 +5,12 @@ import (
 	"github.com/koizuka/scraper"
 )
 
-const (
-	FavNovelCategoryURL    = "https://syosetu.com/favnovelmain/list/"
-	FavNovelCategoryR18URL = "https://syosetu.com/favnovelmain18/list/"
-)
-
 type FavNovelCategory struct {
 	No   uint `attr:"value"`
 	Name string
 }
 
-func ParseFavNovelCategory(page *scraper.Page) (*[]FavNovelCategory, error) {
-	const wantTitle = "ブックマーク"
+func ParseFavNovelCategory(page *scraper.Page, wantTitle string) (*[]FavNovelCategory, error) {
 	title := page.Find("title").Text()
 	if title != wantTitle {
 		return nil, fmt.Errorf("title mismatch: got:'%v', want:'%v'", title, wantTitle)

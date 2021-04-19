@@ -108,7 +108,8 @@ func TestParseFavNovelList(t *testing.T) {
 	}
 
 	type args struct {
-		html string
+		html  string
+		title string
 	}
 	tests := []struct {
 		name    string
@@ -116,7 +117,7 @@ func TestParseFavNovelList(t *testing.T) {
 		want    []FavNovelList
 		wantErr bool
 	}{
-		{"test", args{FavNovelListTestHtml}, []FavNovelList{
+		{"test", args{FavNovelListTestHtml, "ブックマーク"}, []FavNovelList{
 			{"ncode", "novel1", "title1", "author1", datetime("2000/01/02 03:04"), 1, 2, false},
 			{"ncode", "novel2", "title2", "author2", datetime("2001/02/03 04:05"), 3, 4, true},
 			{"ncode", "novel3", "短篇", "author3", datetime("2002/03/04 05:06"), 0, 0, false},
@@ -129,7 +130,7 @@ func TestParseFavNovelList(t *testing.T) {
 				t.Errorf("ParseFavNovelList() html error = %v", err)
 				return
 			}
-			got, err := ParseFavNovelList(page)
+			got, err := ParseFavNovelList(page, tt.args.title)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ParseFavNovelList() error = %v, wantErr %v", err, tt.wantErr)
 				return

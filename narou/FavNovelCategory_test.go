@@ -20,7 +20,8 @@ const FavNovelCategoryTestHtml = `
 
 func TestParseFavNovelCategory(t *testing.T) {
 	type args struct {
-		html string
+		html  string
+		title string
 	}
 	tests := []struct {
 		name    string
@@ -28,7 +29,7 @@ func TestParseFavNovelCategory(t *testing.T) {
 		want    *[]FavNovelCategory
 		wantErr bool
 	}{
-		{"test", args{FavNovelCategoryTestHtml},
+		{"test", args{FavNovelCategoryTestHtml, "ブックマーク"},
 			&[]FavNovelCategory{
 				{1, "カテゴリ1・test"},
 				{2, "カテゴリ2・test"},
@@ -41,7 +42,7 @@ func TestParseFavNovelCategory(t *testing.T) {
 				t.Errorf("ParseFavNovelCategory() html error = %v", err)
 				return
 			}
-			got, err := ParseFavNovelCategory(html)
+			got, err := ParseFavNovelCategory(html, tt.args.title)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ParseFavNovelCategory() error = %v, wantErr %v", err, tt.wantErr)
 				return

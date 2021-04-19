@@ -7,8 +7,10 @@ import (
 )
 
 const (
-	FavNovelListURL    = "https://syosetu.com/favnovelmain/list/"
-	FavNovelListR18URL = "https://syosetu.com/favnovelmain18/list/"
+	FavNovelListURL      = "https://syosetu.com/favnovelmain/list/"
+	FavNovelListTitle    = "ブックマーク"
+	FavNovelListR18URL   = "https://syosetu.com/favnovelmain18/list/"
+	FavNovelListR18Title = "Xブックマーク"
 )
 
 type FavNovelList struct {
@@ -47,8 +49,7 @@ type ParsedFavNovelList struct {
 }
 
 // ParseFavNovelList parses /favnovelmain/list page and returns []FavNovelList
-func ParseFavNovelList(page *scraper.Page) ([]FavNovelList, error) {
-	const wantTitle = "ブックマーク"
+func ParseFavNovelList(page *scraper.Page, wantTitle string) ([]FavNovelList, error) {
 	title := page.Find("title").Text()
 	if title != wantTitle {
 		return nil, fmt.Errorf("favnobel title mismatch: got:'%v', want:'%v'", title, wantTitle)
