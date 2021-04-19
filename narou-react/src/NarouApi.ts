@@ -1,7 +1,10 @@
 type Api = '/narou/login' | '/narou/logout' | '/narou/isnoticelist' | '/r18/isnoticelist';
 
 export class NarouApi {
-    constructor(private server: string) {
+    private server: string;
+
+    constructor(server: string) {
+        this.server = server.replace(/\/$/, '');
     }
 
     async fetch(api: Api): Promise<Response> {
