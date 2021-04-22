@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Avatar, Badge, Box, Button, FormControlLabel, ListItem, ListItemAvatar, ListItemText, Switch } from '@material-ui/core';
+import { Avatar, Badge, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, ListItem, ListItemAvatar, ListItemText, Switch } from '@material-ui/core';
 import { Book } from '@material-ui/icons';
 import { clearCache, IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
 import { Duration } from 'luxon';
@@ -21,6 +21,26 @@ function unread(item: IsNoticeListItem): number {
   return Math.max(item.latest - item.bookmark, 0);
 }
 
+function OpenConfirmDialog({ item, onClose }: { item?: IsNoticeListItem, onClose: () => void }) {
+  return (
+    <Dialog open={!!item} onClose={onClose}>
+      <DialogTitle>{item?.title}</DialogTitle>
+      <DialogContent>作者:{item?.author_name}</DialogContent>
+      <DialogActions>
+        <Button variant="contained" onClick={() => {
+          if (item) window.open(item.base_url, '_blank');
+          onClose();
+        }}>小説ページ</Button>
+        <Button variant="contained" onClick={() => {
+          if (item) window.open(nextLink(item), '_blank');
+          onClose();
+        }}>最新{item?.latest}部分</Button>
+        <Button variant="contained" onClick={() => onClose()}>キャンセル</Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: NarouApi, ignoreDuration: Duration, onUnauthorized: () => void }) {
   const [enableR18, setEnableR18] = useState(false);
   const { data: items, error } = useIsNoticeList(server, { ignoreDuration, enableR18 });
@@ -28,6 +48,8 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
   const unreads = useMemo(() => items?.filter(i => i.bookmark < i.latest), [items]);
   const head = useMemo(() => (unreads && unreads.length > 0) ? unreads[unreads.length - 1] : undefined, [unreads]);
   const headLink = useMemo(() => head ? nextLink(head) : undefined, [head]);
+
+  const [confirm, setConfirm] = useState<IsNoticeListItem | undefined>(undefined);
 
   useEffect(() => {
     document.title = `なろう 未読:${unreads?.length}`;
@@ -65,14 +87,26 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
     return item.base_url === head.base_url;
   }
 
+  const buttonProps = (item: IsNoticeListItem) => {
+    if (unread(item) > 0) {
+      return {
+        href: nextLink(item),
+        target: "_blank",
+      };
+    } else {
+      return { onClick: () => setConfirm(item) };
+    }
+  }
+
   return (
     <Box m={2} display="flex" flexDirection="column" bgcolor="background.paper">
+      <OpenConfirmDialog item={confirm} onClose={() => setConfirm(undefined)} />
       <p><FormControlLabel label="R18を含める" control={<Switch checked={enableR18} onChange={(event) => setEnableR18(event.target.checked)} />} /></p>
       <p>{`未読: ${unreads?.length} 作品.`}</p>
       {items?.map(item => <Box key={item.base_url} width="100%">
         <Button
           variant={isDefaultOpen(item) ? 'contained' : 'outlined'}
-          href={nextLink(item)} target="_blank">
+          {...buttonProps(item)} >
           <ListItem>
             <ListItemAvatar>
               <Badge color="primary" badgeContent={unread(item)}>
