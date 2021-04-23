@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Avatar, Badge, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, ListItem, ListItemAvatar, ListItemText, Switch } from '@material-ui/core';
+import { Avatar, Badge, BadgeTypeMap, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, ListItem, ListItemAvatar, ListItemText, Switch } from '@material-ui/core';
 import { Book } from '@material-ui/icons';
 import { clearCache, IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
 import { Duration } from 'luxon';
@@ -19,6 +19,13 @@ function hasUnread(item: IsNoticeListItem): boolean {
 
 function unread(item: IsNoticeListItem): number {
   return Math.max(item.latest - item.bookmark, 0);
+}
+
+function badgeProps(item: IsNoticeListItem): BadgeTypeMap['props'] {
+  if (item.latest < item.bookmark) {
+    return { color: 'secondary', badgeContent: '!' };
+  }
+  return { color: 'primary', badgeContent: unread(item) };
 }
 
 function OpenConfirmDialog({ item, onClose }: { item?: IsNoticeListItem, onClose: () => void }) {
@@ -109,7 +116,7 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
           {...buttonProps(item)} >
           <ListItem>
             <ListItemAvatar>
-              <Badge color="primary" badgeContent={unread(item)}>
+              <Badge overlap="circle" {...badgeProps(item)} >
                 <Avatar>
                   <Book color={item.isR18 ? "secondary" : undefined} />
                 </Avatar>
