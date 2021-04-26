@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Avatar, Badge, BadgeTypeMap, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, List, ListItem, ListItemAvatar, ListItemText, Switch } from '@material-ui/core';
 import { Book } from '@material-ui/icons';
 import { clearCache, IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
@@ -52,14 +52,76 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
   const [enableR18, setEnableR18] = useState(false);
   const { data: items, error } = useIsNoticeList(server, { ignoreDuration, enableR18 });
 
-  const unreads = useMemo(() => items?.filter(i => i.bookmark < i.latest), [items]);
-  const head = useMemo(() => (unreads && unreads.length > 0) ? unreads[unreads.length - 1] : undefined, [unreads]);
+  const unreads = useMemo(() => items ? items.filter(i => i.bookmark < i.latest).length : 0, [items]);
 
   const [confirm, setConfirm] = useState<IsNoticeListItem | undefined>(undefined);
 
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [defaultIndex, setDefaultIndex] = useState(-1);
+
   useEffect(() => {
-    document.title = `なろう 未読:${unreads?.length}`;
+    document.title = `なろう 未読:${unreads}`;
   }, [unreads]);
+
+  const scrollIn = useCallback(node => {
+    if (node) {
+      node.scrollIntoViewIfNeeded(); // non standard method(not supported on Firefox)
+      node.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    const index = items ?
+      items.reduce((prev, cur, i) => cur.bookmark < cur.latest ? i : prev, -1)
+      : -1;
+
+    setDefaultIndex(index);
+    setSelectedIndex(index);
+  }, [items]);
+
+  useEffect(() => {
+    if (items) {
+      const onKeyDown = (event: KeyboardEvent) => {
+        const len = items.length;
+        switch (event.key) {
+          case 'ArrowUp':
+            if (selectedIndex > 0) {
+              event.preventDefault();
+            }
+            setSelectedIndex(i => i > 0 ? i - 1 : 0);
+            break;
+          case 'ArrowDown':
+            if (selectedIndex < len - 1) {
+              event.preventDefault();
+            }
+            setSelectedIndex(i => i < len ? i + 1 : len - 1);
+            break;
+          case 'Home':
+            setSelectedIndex(0);
+            break;
+          case 'End':
+            setSelectedIndex(len - 1);
+            break;
+        }
+      };
+      document.addEventListener('keydown', onKeyDown, false);
+      return () => {
+        document.removeEventListener('keydown', onKeyDown);
+      };
+    }
+  }, [selectedIndex, items]);
+
+  const buttonProps = useCallback((item: IsNoticeListItem) => {
+    if (unread(item) > 0) {
+      return {
+        component: 'a',
+        href: nextLink(item),
+        target: "_blank",
+      };
+    } else {
+      return { onClick: () => setConfirm(item) };
+    }
+  }, [setConfirm]);
 
   if (error) {
     console.log('error =', error);
@@ -72,34 +134,22 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
     return <div>Loading...</div>;
   }
 
-  const isDefaultOpen = function (item: IsNoticeListItem): boolean {
-    if (!head) {
-      return false;
-    }
-    return item.base_url === head.base_url;
-  }
-
-  const buttonProps = (item: IsNoticeListItem) => {
-    if (unread(item) > 0) {
-      return {
-        component: 'a',
-        href: nextLink(item),
-        target: "_blank",
-      };
-    } else {
-      return { onClick: () => setConfirm(item) };
-    }
-  }
-
   return (
     <Box m={2} display="flex" flexDirection="column" bgcolor="background.paper">
       <OpenConfirmDialog item={confirm} onClose={() => setConfirm(undefined)} />
-      <p><FormControlLabel label="R18を含める" control={<Switch checked={enableR18} onChange={(event) => setEnableR18(event.target.checked)} />} /></p>
-      <p>{`未読: ${unreads?.length} 作品.`}</p>
+      <Box display="flex" flexDirection="row" alignItems="center">
+        <Box><FormControlLabel label="R18を含める" control={<Switch checked={enableR18} onChange={(event) => setEnableR18(event.target.checked)} />} /></Box>
+        <Box m={2}>{`未読: ${unreads} 作品.`}</Box>
+        <Button
+          variant="contained"
+          disabled={defaultIndex === selectedIndex}
+          onClick={() => setSelectedIndex(defaultIndex)}>最古の未読を選択</Button>
+      </Box>
       <List>
-        {items?.map(item =>
+        {items?.map((item, index) =>
           <ListItem key={item.base_url} button={true}
-            {...(isDefaultOpen(item) ? { selected: true, autoFocus: true } : {})}
+            {...(index === selectedIndex ? { selected: true, ref: scrollIn } : {})}
+            onFocusVisible={() => setSelectedIndex(index)}
             {...buttonProps(item)} >
             <ListItemAvatar>
               <Badge overlap="circle" {...badgeProps(item)} >
