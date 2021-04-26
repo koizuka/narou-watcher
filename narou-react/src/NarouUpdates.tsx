@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Avatar, Badge, BadgeTypeMap, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, ListItem, ListItemAvatar, ListItemText, Switch } from '@material-ui/core';
+import { Avatar, Badge, BadgeTypeMap, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, List, ListItem, ListItemAvatar, ListItemText, Switch } from '@material-ui/core';
 import { Book } from '@material-ui/icons';
 import { clearCache, IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
 import { Duration } from 'luxon';
@@ -54,27 +54,12 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
 
   const unreads = useMemo(() => items?.filter(i => i.bookmark < i.latest), [items]);
   const head = useMemo(() => (unreads && unreads.length > 0) ? unreads[unreads.length - 1] : undefined, [unreads]);
-  const headLink = useMemo(() => head ? nextLink(head) : undefined, [head]);
 
   const [confirm, setConfirm] = useState<IsNoticeListItem | undefined>(undefined);
 
   useEffect(() => {
     document.title = `なろう 未読:${unreads?.length}`;
   }, [unreads]);
-
-  useEffect(() => {
-    if (headLink !== undefined) {
-      const onKeyDown = (event: KeyboardEvent) => {
-        if (event.key === 'Enter') {
-          window.open(headLink, '_blank');
-        }
-      };
-      document.addEventListener('keydown', onKeyDown, false);
-      return () => {
-        document.removeEventListener('keydown', onKeyDown);
-      };
-    }
-  }, [headLink]);
 
   if (error) {
     console.log('error =', error);
@@ -97,6 +82,7 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
   const buttonProps = (item: IsNoticeListItem) => {
     if (unread(item) > 0) {
       return {
+        component: 'a',
         href: nextLink(item),
         target: "_blank",
       };
@@ -110,11 +96,11 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
       <OpenConfirmDialog item={confirm} onClose={() => setConfirm(undefined)} />
       <p><FormControlLabel label="R18を含める" control={<Switch checked={enableR18} onChange={(event) => setEnableR18(event.target.checked)} />} /></p>
       <p>{`未読: ${unreads?.length} 作品.`}</p>
-      {items?.map(item => <Box key={item.base_url} width="100%">
-        <Button
-          variant={isDefaultOpen(item) ? 'contained' : 'outlined'}
-          {...buttonProps(item)} >
-          <ListItem>
+      <List>
+        {items?.map(item =>
+          <ListItem key={item.base_url} button={true}
+            {...(isDefaultOpen(item) ? { selected: true, autoFocus: true } : {})}
+            {...buttonProps(item)} >
             <ListItemAvatar>
               <Badge overlap="circle" {...badgeProps(item)} >
                 <Avatar>
@@ -128,11 +114,9 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
                 :
                 `${item.title} (${item.latest})`}
               secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
-          </ListItem>
-        </Button>
-      </Box>
-      )}
-    </Box>
+          </ListItem>)}
+      </List>
+    </Box >
   );
 }
 
