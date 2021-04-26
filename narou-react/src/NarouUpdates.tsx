@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Avatar, Badge, BadgeTypeMap, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, List, ListItem, ListItemAvatar, ListItemText, Switch } from '@material-ui/core';
+import { AppBar, Avatar, Badge, BadgeTypeMap, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, List, ListItem, ListItemAvatar, ListItemText, Switch, Toolbar } from '@material-ui/core';
 import { Book } from '@material-ui/icons';
 import { clearCache, IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
 import { Duration } from 'luxon';
@@ -137,14 +137,16 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
   return (
     <Box m={2} display="flex" flexDirection="column" bgcolor="background.paper">
       <OpenConfirmDialog item={confirm} onClose={() => setConfirm(undefined)} />
-      <Box display="flex" flexDirection="row" alignItems="center">
-        <Box><FormControlLabel label="R18を含める" control={<Switch checked={enableR18} onChange={(event) => setEnableR18(event.target.checked)} />} /></Box>
-        <Box m={2}>{`未読: ${unreads} 作品.`}</Box>
-        <Button
-          variant="contained"
-          disabled={defaultIndex === selectedIndex}
-          onClick={() => setSelectedIndex(defaultIndex)}>最古の未読を選択</Button>
-      </Box>
+      <AppBar position="sticky">
+        <Toolbar>
+          <Box><FormControlLabel label="含R18" control={<Switch checked={enableR18} onChange={(event) => setEnableR18(event.target.checked)} />} /></Box>
+          <Box m={2}>{`未読: ${unreads} 作品.`}</Box>
+          <Button
+            variant="contained"
+            disabled={defaultIndex === selectedIndex}
+            onClick={() => setSelectedIndex(defaultIndex)}>最古の未読へ</Button>
+        </Toolbar>
+      </AppBar>
       <List>
         {items?.map((item, index) =>
           <ListItem key={item.base_url} button={true}
