@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppBar, Avatar, Badge, BadgeTypeMap, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, List, ListItem, ListItemAvatar, ListItemText, Switch, Toolbar } from '@material-ui/core';
 import { Book } from '@material-ui/icons';
 import { clearCache, IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
@@ -79,6 +79,14 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
     setSelectedIndex(index);
   }, [items]);
 
+  const defaultRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (selectedIndex === -1) {
+      defaultRef.current?.focus();
+    }
+  }, [selectedIndex]);
+
   useEffect(() => {
     if (items) {
       const onKeyDown = (event: KeyboardEvent) => {
@@ -102,6 +110,9 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
           case 'End':
             setSelectedIndex(len - 1);
             break;
+          case 'Escape':
+            setSelectedIndex(defaultIndex);
+            break;
         }
       };
       document.addEventListener('keydown', onKeyDown, false);
@@ -109,7 +120,7 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
         document.removeEventListener('keydown', onKeyDown);
       };
     }
-  }, [selectedIndex, items]);
+  }, [selectedIndex, defaultIndex, items]);
 
   const buttonProps = useCallback((item: IsNoticeListItem) => {
     if (unread(item) > 0) {
@@ -135,40 +146,53 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
   }
 
   return (
-    <Box m={2} display="flex" flexDirection="column" bgcolor="background.paper">
+    <>
       <OpenConfirmDialog item={confirm} onClose={() => setConfirm(undefined)} />
       <AppBar position="sticky">
         <Toolbar>
-          <Box><FormControlLabel label="含R18" control={<Switch checked={enableR18} onChange={(event) => setEnableR18(event.target.checked)} />} /></Box>
-          <Box m={2}>{`未読: ${unreads} 作品.`}</Box>
+          <Box>
+            <FormControlLabel
+              label="R18"
+              control={
+                <Switch
+                  checked={enableR18}
+                  onChange={event => setEnableR18(event.target.checked)}
+                  inputRef={defaultRef}
+                />}
+            />
+          </Box>
+          <Box m={2}>未読: {unreads}</Box>
           <Button
             variant="contained"
             disabled={defaultIndex === selectedIndex}
-            onClick={() => setSelectedIndex(defaultIndex)}>最古の未読へ</Button>
+            onClick={() => setSelectedIndex(defaultIndex)}>最古の未読</Button>
         </Toolbar>
       </AppBar>
-      <List>
-        {items?.map((item, index) =>
-          <ListItem key={item.base_url} button={true}
-            {...(index === selectedIndex ? { selected: true, ref: scrollIn } : {})}
-            onFocusVisible={() => setSelectedIndex(index)}
-            {...buttonProps(item)} >
-            <ListItemAvatar>
-              <Badge overlap="circle" {...badgeProps(item)} >
-                <Avatar>
-                  <Book color={item.isR18 ? "secondary" : undefined} />
-                </Avatar>
-              </Badge>
-            </ListItemAvatar>
-            <ListItemText
-              primary={hasUnread(item) ?
-                `${item.title} (${item.bookmark}/${item.latest})`
-                :
-                `${item.title} (${item.latest})`}
-              secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
-          </ListItem>)}
-      </List>
-    </Box >
+      <Box m={2} display="flex" flexDirection="column" bgcolor="background.paper">
+        <List>
+          {items?.map((item, index) =>
+            <ListItem key={item.base_url} button={true}
+              {...(index === selectedIndex ? { selected: true, ref: scrollIn } : {})}
+              disableRipple={true}
+              onFocusVisible={() => setSelectedIndex(index)}
+              {...buttonProps(item)} >
+              <ListItemAvatar>
+                <Badge overlap="circle" {...badgeProps(item)} >
+                  <Avatar>
+                    <Book color={item.isR18 ? "secondary" : undefined} />
+                  </Avatar>
+                </Badge>
+              </ListItemAvatar>
+              <ListItemText
+                primary={hasUnread(item) ?
+                  `${item.title} (${item.bookmark}/${item.latest})`
+                  :
+                  `${item.title} (${item.latest})`}
+                secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
+            </ListItem>)}
+        </List>
+      </Box >
+    </>
   );
 }
 
@@ -187,13 +211,13 @@ export function NarouUpdates({ api, ignoreDuration }: { api: NarouApi, ignoreDur
   }
 
   return (
-    <Box>
+    <>
       <NarouUpdateList server={api} ignoreDuration={ignoreDuration}
         onUnauthorized={() => setLoginMode(true)} />
       <Button onClick={async () => {
         await api.logout();
         setLoginMode(true);
       }}>logout</Button>
-    </Box>
+    </>
   );
 }
