@@ -7,6 +7,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { useEffect, useMemo, useState } from 'react';
 import { CssBaseline, Link, Typography, useMediaQuery } from '@material-ui/core';
 import { NarouApi } from './NarouApi';
+import { cyan } from '@material-ui/core/colors';
 
 const IgnoreDuration = Duration.fromObject({ days: 30 });
 const PollingInterval = 5 * 60 * 1000; // 5分ごとにポーリング
@@ -37,6 +38,7 @@ function App() {
       createMuiTheme({
         palette: {
           type: prefersDarkMode ? 'dark' : 'light',
+          primary: cyan,
         },
       }),
     [prefersDarkMode],

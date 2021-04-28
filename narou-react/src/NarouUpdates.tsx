@@ -5,6 +5,7 @@ import { clearCache, IsNoticeListItem, useIsNoticeList } from './useIsNoticeList
 import { Duration } from 'luxon';
 import { NarouLoginForm } from './NarouLoginForm';
 import { NarouApi } from './NarouApi';
+import scrollIntoView from 'scroll-into-view-if-needed';
 
 function nextLink(item: IsNoticeListItem): string {
   if (item.bookmark >= item.latest) {
@@ -65,7 +66,7 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
 
   const scrollIn = useCallback(node => {
     if (node) {
-      node.scrollIntoViewIfNeeded(); // non standard method(not supported on Firefox)
+      scrollIntoView(node, { behavior: 'smooth', scrollMode: 'if-needed' });
       node.focus();
     }
   }, []);
