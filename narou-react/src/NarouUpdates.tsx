@@ -200,12 +200,6 @@ function NarouUpdateList({ server, ignoreDuration, onUnauthorized }: { server: N
 export function NarouUpdates({ api, ignoreDuration }: { api: NarouApi, ignoreDuration: Duration }) {
   const [loginMode, setLoginMode] = useState(false);
 
-  useEffect(() => {
-    if (loginMode) {
-      clearCache();
-    }
-  }, [loginMode]);
-
   if (loginMode) {
     return <NarouLoginForm api={api} onLogin={() => {
       console.log('logged in!');
@@ -219,6 +213,7 @@ export function NarouUpdates({ api, ignoreDuration }: { api: NarouApi, ignoreDur
         onUnauthorized={() => setLoginMode(true)} />
       <Button onClick={async () => {
         await api.logout();
+        clearCache();
         setLoginMode(true);
       }}>logout</Button>
     </>
