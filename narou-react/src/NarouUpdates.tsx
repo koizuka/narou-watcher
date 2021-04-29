@@ -203,6 +203,7 @@ export function NarouUpdates({ api, ignoreDuration }: { api: NarouApi, ignoreDur
   if (loginMode) {
     return <NarouLoginForm api={api} onLogin={() => {
       console.log('logged in!');
+      clearCache();
       setLoginMode(false);
     }} />
   }
@@ -210,7 +211,10 @@ export function NarouUpdates({ api, ignoreDuration }: { api: NarouApi, ignoreDur
   return (
     <>
       <NarouUpdateList server={api} ignoreDuration={ignoreDuration}
-        onUnauthorized={() => setLoginMode(true)} />
+        onUnauthorized={() => {
+          clearCache();
+          setLoginMode(true)
+        }} />
       <Button onClick={async () => {
         await api.logout();
         clearCache();
