@@ -18,7 +18,7 @@ function hasUnread(item: IsNoticeListItem): boolean {
 }
 
 function itemSummary(item: IsNoticeListItem): string {
-  const fields = [item.title];
+  const fields = [item.title, ' ('];
   if (hasUnread(item)) {
     fields.push(`${item.bookmark}/`);
   }
@@ -83,9 +83,16 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   }, []);
 
   useEffect(() => {
-    const index = items ?
-      items.reduce((prev, cur, i) => cur.bookmark < cur.latest ? i : prev, -1)
-      : -1;
+    // 未読数が少ない方が優先かつ、未読数が等しい場合は古い方優先
+    const [index] = items ?
+      items.reduce(([prev, prevMin], cur, i) => {
+        const unread = Math.max(cur.latest - cur.bookmark, 0);
+        if (unread && unread <= prevMin) {
+          return [i, unread];
+        }
+        return [prev, prevMin];
+      }, [-1, Number.MAX_SAFE_INTEGER])
+      : [-1];
 
     setDefaultIndex(index);
     setSelectedIndex(index);
