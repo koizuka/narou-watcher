@@ -107,6 +107,7 @@ func GetIsNoticeList(watcher *narou.NarouWatcher, url string) ([]model.IsNoticeL
 			LatestEpisode:   item.LatestEpisode,
 			Title:           item.Title,
 			AuthorName:      item.AuthorName,
+			Completed:       item.Completed,
 		})
 	}
 	return result, nil

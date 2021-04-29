@@ -137,8 +137,8 @@ func TestParseIsNoticeList(t *testing.T) {
 	}{
 		{"更新チェック中一覧テスト", args{TestHtml},
 			[]IsNoticeList{
-				{"ncode", "作品1", "タイトル1", "作者1", datetime("2000/01/02 03:04"), 1, 2},
-				{"ncode", "作品2", "タイトル2", "作者2", datetime("2001/02/03 04:05"), 3, 4},
+				{"ncode", "作品1", "タイトル1", "作者1", datetime("2000/01/02 03:04"), 1, 2, false},
+				{"ncode", "作品2", "タイトル2", "作者2", datetime("2001/02/03 04:05"), 3, 4, true},
 			},
 			nil,
 		},

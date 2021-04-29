@@ -10,6 +10,7 @@ type IsNoticeListRecord = {
   latest: number;
   title: string;
   author_name: string;
+  completed?: boolean;
 };
 
 export type IsNoticeListItem = {
@@ -19,6 +20,7 @@ export type IsNoticeListItem = {
   latest: number;
   title: string;
   author_name: string;
+  completed?: boolean;
   isR18: boolean;
 };
 

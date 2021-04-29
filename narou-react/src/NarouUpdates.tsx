@@ -17,6 +17,18 @@ function hasUnread(item: IsNoticeListItem): boolean {
   return item.latest > item.bookmark;
 }
 
+function itemSummary(item: IsNoticeListItem): string {
+  const fields = [item.title];
+  if (hasUnread(item)) {
+    fields.push(`${item.bookmark}/`);
+  }
+  fields.push(`${item.latest})`);
+  if (item.completed) {
+    fields.push('[完結]');
+  }
+  return fields.join('');
+}
+
 function unread(item: IsNoticeListItem): number {
   return Math.max(item.latest - item.bookmark, 0);
 }
@@ -184,10 +196,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
                 </Badge>
               </ListItemAvatar>
               <ListItemText
-                primary={hasUnread(item) ?
-                  `${item.title} (${item.bookmark}/${item.latest})`
-                  :
-                  `${item.title} (${item.latest})`}
+                primary={itemSummary(item)}
                 secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
             </ListItem>)}
         </List>

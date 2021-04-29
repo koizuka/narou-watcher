@@ -19,6 +19,7 @@ type IsNoticeList struct {
 	UpdateTime      time.Time
 	BookmarkEpisode uint
 	LatestEpisode   uint
+	Completed       bool
 }
 
 func (i *IsNoticeList) NextEpisode() EpisodeURL {
@@ -29,19 +30,20 @@ func (i *IsNoticeList) NextEpisode() EpisodeURL {
 	}
 }
 
-type IsnoticelistTitleinfo struct {
+type IsNoticelistTitleInfo struct {
 	Title      string     `find:"a.title"`
 	NovelURL   EpisodeURL `find:"a.title" attr:"href"`
 	AuthorName string     `find:"span.fn_name" re:".*（(.*)）.*"`
 }
-type IsnoticelistUpdateinfo struct {
+type IsNoticelistUpdateInfo struct {
 	UpdateTime  time.Time  `find:"td.info2 p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
 	BookmarkURL EpisodeURL `find:"span.no a:nth-of-type(1)" attr:"href"`
 	LatestURL   EpisodeURL `find:"span.no a:nth-of-type(2)" attr:"href"`
+	Completed   *string    `find:"span.no a:last-of-type" re:"(最終)"`
 }
 type ParsedIsNoticeList struct {
-	TitleInfo  IsnoticelistTitleinfo  `find:"tr:nth-of-type(1)"`
-	UpdateInfo IsnoticelistUpdateinfo `find:"tr:nth-of-type(2)"`
+	TitleInfo  IsNoticelistTitleInfo  `find:"tr:nth-of-type(1)"`
+	UpdateInfo IsNoticelistUpdateInfo `find:"tr:nth-of-type(2)"`
 }
 
 /** 更新通知チェック中一覧の先頭ページの内容を解読して返す
@@ -98,6 +100,7 @@ func ParseIsNoticeList(page *scraper.Page) ([]IsNoticeList, error) {
 			UpdateTime:      updateInfo.UpdateTime,
 			BookmarkEpisode: updateInfo.BookmarkURL.Episode,
 			LatestEpisode:   updateInfo.LatestURL.Episode,
+			Completed:       updateInfo.Completed != nil,
 		})
 	}
 

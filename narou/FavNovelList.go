@@ -33,12 +33,12 @@ func (i *FavNovelList) NextEpisode() EpisodeURL {
 	}
 }
 
-type FavNovelListTitleinfo struct {
+type FavNovelListTitleInfo struct {
 	Title      string     `find:"a.title"`
 	NovelURL   EpisodeURL `find:"a.title" attr:"href"`
 	AuthorName string     `find:"span.fn_name" re:".*（(.*)）.*"`
 }
-type FavNovelListUpdateinfo struct {
+type FavNovelListUpdateInfo struct {
 	IsNotice    *string     `find:"span.isnotice"`
 	UpdateTime  time.Time   `find:"td.info p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
 	BookmarkURL *EpisodeURL `find:"span.no a:nth-of-type(1)" attr:"href"`
@@ -46,8 +46,8 @@ type FavNovelListUpdateinfo struct {
 	Completed   *string     `find:"span.no a:last-of-type" re:"(最終)"`
 }
 type ParsedFavNovelList struct {
-	TitleInfo  FavNovelListTitleinfo  `find:"tr:nth-of-type(1)"`
-	UpdateInfo FavNovelListUpdateinfo `find:"tr:nth-of-type(2)"`
+	TitleInfo  FavNovelListTitleInfo  `find:"tr:nth-of-type(1)"`
+	UpdateInfo FavNovelListUpdateInfo `find:"tr:nth-of-type(2)"`
 }
 
 // ParseFavNovelList parses /favnovelmain/list page and returns []FavNovelList
