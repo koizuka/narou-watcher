@@ -1,6 +1,6 @@
 //import './App.css';
 import { SWRConfig } from 'swr';
-import { DateTime, Duration } from 'luxon';
+import { DateTime } from 'luxon';
 import preval from 'preval.macro'
 import { NarouUpdates } from './NarouUpdates';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
@@ -9,7 +9,6 @@ import { CssBaseline, Link, Typography, useMediaQuery } from '@material-ui/core'
 import { NarouApi } from './NarouApi';
 import { cyan } from '@material-ui/core/colors';
 
-const IgnoreDuration = Duration.fromObject({ days: 30 });
 const PollingInterval = 5 * 60 * 1000; // 5分ごとにポーリング
 
 const buildDate: string = preval`module.exports = new Date().toISOString();`
@@ -65,7 +64,7 @@ function App() {
       <SWRConfig value={{
         refreshInterval: PollingInterval,
       }}>
-        <NarouUpdates api={api} ignoreDuration={IgnoreDuration} />
+        <NarouUpdates api={api} />
       </SWRConfig>
       <div style={{
         display: "inline-block",
