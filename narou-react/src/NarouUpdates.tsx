@@ -201,7 +201,9 @@ export function NarouUpdates({ api, ignoreDuration }: { api: NarouApi, ignoreDur
   const [loginMode, setLoginMode] = useState(false);
 
   useEffect(() => {
-    clearCache();
+    if (loginMode) {
+      clearCache();
+    }
   }, [loginMode]);
 
   if (loginMode) {
