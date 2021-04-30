@@ -83,12 +83,12 @@
 4. 上記に該当しなければエラー
 
 ログイン状態で無ければ、ログイン画面が開きます。
-![image](https://user-images.githubusercontent.com/864587/114964390-9caa4c00-9ea9-11eb-99eb-692a510d39dc.png)
+![image](https://user-images.githubusercontent.com/864587/116656634-f7729600-a9c7-11eb-852d-71baa8ce3f91.png)
 
 無事ログインすると、新着更新チェック中一覧の新しい順の数十件が出ます。タブをアクティブにするたびに更新します。また、5分ごとにも更新します。
 未読数はページタイトルに設定されます。
 
-![image](https://user-images.githubusercontent.com/864587/116077097-08718d80-a6d0-11eb-90f0-0dc42c2b463a.png)
+![image](https://user-images.githubusercontent.com/864587/116656566-db6ef480-a9c7-11eb-9401-1f584d481213.png)
 
 未読があるとバッジにそれぞれの未読数がでて、そのうち一番更新が古い作品の色が変わっていてこの状態で Enter キーを押すとそれが新しいタブで開きます。
 開いた作品を読んでしおりを更新してタブを閉じると、再びこのページに戻ってくると即座に更新され、次の未読が選択されます。
