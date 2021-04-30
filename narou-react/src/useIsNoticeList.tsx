@@ -57,7 +57,7 @@ export function useIsNoticeList(
         return i.latest - i.bookmark;
       }
 
-      // なろう、R18のアイテムを混ぜて、古いアイテムを捨てて、更新日時降順にする
+      // なろう、R18のアイテムを混ぜて、未読があって少ない順にし、それが等しいときは更新日時降順にする
       const n = [
         ...raw_items.map(i => ({ ...i, isR18: false })),
         ...(raw_items18 || []).map(i => ({ ...i, isR18: true }))
