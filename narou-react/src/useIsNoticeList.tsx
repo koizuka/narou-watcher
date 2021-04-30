@@ -51,14 +51,26 @@ export function useIsNoticeList(
         return undefined;
       }
 
+      const score = (i: IsNoticeListItem) => {
+        if (i.bookmark === i.latest) return Number.MAX_SAFE_INTEGER;
+        if (i.bookmark > i.latest) return Number.MAX_SAFE_INTEGER - 1;
+        return i.latest - i.bookmark;
+      }
+
       // なろう、R18のアイテムを混ぜて、古いアイテムを捨てて、更新日時降順にする
       const n = [
         ...raw_items.map(i => ({ ...i, isR18: false })),
         ...(raw_items18 || []).map(i => ({ ...i, isR18: true }))
       ].map(i => ({ ...i, update_time: DateTime.fromISO(i.update_time) }))
-        .sort((a, b) => (a.update_time > b.update_time) ? -1 :
-          (a.update_time < b.update_time) ? 1 : 0
-        );
+        .sort((a, b) => {
+          const as = score(a);
+          const bs = score(b);
+          if (as > bs) return 1;
+          if (as < bs) return -1;
+          if (a.update_time < b.update_time) return 1;
+          if (a.update_time > b.update_time) return -1;
+          return 0;
+        });
       return n;
     },
     [raw_items, raw_items18]
