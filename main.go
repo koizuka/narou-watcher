@@ -82,7 +82,7 @@ func GetFavNovelList(watcher *narou.NarouWatcher, url, wantTitle string) ([]mode
 	return result, nil
 }
 
-func GetIsNoticeList(watcher *narou.NarouWatcher, url string) ([]model.IsNoticeListRecord, error) {
+func GetIsNoticeListPage(watcher *narou.NarouWatcher, url string) (*narou.IsNoticeListPage, error) {
 	page, err := watcher.GetPage(url)
 	if err != nil {
 		switch err.(type) {
@@ -93,9 +93,29 @@ func GetIsNoticeList(watcher *narou.NarouWatcher, url string) ([]model.IsNoticeL
 		}
 	}
 
-	items, err := narou.ParseIsNoticeList(page)
+	itemsPage, err := narou.ParseIsNoticeList(page)
 	if err != nil {
 		return nil, err
+	}
+	return itemsPage, nil
+}
+
+func GetIsNoticeList(watcher *narou.NarouWatcher, url string) ([]model.IsNoticeListRecord, error) {
+	page, err := GetIsNoticeListPage(watcher, url)
+	if err != nil {
+		return nil, err
+	}
+
+	items := page.Items
+
+	// append next page if exists
+	if page.NextPageLink != "" {
+		page, err = GetIsNoticeListPage(watcher, page.NextPageLink)
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, page.Items...)
 	}
 
 	var result []model.IsNoticeListRecord

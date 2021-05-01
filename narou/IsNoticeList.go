@@ -46,10 +46,22 @@ type ParsedIsNoticeList struct {
 	UpdateInfo IsNoticelistUpdateInfo `find:"tr:nth-of-type(2)"`
 }
 
+type ParsedIsNoticeListPage struct {
+	NumItems     uint                 `find:"h3.isnoticelist" re:"更新通知チェック中一覧 ([0-9]+)/[0-9]+"`
+	NextPageLink *string              `find:"form div:nth-of-type(1) a[title='next page']" attr:"href"`
+	Items        []ParsedIsNoticeList `find:"table.favnovel"`
+}
+
+type IsNoticeListPage struct {
+	NumItems     uint
+	NextPageLink string
+	Items        []IsNoticeList
+}
+
 /** 更新通知チェック中一覧の先頭ページの内容を解読して返す
  * @param page 更新チェック中小説一覧ページ(IsNoticeListURL)を取得した結果を与えること
  */
-func ParseIsNoticeList(page *scraper.Page) ([]IsNoticeList, error) {
+func ParseIsNoticeList(page *scraper.Page) (*IsNoticeListPage, error) {
 	const wantTitle = "更新通知チェック中一覧"
 	title := page.Find("title").Text()
 	if title != wantTitle {
@@ -76,23 +88,31 @@ func ParseIsNoticeList(page *scraper.Page) ([]IsNoticeList, error) {
 	//       p.right
 	//         a[@href=リンク]
 	//           設定
-	var result []IsNoticeList
+	result := &IsNoticeListPage{}
 
-	var parsed []ParsedIsNoticeList
+	var parsed ParsedIsNoticeListPage
 	err := scraper.Unmarshal(
 		&parsed,
-		page.Find("table.favnovel"),
+		page.Find("div#main"),
 		scraper.UnmarshalOption{Loc: NarouLocation},
 	)
 	if err != nil {
 		return result, fmt.Errorf("unmarshal failed: %v", err)
 	}
 
-	for _, item := range parsed {
+	result.NumItems = parsed.NumItems
+	if parsed.NextPageLink != nil {
+		result.NextPageLink, err = page.ResolveLink(*parsed.NextPageLink)
+		if err != nil {
+			return nil, fmt.Errorf("ResolvedLink error: %v", parsed.NextPageLink)
+		}
+	}
+
+	for _, item := range parsed.Items {
 		titleInfo := item.TitleInfo
 		updateInfo := item.UpdateInfo
 
-		result = append(result, IsNoticeList{
+		result.Items = append(result.Items, IsNoticeList{
 			Title:           titleInfo.Title,
 			SiteID:          titleInfo.NovelURL.SiteID,
 			NovelID:         titleInfo.NovelURL.NovelID,

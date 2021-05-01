@@ -200,7 +200,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		updates := filterUpdates(results)
+		updates := filterUpdates(results.Items)
 		if len(updates) == 0 {
 			continue
 		}
