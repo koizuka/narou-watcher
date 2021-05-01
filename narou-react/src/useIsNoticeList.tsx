@@ -70,7 +70,8 @@ export function useIsNoticeList(
           if (a.update_time < b.update_time) return 1;
           if (a.update_time > b.update_time) return -1;
           return 0;
-        });
+        })
+        .slice(0, 30);
       return n;
     },
     [raw_items, raw_items18]
