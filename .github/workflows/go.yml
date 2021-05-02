@@ -1,15 +1,14 @@
-name: Go
+name: Go Test
 
 on:
   push:
-    branches: [ main ]
+    branches-ignore: [ main ]
     paths:
     - '**.go'
     - 'go.sub'
     - 'go.mod'
     - '.github/workflows/go.yml'
   pull_request:
-    branches: [ main ]
     paths:
     - '**.go'
     - 'go.sub'
