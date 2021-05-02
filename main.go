@@ -100,22 +100,21 @@ func GetIsNoticeListPage(watcher *narou.NarouWatcher, url string) (*narou.IsNoti
 	return itemsPage, nil
 }
 
-func GetIsNoticeList(watcher *narou.NarouWatcher, url string) ([]model.IsNoticeListRecord, error) {
-	page, err := GetIsNoticeListPage(watcher, url)
-	if err != nil {
-		return nil, err
-	}
+func GetIsNoticeList(watcher *narou.NarouWatcher, url string, maxPage uint) ([]model.IsNoticeListRecord, error) {
+	var items []narou.IsNoticeList
 
-	items := page.Items
-
-	// append next page if exists
-	if page.NextPageLink != "" {
-		page, err = GetIsNoticeListPage(watcher, page.NextPageLink)
+	for i := uint(0); i < maxPage; i++ {
+		page, err := GetIsNoticeListPage(watcher, url)
 		if err != nil {
 			return nil, err
 		}
 
 		items = append(items, page.Items...)
+
+		if page.NextPageLink == "" {
+			break
+		}
+		url = page.NextPageLink
 	}
 
 	var result []model.IsNoticeListRecord
@@ -180,6 +179,14 @@ func NewNarouApiService(logDir, sessionName string, openAddress *url.URL, debug 
 	}
 }
 
+type BadRequestError struct {
+	Message string
+}
+
+func (e BadRequestError) Error() string {
+	return e.Message
+}
+
 func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		watcher, err := narou.NewNarouWatcher(narou.Options{
@@ -213,6 +220,8 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 			switch err.(type) {
 			case narou.LoginError:
 				http.Error(w, "Unauthorized", 401)
+			case BadRequestError:
+				http.Error(w, fmt.Sprintf("Bad Request: %v", err), 400)
 			default:
 				log.Printf("%v %v: error %v: %v", r.Method, r.URL, 503, err)
 				http.Error(w, fmt.Sprintf("Internal Server Error: %v", err), 503)
@@ -325,7 +334,17 @@ func favNovelListHandler(baseUrl, title string, category uint, order string, pag
 
 func isNoticeListHandler(url string) NarouApiHandlerType {
 	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
-		results, err := GetIsNoticeList(watcher, url)
+		query := r.URL.Query()
+		var maxPage uint = 1
+		if p, ok := query["max_page"]; ok {
+			p, err := strconv.ParseUint(p[0], 10, 32)
+			if err != nil {
+				return nil, BadRequestError{"max_page must greater or equal to 1"}
+			}
+			maxPage = uint(p)
+		}
+
+		results, err := GetIsNoticeList(watcher, url, maxPage)
 		if err != nil {
 			return nil, err
 		}
