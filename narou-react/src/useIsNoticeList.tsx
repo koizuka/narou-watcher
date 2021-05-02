@@ -32,16 +32,17 @@ export function clearCache() {
 
 export function useIsNoticeList(
   api: NarouApi,
-  { enableR18 }: { enableR18: boolean }
+  { enableR18, maxPage = 1 }: { enableR18: boolean, maxPage: number }
 ) {
-  const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>('/narou/isnoticelist',
+  const query = `?max_page=${maxPage}`
+  const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>('/narou/isnoticelist'+query,
     async path => api.call(path),
     {
       onErrorRetry: (error) => {
         console.log('onErrorRetry:', error, error.status);
       },
     });
-  const { data: raw_items18, error: error18 } = useSWR<IsNoticeListRecord[]>((!error && enableR18) ? '/r18/isnoticelist' : null,
+  const { data: raw_items18, error: error18 } = useSWR<IsNoticeListRecord[]>((!error && enableR18) ? '/r18/isnoticelist'+query : null,
     async path => api.call(path),
   );
 

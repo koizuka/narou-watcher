@@ -62,7 +62,9 @@ function OpenConfirmDialog({ item, onClose }: { item?: IsNoticeListItem, onClose
 
 function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnauthorized: () => void }) {
   const [enableR18, setEnableR18] = useState(false);
-  const { data: items, error } = useIsNoticeList(server, { enableR18 });
+  const [maxPage, setMaxPage] = useState(1);
+
+  const { data: items, error } = useIsNoticeList(server, { enableR18, maxPage });
 
   const unreads = useMemo(() => items ? items.filter(i => i.bookmark < i.latest).length : 0, [items]);
 
@@ -180,11 +182,21 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
                 />}
             />
           </Box>
+          <Box>
+            <FormControlLabel
+              label={`${maxPage}頁`}
+              control={
+                <Switch
+                  checked={maxPage > 1}
+                  onChange={event => setMaxPage(event.target.checked ? 2 : 1)}
+                />}
+            />
+          </Box>
           <Box m={2}>未読: {unreads}</Box>
           <Button
             variant="contained"
             disabled={defaultIndex === selectedIndex}
-            onClick={() => setSelectedIndex(defaultIndex)}>最古の未読</Button>
+            onClick={() => setSelectedIndex(defaultIndex)}>ESC</Button>
         </Toolbar>
       </AppBar>
       <Box m={2} display="flex" flexDirection="column" bgcolor="background.paper">
