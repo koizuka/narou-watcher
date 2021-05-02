@@ -1,0 +1,55 @@
+name: Deploy Server
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - '**.go'
+    - 'go.sub'
+    - 'go.mod'
+    - '.github/workflows/deploy-server.yml'
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+
+    - name: Test
+      run: go test -v ./...
+
+    - name: Build
+      run: go build -v
+      env:
+        GOOS: "linux"
+        GOARCH: "amd64"
+
+    - name: Setup SSH
+      uses: kielabokkie/ssh-key-and-known-hosts-action@v1
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        ssh-host: ${{ secrets.SSH_HOST }}
+        ssh-port: ${{ secrets.SSH_PORT }}
+    
+    - name: Deploy
+      env:
+        REMOTE: "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}"
+        BINARY: "narou-watcher"
+        TARGET_DIR: "~/"
+        RESTART_COMMAND: "./start.sh"
+      run: |
+        # fix break the file (workaround for ssh-key-and-known-hosts-action)
+        echo >> ~/.ssh/known_hosts 
+
+        echo "scp"
+        scp -P ${{ secrets.SSH_PORT }} $BINARY $REMOTE:$TARGET_DIR$BINARY.$GITHUB_SHA
+        echo "ln"
+        ssh -p ${{ secrets.SSH_PORT }} $REMOTE ln -sf $TARGET_DIR$BINARY.$GITHUB_SHA $TARGET_DIR$BINARY
+
+        echo "restart"
+        ssh -p ${{ secrets.SSH_PORT }} $REMOTE ${RESTART_COMMAND}
