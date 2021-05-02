@@ -1,10 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppBar, Avatar, Badge, BadgeTypeMap, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, List, ListItem, ListItemAvatar, ListItemText, Switch, Toolbar } from '@material-ui/core';
+import { AppBar, Avatar, Backdrop, Badge, BadgeTypeMap, Box, Button, CircularProgress, createStyles, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, List, ListItem, ListItemAvatar, ListItemText, makeStyles, Switch, Theme, Toolbar } from '@material-ui/core';
 import { Book } from '@material-ui/icons';
 import { clearCache, IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
 import { NarouLoginForm } from './NarouLoginForm';
 import { NarouApi } from './NarouApi';
 import scrollIntoView from 'scroll-into-view-if-needed';
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    backdrop: {
+      zIndex: theme.zIndex.drawer + 1,
+      color: '#fff',
+    },
+  }),
+);
 
 function nextLink(item: IsNoticeListItem): string {
   if (item.bookmark >= item.latest) {
@@ -61,6 +70,8 @@ function OpenConfirmDialog({ item, onClose }: { item?: IsNoticeListItem, onClose
 }
 
 function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnauthorized: () => void }) {
+  const classes = useStyles();
+
   const [enableR18, setEnableR18] = useState(false);
   const [maxPage, setMaxPage] = useState(1);
 
@@ -163,7 +174,9 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
     return <div>Server({JSON.stringify(server)}) is not working...?</div>;
   }
   if (!items) {
-    return <div>Loading...</div>;
+    return <Backdrop className={classes.backdrop} open={true}>
+      <CircularProgress color="inherit" />
+    </Backdrop>
   }
 
   return (
