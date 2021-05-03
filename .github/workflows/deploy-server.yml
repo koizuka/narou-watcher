@@ -42,14 +42,20 @@ jobs:
         BINARY: "narou-watcher"
         TARGET_DIR: "~/"
         RESTART_COMMAND: "./start.sh"
+        SSH: "ssh -p ${{ secrets.SSH_PORT }}"
+        SCP: "scp -P ${{ secrets.SSH_PORT }}"
       run: |
         # fix break the file (workaround for ssh-key-and-known-hosts-action)
         echo >> ~/.ssh/known_hosts 
 
-        echo "scp"
-        scp -P ${{ secrets.SSH_PORT }} $BINARY $REMOTE:$TARGET_DIR$BINARY.$GITHUB_SHA
-        echo "ln"
-        ssh -p ${{ secrets.SSH_PORT }} $REMOTE ln -sf $TARGET_DIR$BINARY.$GITHUB_SHA $TARGET_DIR$BINARY
+        echo "rename old file"
+        $SSH $REMOTE "[ -f $TARGET_DIR$BINARY ] && mv -f $TARGET_DIR$BINARY $TARGET_DIR$BINARY.old"
+
+        echo "scp new file"
+        $SCP $BINARY $REMOTE:$TARGET_DIR$BINARY
 
         echo "restart"
-        ssh -p ${{ secrets.SSH_PORT }} $REMOTE ${RESTART_COMMAND}
+        $SSH $REMOTE ${RESTART_COMMAND}
+
+        echo "delete old file"
+        $SSH $REMOTE rm -f $TARGET_DIR$BINARY.old
