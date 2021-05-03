@@ -150,7 +150,8 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
       return {
         component: 'a',
         href: nextLink(item),
-        target: "_blank",
+        onClick: () => setSelectedIndex(-1), // workaround against remaining focus style
+        target: '_blank',
       };
     } else {
       return { onClick: () => setConfirm(item) };
