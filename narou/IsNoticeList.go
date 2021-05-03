@@ -36,10 +36,9 @@ type IsNoticelistTitleInfo struct {
 	AuthorName string     `find:"span.fn_name" re:".*（(.*)）.*"`
 }
 type IsNoticelistUpdateInfo struct {
-	UpdateTime  time.Time  `find:"td.info2 p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
-	BookmarkURL EpisodeURL `find:"span.no a:nth-of-type(1)" attr:"href"`
-	LatestURL   EpisodeURL `find:"span.no a:nth-of-type(2)" attr:"href"`
-	Completed   *string    `find:"span.no a:last-of-type" re:"(最終)"`
+	UpdateTime time.Time    `find:"td.info2 p:nth-of-type(1)" re:"([0-9]{4}/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
+	ItemURL    []EpisodeURL `find:"span.no a" attr:"href"`
+	Completed  *string      `find:"span.no a:last-of-type" re:"(最終)"`
 }
 type ParsedIsNoticeList struct {
 	TitleInfo  IsNoticelistTitleInfo  `find:"tr:nth-of-type(1)"`
@@ -111,6 +110,15 @@ func ParseIsNoticeList(page *scraper.Page) (*IsNoticeListPage, error) {
 	for _, item := range parsed.Items {
 		titleInfo := item.TitleInfo
 		updateInfo := item.UpdateInfo
+		var bookmarkEpisode uint
+		var latestEpisode uint
+		switch len(updateInfo.ItemURL) {
+		case 1:
+			latestEpisode = updateInfo.ItemURL[0].Episode
+		case 2:
+			bookmarkEpisode = updateInfo.ItemURL[0].Episode
+			latestEpisode = updateInfo.ItemURL[1].Episode
+		}
 
 		result.Items = append(result.Items, IsNoticeList{
 			Title:           titleInfo.Title,
@@ -118,8 +126,8 @@ func ParseIsNoticeList(page *scraper.Page) (*IsNoticeListPage, error) {
 			NovelID:         titleInfo.NovelURL.NovelID,
 			AuthorName:      titleInfo.AuthorName,
 			UpdateTime:      updateInfo.UpdateTime,
-			BookmarkEpisode: updateInfo.BookmarkURL.Episode,
-			LatestEpisode:   updateInfo.LatestURL.Episode,
+			BookmarkEpisode: bookmarkEpisode,
+			LatestEpisode:   latestEpisode,
 			Completed:       updateInfo.Completed != nil,
 		})
 	}

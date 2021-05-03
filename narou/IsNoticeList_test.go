@@ -113,6 +113,34 @@ const TestHtml = `<?xml version="1.0" encoding="UTF-8"?>
 </td>
 </tr>
 </table>
+
+<table class="favnovel">
+<tr>
+<td rowspan="2" class="jyokyo1"></td>
+<td class="title2">
+<a class="title" href="https://ncode.syosetu.com/作品3/">タイトル3</a>
+<span class="fn_name">
+（作者3）
+</span></td>
+</tr>
+<tr>
+<td class="info2">
+<p>
+<span class="isnotice">チェック中</span>
+更新日：2002/03/04 05:06
+
+<span class="no">
+
+<a href="https://ncode.syosetu.com/作品3/3/">
+最新3部分</a></span>
+
+</p>
+<p class="right">
+<a href="/favnovelmain/updateinput/useridfavncode/870350_1716642/">設定</a>
+</p>
+</td>
+</tr>
+</table>
 <div class="pager_idou"><span>1</span>&nbsp;<a href="index.php?p=2" title="page 2">2</a>&nbsp;<a href="index.php?p=3" title="page 3">3</a>&nbsp;<a href="index.php?p=4" title="page 4">4</a>&nbsp;<a href="index.php?p=5" title="page 5">5</a>&nbsp;<a href="index.php?p=6" title="page 6">6</a>&nbsp;<a href="index.php?p=7" title="page 7">7</a>&nbsp;<a href="index.php?p=8" title="page 8">8</a>&nbsp;<a href="index.php?p=2" title="next page">Next &gt;&gt;</a>&nbsp;</div>
 </form>
 </div><!--main-->
@@ -142,6 +170,7 @@ func TestParseIsNoticeList(t *testing.T) {
 				Items: []IsNoticeList{
 					{"ncode", "作品1", "タイトル1", "作者1", datetime("2000/01/02 03:04"), 1, 2, false},
 					{"ncode", "作品2", "タイトル2", "作者2", datetime("2001/02/03 04:05"), 3, 4, true},
+					{"ncode", "作品3", "タイトル3", "作者3", datetime("2002/03/04 05:06"), 0, 3, false},
 				},
 			},
 			nil,
