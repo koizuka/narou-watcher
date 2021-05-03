@@ -96,16 +96,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   }, []);
 
   useEffect(() => {
-    // 未読数が少ない方が優先かつ、未読数が等しい場合は古い方優先
-    const [index] = items ?
-      items.reduce(([prev, prevMin], cur, i) => {
-        const unread = Math.max(cur.latest - cur.bookmark, 0);
-        if (unread && unread <= prevMin) {
-          return [i, unread];
-        }
-        return [prev, prevMin];
-      }, [-1, Number.MAX_SAFE_INTEGER])
-      : [-1];
+    const index = items && items.length > 0 && unread(items[0]) > 0 ? 0 : -1;
 
     setDefaultIndex(index);
     setSelectedIndex(index);
