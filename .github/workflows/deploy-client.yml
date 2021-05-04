@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/narou-react.yml'
+      - '.github/workflows/deploy-client.yml'
       - 'narou-react/**'
 
 defaults:

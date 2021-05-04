@@ -2,15 +2,10 @@ name: narou-react build test
 
 # Controls when the action will run. 
 on:
-  push:
-    branches-ignore: [ main ]
-    paths:
-      - '.github/workflows/narou-react.yml'
-      - 'narou-react/**'
   pull_request:
     branches: [ main ]
     paths:
-      - '.github/workflows/narou-react.yml'
+      - '.github/workflows/ci-client.yml'
       - 'narou-react/**'
 
 defaults:
