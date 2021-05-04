@@ -1,10 +1,9 @@
-name: narou-react build and deploy to GitHub pages
+name: narou-react build test
 
 # Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches-ignore: [ main ]
     paths:
       - '.github/workflows/narou-react.yml'
       - 'narou-react/**'
@@ -50,9 +49,3 @@ jobs:
 
     - name: Build
       run: yarn build
-
-    - name: deploy
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: narou-react/build
