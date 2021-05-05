@@ -7,3 +7,4 @@ narou-watcher.exe
 /cmd/standalone/standalone
 /cmd/standalone/standalone.exe
 login.txt
+.DS_Store
