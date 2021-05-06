@@ -93,11 +93,15 @@ function OpenConfirmDialog({ item, onClose }: { item?: IsNoticeListItem, onClose
   );
 }
 
+function maxPageValue(sw: boolean): number {
+  return sw ? 2 : 1;
+}
+
 function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnauthorized: () => void }) {
   const classes = useStyles();
 
   const [enableR18, setEnableR18] = useState(false);
-  const [maxPage, setMaxPage] = useState(1);
+  const [maxPage, setMaxPage] = useState(maxPageValue(false));
 
   const { data: items, error } = useIsNoticeList(server, { enableR18, maxPage });
 
@@ -128,7 +132,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
     setSelectedIndex(index);
   }, [items]);
 
-  const defaultRef = useRef<HTMLInputElement>(null);
+  const defaultRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (selectedIndex === -1) {
@@ -162,6 +166,13 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
           case 'Escape':
             setSelectedIndex(defaultIndex);
             break;
+          case 'r':
+            setEnableR18(v => !v);
+            break;
+          case '1':
+            setMaxPage(v => maxPageValue(v === maxPageValue(false)));
+            break;
+
         }
       };
       document.addEventListener('keydown', onKeyDown, false);
@@ -209,7 +220,6 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
                 <Switch
                   checked={enableR18}
                   onChange={event => setEnableR18(event.target.checked)}
-                  inputRef={defaultRef}
                 />}
             />
           </Box>
@@ -218,15 +228,17 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
               label={`${maxPage}頁`}
               control={
                 <Switch
-                  checked={maxPage > 1}
-                  onChange={event => setMaxPage(event.target.checked ? 2 : 1)}
+                  checked={maxPage !== maxPageValue(false)}
+                  onChange={event => setMaxPage(maxPageValue(event.target.checked))}
                 />}
             />
           </Box>
           <Box m={2}>未読: {unreads ?? ''}</Box>
           <Button
             variant="contained"
-            disabled={defaultIndex === selectedIndex}
+            disabled={selectedIndex === 0}
+            disableRipple={true}
+            ref={defaultRef}
             onClick={() => setSelectedIndex(defaultIndex)}>ESC</Button>
         </Toolbar>
       </AppBar>
