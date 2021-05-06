@@ -1,5 +1,28 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppBar, Avatar, Backdrop, Badge, BadgeTypeMap, Box, Button, CircularProgress, createStyles, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, List, ListItem, ListItemAvatar, ListItemText, makeStyles, Switch, Theme, Toolbar } from '@material-ui/core';
+import {
+  AppBar,
+  Avatar,
+  Backdrop,
+  Badge,
+  BadgeTypeMap,
+  Box,
+  Button,
+  CircularProgress,
+  createStyles,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  makeStyles,
+  Switch,
+  Theme,
+  Toolbar,
+} from '@material-ui/core';
 import { Book } from '@material-ui/icons';
 import { clearCache, IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
 import { NarouLoginForm } from './NarouLoginForm';
@@ -55,15 +78,16 @@ function OpenConfirmDialog({ item, onClose }: { item?: IsNoticeListItem, onClose
       <DialogTitle>{item?.title}</DialogTitle>
       <DialogContent>作者:{item?.author_name}</DialogContent>
       <DialogActions>
-        <Button variant="contained" onClick={() => {
+        <Button size="small" variant="contained" onClick={() => {
           if (item) window.open(item.base_url, '_blank');
           onClose();
         }}>小説ページ</Button>
-        <Button variant="contained" onClick={() => {
+        <Button size="small" variant="contained" onClick={() => {
           if (item) window.open(nextLink(item), '_blank');
           onClose();
         }}>最新{item?.latest}部分</Button>
-        <Button variant="contained" onClick={() => onClose()}>キャンセル</Button>
+        <Button size="small" variant="contained" onClick={() => onClose()
+        }>キャンセル</Button>
       </DialogActions>
     </Dialog>
   );
