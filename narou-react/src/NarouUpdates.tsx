@@ -77,7 +77,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
 
   const { data: items, error } = useIsNoticeList(server, { enableR18, maxPage });
 
-  const unreads = useMemo(() => items ? items.filter(i => i.bookmark < i.latest).length : 0, [items]);
+  const unreads = useMemo(() => items ? items.filter(i => i.bookmark < i.latest).length : null, [items]);
 
   const [confirm, setConfirm] = useState<IsNoticeListItem | undefined>(undefined);
 
@@ -85,7 +85,9 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   const [defaultIndex, setDefaultIndex] = useState(-1);
 
   useEffect(() => {
-    document.title = `なろう 未読:${unreads}`;
+    if (unreads !== null) {
+      document.title = `なろう 未読:${unreads}`;
+    }
   }, [unreads]);
 
   const scrollIn = useCallback(node => {
@@ -197,7 +199,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
                 />}
             />
           </Box>
-          <Box m={2}>未読: {unreads}</Box>
+          <Box m={2}>未読: {unreads ?? ''}</Box>
           <Button
             variant="contained"
             disabled={defaultIndex === selectedIndex}
