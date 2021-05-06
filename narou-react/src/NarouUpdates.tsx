@@ -189,7 +189,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
     if (error.status === 401) {
       onUnauthorized();
     }
-    return <div>Server({JSON.stringify(server)}) is not working...?</div>;
+    return <div>Server({JSON.stringify(server)}) is not working...? status: ${error.status}</div>;
   }
   if (!items) {
     return <Backdrop className={classes.backdrop} open={true}>
