@@ -44,12 +44,17 @@ function App() {
   );
 
   const [api, setApi] = useState<NarouApi | null>(null);
+  const [hostError, setHostError] = useState(false);
   useEffect(() => {
     const host = getServerAddress(document.location);
-    setApi(host ? new NarouApi(host) : null);
+    if (host) {
+      setApi(new NarouApi(host));
+    } else {
+      setHostError(true);
+    }
   }, [])
 
-  if (!api) {
+  if (hostError) {
     return (
       <ThemeProvider theme={theme}>
         <Typography>http以外の場合は必ず server クエリパラメータにサーバーアドレスを指定してください</Typography>
@@ -64,7 +69,7 @@ function App() {
       <SWRConfig value={{
         refreshInterval: PollingInterval,
       }}>
-        <NarouUpdates api={api} />
+        {api && <NarouUpdates api={api} />}
       </SWRConfig>
       <div style={{
         display: "inline-block",
