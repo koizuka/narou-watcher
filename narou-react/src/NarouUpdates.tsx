@@ -126,6 +126,10 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   }, []);
 
   useEffect(() => {
+    setSelectedIndex(-1);
+  }, [enableR18, maxPage]);
+
+  useEffect(() => {
     const index = items && items.length > 0 && unread(items[0]) > 0 ? 0 : -1;
 
     setDefaultIndex(index);
