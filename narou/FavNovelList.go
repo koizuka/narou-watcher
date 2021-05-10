@@ -50,8 +50,22 @@ type ParsedFavNovelList struct {
 	UpdateInfo FavNovelListUpdateInfo `find:"tr:nth-of-type(2)"`
 }
 
+type ParsedFavNovelListPage struct {
+	NumItems     uint                 `find:"div#sub ul.category_box li.now a" re:".*\\(([0-9]+)\\)$"`
+	TotalItems   uint                 `find:"div#main div.nowcategory" re:"\\(全([0-9]+)件\\)"`
+	NextPageLink *string              `find:"div#main form div:nth-of-type(1) a[title='next page']" attr:"href"`
+	Items        []ParsedFavNovelList `find:"div#main table.favnovel"`
+}
+
+type FavNovelListPage struct {
+	NumItems     uint
+	TotalItems   uint
+	NextPageLink string
+	Items        []FavNovelList
+}
+
 // ParseFavNovelList parses /favnovelmain/list page and returns []FavNovelList
-func ParseFavNovelList(page *scraper.Page, wantTitle string) ([]FavNovelList, error) {
+func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage, error) {
 	title := page.Find("title").Text()
 	if title != wantTitle {
 		return nil, fmt.Errorf("favnobel title mismatch: got:'%v', want:'%v'", title, wantTitle)
@@ -77,19 +91,28 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) ([]FavNovelList, er
 	//       p.right
 	//         a[@href=リンク]
 	//           設定
-	var result []FavNovelList
+	result := &FavNovelListPage{}
 
-	var parsed []ParsedFavNovelList
+	var parsed ParsedFavNovelListPage
 	err := scraper.Unmarshal(
 		&parsed,
-		page.Find("table.favnovel"),
+		page.Find("body"),
 		scraper.UnmarshalOption{Loc: NarouLocation},
 	)
 	if err != nil {
 		return result, fmt.Errorf("favnovel unmarshal failed: %v", err)
 	}
 
-	for _, item := range parsed {
+	result.NumItems = parsed.NumItems
+	result.TotalItems = parsed.TotalItems
+	if parsed.NextPageLink != nil {
+		result.NextPageLink, err = page.ResolveLink(*parsed.NextPageLink)
+		if err != nil {
+			return nil, fmt.Errorf("ResolvedLink error: %v", parsed.NextPageLink)
+		}
+	}
+
+	for _, item := range parsed.Items {
 		titleInfo := item.TitleInfo
 		updateInfo := item.UpdateInfo
 		var bookmarkEpisode uint
@@ -101,7 +124,7 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) ([]FavNovelList, er
 			latestEpisode = updateInfo.LatestURL.Episode
 		}
 
-		result = append(result, FavNovelList{
+		result.Items = append(result.Items, FavNovelList{
 			Title:           titleInfo.Title,
 			SiteID:          titleInfo.NovelURL.SiteID,
 			NovelID:         titleInfo.NovelURL.NovelID,

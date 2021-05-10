@@ -43,14 +43,15 @@ func GetFavNovelCategory(watcher *narou.NarouWatcher, url, wantTitle string) ([]
 	var result []model.FavNovelCategory
 	for _, item := range *items {
 		result = append(result, model.FavNovelCategory{
-			No:   item.No,
-			Name: item.Name,
+			No:       item.No,
+			Name:     item.Name,
+			NumItems: item.NumItems,
 		})
 	}
 	return result, nil
 }
 
-func GetFavNovelList(watcher *narou.NarouWatcher, url, wantTitle string) ([]model.FavNovelListRecord, error) {
+func GetFavNovelListPage(watcher *narou.NarouWatcher, url string, wantTitle string) (*narou.FavNovelListPage, error) {
 	page, err := watcher.GetPage(url)
 	if err != nil {
 		switch err.(type) {
@@ -61,9 +62,28 @@ func GetFavNovelList(watcher *narou.NarouWatcher, url, wantTitle string) ([]mode
 		}
 	}
 
-	items, err := narou.ParseFavNovelList(page, wantTitle)
+	itemsPage, err := narou.ParseFavNovelList(page, wantTitle)
 	if err != nil {
 		return nil, err
+	}
+	return itemsPage, nil
+}
+
+func GetFavNovelList(watcher *narou.NarouWatcher, url, wantTitle string, maxPage uint) ([]model.FavNovelListRecord, error) {
+	var items []narou.FavNovelList
+
+	for i := uint(0); i < maxPage; i++ {
+		page, err := GetFavNovelListPage(watcher, url, wantTitle)
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, page.Items...)
+
+		if page.NextPageLink == "" {
+			break
+		}
+		url = page.NextPageLink
 	}
 
 	var result []model.FavNovelListRecord
@@ -309,7 +329,7 @@ func favNovelCategoryHandler(url, wantTitle string) NarouApiHandlerType {
 	}
 }
 
-func favNovelListHandler(baseUrl, title string, category uint, order string, page uint) NarouApiHandlerType {
+func favNovelListHandler(baseUrl, title string, category uint, order string, page, maxPage uint) NarouApiHandlerType {
 	u, _ := url.Parse(baseUrl)
 	query := url.Values{}
 	if category > 1 {
@@ -324,7 +344,7 @@ func favNovelListHandler(baseUrl, title string, category uint, order string, pag
 	u.RawQuery = query.Encode()
 
 	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
-		results, err := GetFavNovelList(watcher, u.String(), title)
+		results, err := GetFavNovelList(watcher, u.String(), title, maxPage)
 		if err != nil {
 			return nil, err
 		}
@@ -430,7 +450,16 @@ func main() {
 					}
 					page = uint(p)
 				}
-				narouApiService.HandlerFunc(favNovelListHandler(getURL, title, uint(category), order, page))(w, r)
+				var maxPage uint = 1
+				if p, ok := query["max_page"]; ok {
+					p, err := strconv.ParseUint(p[0], 10, 32)
+					if err != nil {
+						http.NotFound(w, r)
+						return
+					}
+					maxPage = uint(p)
+				}
+				narouApiService.HandlerFunc(favNovelListHandler(getURL, title, uint(category), order, page, maxPage))(w, r)
 				return
 			}
 		})

@@ -16,6 +16,14 @@ const FavNovelCategoryTestHtml = `
 <option value="2">カテゴリ2・test</option>
 </select>
 </form>
+
+<div id="sub">
+<ul class="category_box">
+<li class="now"><a href="/favnovelmain/list/?nowcategory=1&order=updated_at">カテゴリ1・test(123)</a></li>
+<li><a href="/favnovelmain/list/?nowcategory=2&order=updated_at">カテゴリ2・test(456)</a></li>
+</ul>
+</div><!--sub-->
+
 </body>`
 
 func TestParseFavNovelCategory(t *testing.T) {
@@ -31,8 +39,8 @@ func TestParseFavNovelCategory(t *testing.T) {
 	}{
 		{"test", args{FavNovelCategoryTestHtml, "ブックマーク"},
 			&[]FavNovelCategory{
-				{1, "カテゴリ1・test"},
-				{2, "カテゴリ2・test"},
+				{1, "カテゴリ1・test", 123},
+				{2, "カテゴリ2・test", 456},
 			}, false},
 	}
 	for _, tt := range tests {
