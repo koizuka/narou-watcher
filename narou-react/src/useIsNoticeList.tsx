@@ -11,6 +11,7 @@ type IsNoticeListRecord = {
   title: string;
   author_name: string;
   completed?: boolean;
+  is_notice?: boolean; // only in bookmark
 };
 
 export type IsNoticeListItem = {
@@ -60,7 +61,12 @@ function compare<T>(a: T, b: T, ...cmps: (((v: T) => any) | Reverse<T>)[]): -1 |
 
 export function useIsNoticeList(
   api: NarouApi,
-  { enableR18, maxPage = 1 }: { enableR18: boolean, maxPage: number }
+  { enableR18, maxPage = 1, bookmark1 = false }:
+    {
+      enableR18: boolean,
+      maxPage: number,
+      bookmark1: boolean,
+    }
 ) {
   const query = `?max_page=${maxPage}`
   const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>('/narou/isnoticelist' + query,
@@ -70,13 +76,35 @@ export function useIsNoticeList(
         console.log('onErrorRetry:', error, error.status);
       },
     });
+
+  // order: updated_at:ブクマ更新順, new:ブクマ追加順
+  const bookmark = 1;
+  const order: 'updated_at' | 'new' = 'new';
+  const { data: bookmark_items, error: bookmark_error } = useSWR<IsNoticeListRecord[]>((!error && bookmark1) ? `/narou/bookmarks/${bookmark}?order=${order}` : null,
+    async path => api.call(path),
+  );
+
   const { data: raw_items18, error: error18 } = useSWR<IsNoticeListRecord[]>((!error && enableR18) ? '/r18/isnoticelist' + query : null,
     async path => api.call(path),
   );
 
+  // merge bookmark
+  const raw_items2 = useMemo(() => {
+    if (raw_items) {
+      if (bookmark_items) {
+        const keys = new Set(raw_items.map(i => i.base_url));
+        const adds = bookmark_items.filter(i => i.is_notice && !keys.has(i.base_url));
+        if (adds.length > 0) {
+          return [...raw_items, ...adds];
+        }
+      }
+    }
+    return raw_items;
+  }, [raw_items, bookmark_items]);
+
   const items: IsNoticeListItem[] | undefined = useMemo(
     () => {
-      if (raw_items === undefined) {
+      if (raw_items2 === undefined) {
         return undefined;
       }
 
@@ -89,7 +117,7 @@ export function useIsNoticeList(
       // なろう、R18のアイテムを混ぜて、未読があって少ない順にし、
       // 未読がある場合、同じ未読数同士は更新日時昇順、未読がない場合は更新日時降順
       const n = [
-        ...raw_items.map(i => ({ ...i, isR18: false })),
+        ...raw_items2.map(i => ({ ...i, isR18: false })),
         ...(raw_items18 || []).map(i => ({ ...i, isR18: true }))
       ].map(i => ({ ...i, update_time: DateTime.fromISO(i.update_time) }))
         .sort((a, b) => {
@@ -103,8 +131,8 @@ export function useIsNoticeList(
         .slice(0, 30);
       return n;
     },
-    [raw_items, raw_items18]
+    [raw_items2, raw_items18]
   );
 
-  return { data: error ? undefined : items, error: error || error18 };
+  return { data: error ? undefined : items, error: error || error18 || bookmark_error };
 }

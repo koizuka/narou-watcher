@@ -102,8 +102,9 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
 
   const [enableR18, setEnableR18] = useState(false);
   const [maxPage, setMaxPage] = useState(maxPageValue(false));
+  const [bookmark1, setBookmark1] = useState(false);
 
-  const { data: items, error } = useIsNoticeList(server, { enableR18, maxPage });
+  const { data: items, error } = useIsNoticeList(server, { enableR18, maxPage, bookmark1 });
 
   const unreads = useMemo(() => items ? items.filter(i => i.bookmark < i.latest).length : null, [items]);
 
@@ -173,6 +174,9 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
           case 'r':
             setEnableR18(v => !v);
             break;
+          case 'b':
+            setBookmark1(v => !v);
+            break;
           case '1':
             setMaxPage(v => maxPageValue(v === maxPageValue(false)));
             break;
@@ -229,11 +233,11 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
           </Box>
           <Box>
             <FormControlLabel
-              label={`${maxPage}頁`}
+              label="BM1"
               control={
                 <Switch
-                  checked={maxPage !== maxPageValue(false)}
-                  onChange={event => setMaxPage(maxPageValue(event.target.checked))}
+                  checked={bookmark1}
+                  onChange={event => setBookmark1(event.target.checked)}
                 />}
             />
           </Box>
