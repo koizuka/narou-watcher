@@ -34,13 +34,13 @@
     * クエリパラメータ `max_page` は指定分、次ページを合成する。1(初期値)なら指定ページのみ。
 
     |key|type|説明|
-      |---|---|---|
-      |base_url|string|小説自体のURL|
-      |update_time|ISO8601形式の日時|更新時刻(分解能は分まで)|
-      |bookmark|uint|しおりの部分番号|
-      |latest|uint|最終更新の部分番号|
-      |title|string|小説のタイトル|
-      |author_name|string|著者の名前|
+    |---|---|---|
+    |base_url|string|小説自体のURL|
+    |update_time|ISO8601形式の日時|更新時刻(分解能は分まで)|
+    |bookmark|uint|しおりの部分番号|
+    |latest|uint|最終更新の部分番号|
+    |title|string|小説のタイトル|
+    |author_name|string|著者の名前|
 
 * `GET /r18/isnoticelist`
     * Xユーザーページ(R18)の側の新着更新チェック中小説を取得します。
@@ -57,11 +57,11 @@
     
 * `GET /narou/bookmarks/:no`
     * ブックマークの内容の1ページ
-    * :no は1〜10
+    * `:no` は1〜10
     * クエリパラメータ `page` をつけるとページング。1が先頭
     * クエリパラメータ `order` はソートオーダー。そのまま中継される。
-          * `updated_at` がブックマーク更新順
-          * `new` はブックマーク追加順
+      * `updated_at` がブックマーク更新順
+      * `new` はブックマーク追加順
     * クエリパラメータ `max_page` は指定分、次ページを合成する。1(初期値)なら指定ページのみ。
       
       |key|type|説明|
