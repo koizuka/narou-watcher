@@ -28,7 +28,7 @@
         * 失敗したら HTTP status=401 を返します。
 * `GET /logout`
     * 「小説家になろう」からログアウトし、こちらのセッションクッキーも削除します。
-* `GET /narou/isnoticelist`
+* `GET /narou/isnoticelist` `GET /r18/isnoticelist`
     * ログイン状態でなければ HTTP status=401 を返します。
     * ログイン状態で、新着更新チェック中小説一覧の1ページ目を取得して以下のオブジェクトを配列にしてJSONにして返します。
     * クエリパラメータ `max_page` は指定分、次ページを合成する。1(初期値)なら指定ページのみ。
@@ -42,11 +42,7 @@
     |title|string|小説のタイトル|
     |author_name|string|著者の名前|
 
-* `GET /r18/isnoticelist`
-    * Xユーザーページ(R18)の側の新着更新チェック中小説を取得します。
-    * クエリパラメータ `max_page` は指定分、次ページを合成する。1(初期値)なら指定ページのみ。
-
-* `GET /narou/bookmarks`
+* `GET /narou/bookmarks` `GET /r18/bookmarks`
     * ブックマーク名一覧。以下のオブジェクトが登録分並ぶ。
       
       |key|type|説明|
@@ -55,7 +51,7 @@
       |name|string|ブックマーク名|
       |num_items|number|登録アイテム数|
     
-* `GET /narou/bookmarks/:no`
+* `GET /narou/bookmarks/:no` `GET /r18/bookmarsk/:no`
     * ブックマークの内容の1ページ
     * `:no` は1〜10
     * クエリパラメータ `page` をつけるとページング。1が先頭
@@ -74,6 +70,19 @@
       |author_name|string|著者の名前|
       |is_notice|boolean|更新チェック中ならtrue|
       |completed|boolean|完結ならtrue|
+    
+* `GET /narou/novels/:ncode` `GET /r18/novels/:ncode`
+    * 小説のncodeから概要ページの内容の抜粋を得る
+      
+      |key|type|説明|
+      |---|---|---|
+      |title|string|小説のタイトル|
+      |abstract|string|小説の概要(HTML)|
+      |author_name|string|著者の名前|
+      |author_url|string|著者ページのURL|
+      |keywords|[]string|キーワード|
+      |bookmark_no|uint|ブックマークのカテゴリ番号(登録されていなければフィールドなし)|
+      |bookmark_episode|uint|しおり部分(登録されていなければフィールドなし)|
 #### ログインセッションクッキー
 小説家になろうのサイトが Set-Cookieしてきたものの名前の前に `narou-` をつけてこちらのクッキーとして Set-Cookie にして返し、ブラウザに覚えさせます。
 

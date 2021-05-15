@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/koizuka/scraper"
 	"github.com/rs/cors"
 	"github.com/skratchdot/open-golang/open"
 	"log"
@@ -240,6 +241,12 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 			switch err.(type) {
 			case narou.LoginError:
 				http.Error(w, "Unauthorized", 401)
+			case scraper.RequestError:
+				e := err.(scraper.RequestError)
+				http.Error(w, fmt.Sprintf("Request Failed: %#v: %v", e.RequestURL.String(), e.Err), 503)
+			case scraper.ResponseError:
+				e := err.(scraper.ResponseError)
+				http.Error(w, fmt.Sprintf("%v: %#v", e.Response.Status, e.RequestURL.String()), e.Response.StatusCode)
 			case BadRequestError:
 				http.Error(w, fmt.Sprintf("Bad Request: %v", err), 400)
 			default:
@@ -352,6 +359,58 @@ func favNovelListHandler(baseUrl, title string, category uint, order string, pag
 	}
 }
 
+func novelInfoHandler(ncode, baseUrl string, r18 bool) NarouApiHandlerType {
+	domain := strings.TrimSuffix(baseUrl, "/") + "/"
+	getUrl := domain + ncode + "/"
+
+	domainURL, err := url.Parse(domain)
+	if err != nil {
+		log.Fatalf("novelInfoHandler: baseUrl %#v is invalid", baseUrl)
+	}
+
+	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+		if r18 {
+			watcher.SetCookies(domainURL, []*http.Cookie{{Name: "over18", Value: "yes"}})
+		}
+
+		page, err := watcher.GetPage(getUrl)
+		if err != nil {
+			switch err.(type) {
+			case narou.LoginError:
+			case scraper.RequestError:
+			case scraper.ResponseError:
+				return nil, err
+			default:
+				return nil, fmt.Errorf("%#v: %v", getUrl, err)
+			}
+			return nil, err
+		}
+
+		confirm, err := narou.IsAgeConfirmPage(page)
+		if err != nil {
+			return nil, err
+		}
+		if confirm {
+			return nil, fmt.Errorf("年連認証で停止")
+		}
+
+		novelInfo, err := narou.ParseNovelInfo(page)
+		if err != nil {
+			return nil, fmt.Errorf("%#v: %v", getUrl, err)
+		}
+
+		return ReturnJson(w, model.NovelInfoRecord{
+			Title:           novelInfo.Title,
+			AuthorName:      novelInfo.AuthorName,
+			Keywords:        strings.Split(novelInfo.Keywords, " "),
+			Abstract:        novelInfo.Abstract,
+			AuthorURL:       novelInfo.AuthorURL,
+			BookmarkNo:      novelInfo.BookmarkNo,
+			BookmarkEpisode: novelInfo.BookmarkEpisode,
+		})
+	}
+}
+
 func isNoticeListHandler(url string) NarouApiHandlerType {
 	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
 		query := r.URL.Query()
@@ -423,8 +482,8 @@ func main() {
 	}
 
 	setBookmarksHandler := func(pattern, getURL, title string) {
+		base := path.Clean(pattern)
 		mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
-			base := path.Clean(pattern)
 			subPath := path.Clean(path.Clean(r.URL.Path)[len(base):])
 			// log.Printf("bookmarks: subPath=%v", subPath)
 			if subPath == "." {
@@ -466,6 +525,23 @@ func main() {
 	}
 	setBookmarksHandler("/narou/bookmarks/", narou.FavNovelListURL, narou.FavNovelListTitle)
 	setBookmarksHandler("/r18/bookmarks/", narou.FavNovelListR18URL, narou.FavNovelListR18Title)
+
+	setNovelInfoHandler := func(pattern, baseUrl string, r18 bool) {
+		base := path.Clean(pattern)
+		mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+			subPath := path.Clean(path.Clean(r.URL.Path)[len(base):])
+			if subPath == "." {
+				http.NotFound(w, r)
+				return
+			} else {
+				ncode := subPath[1:]
+				narouApiService.HandlerFunc(novelInfoHandler(ncode, baseUrl, r18))(w, r)
+				return
+			}
+		})
+	}
+	setNovelInfoHandler("/narou/novels/", "https://ncode.syosetu.com/", false)
+	setNovelInfoHandler("/r18/novels/", "https://novel18.syosetu.com/", true)
 
 	setHandler("/narou/isnoticelist", isNoticeListHandler(narou.IsNoticeListURL))
 	setHandler("/r18/isnoticelist", isNoticeListHandler(narou.IsNoticeListR18URL))
