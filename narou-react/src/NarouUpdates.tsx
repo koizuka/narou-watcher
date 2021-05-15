@@ -14,6 +14,7 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
+  Link,
   List,
   ListItem,
   ListItemAvatar,
@@ -28,6 +29,7 @@ import { clearCache, IsNoticeListItem, useIsNoticeList } from './useIsNoticeList
 import { NarouLoginForm } from './NarouLoginForm';
 import { NarouApi } from './NarouApi';
 import scrollIntoView from 'scroll-into-view-if-needed';
+import useSWR from 'swr';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -72,11 +74,60 @@ function badgeProps(item: IsNoticeListItem): BadgeTypeMap['props'] {
   return { color: 'primary', badgeContent: unread(item) };
 }
 
-function OpenConfirmDialog({ item, onClose }: { item?: IsNoticeListItem, onClose: () => void }) {
+type NovelInfo = {
+  title: string;
+  abstract: string;
+  author_name: string;
+  author_url: string;
+  keywords: string[];
+  bookmark_no?: number;
+  bookmark_episode?: number;
+}
+
+function novelInfoPath(base_url?: string): string | null {
+  if (!base_url) {
+    return null;
+  }
+
+  const m = base_url.match(/https:\/\/([a-zA-Z.]+)\/([0-9a-z]+)\/?/);
+  if (!m) {
+    // base_url is invalid
+    return null;
+  }
+  const [, host, ncode] = m;
+  switch (host) {
+    case 'ncode.syosetu.com':
+      return `/narou/novels/${ncode}`;
+    case 'novel18.syosetu.com':
+      return `/r18/novels/${ncode}`;
+    default:
+      // unknown host
+      return null;
+  }
+}
+
+function useNovelInfo(
+  api: NarouApi,
+  base_url?: string
+) {
+  const { data, error } = useSWR<NovelInfo>(
+    novelInfoPath(base_url),
+    async path => api.call(path),
+  );
+
+  return { data, error };
+}
+
+function OpenConfirmDialog({ api, item, onClose }: {
+  api: NarouApi,
+  item?: IsNoticeListItem,
+  onClose: () => void,
+}) {
+  const { data } = useNovelInfo(api, item?.base_url);
   return (
     <Dialog open={!!item} onClose={onClose}>
       <DialogTitle>{item?.title}</DialogTitle>
-      <DialogContent>作者:{item?.author_name}</DialogContent>
+      <DialogContent>作者:<Link href={data?.author_url} target="_blank">{item?.author_name}</Link></DialogContent>
       <DialogActions>
         <Button size="small" variant="contained" onClick={() => {
           if (item) window.open(item.base_url, '_blank');
@@ -218,7 +269,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
 
   return (
     <>
-      <OpenConfirmDialog item={confirm} onClose={() => setConfirm(undefined)} />
+      <OpenConfirmDialog api={server} item={confirm} onClose={() => setConfirm(undefined)} />
       <AppBar position="sticky">
         <Toolbar>
           <Box>
