@@ -58,8 +58,7 @@ export function useIsNoticeList(
       bookmark1: boolean,
     }
 ) {
-  const query = `?max_page=${maxPage}`
-  const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>('/narou/isnoticelist' + query,
+  const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>(NarouApi.isnoticelist({ maxPage }),
     async path => api.call(path),
     {
       onErrorRetry: (error) => {
@@ -70,11 +69,11 @@ export function useIsNoticeList(
   // order: updated_at:ブクマ更新順, new:ブクマ追加順
   const bookmark = 1;
   const order: 'updated_at' | 'new' = 'new';
-  const { data: bookmark_items, error: bookmark_error } = useSWR<IsNoticeListRecord[]>((!error && bookmark1) ? `/narou/bookmarks/${bookmark}?order=${order}` : null,
+  const { data: bookmark_items, error: bookmark_error } = useSWR<IsNoticeListRecord[]>((!error && bookmark1) ? NarouApi.bookmark(bookmark, { order }) : null,
     async path => api.call(path),
   );
 
-  const { data: raw_items18, error: error18 } = useSWR<IsNoticeListRecord[]>((!error && enableR18) ? '/r18/isnoticelist' + query : null,
+  const { data: raw_items18, error: error18 } = useSWR<IsNoticeListRecord[]>((!error && enableR18) ? NarouApi.isnoticelistR18({ maxPage }) : null,
     async path => api.call(path),
   );
 

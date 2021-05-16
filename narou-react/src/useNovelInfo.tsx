@@ -24,9 +24,9 @@ function novelInfoPath(base_url?: string): string | null {
   const [, host, ncode] = m;
   switch (host) {
     case 'ncode.syosetu.com':
-      return `/narou/novels/${ncode}`;
+      return NarouApi.novelInfo(ncode);
     case 'novel18.syosetu.com':
-      return `/r18/novels/${ncode}`;
+      return NarouApi.novelInfoR18(ncode);
     default:
       // unknown host
       return null;
