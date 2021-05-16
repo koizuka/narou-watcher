@@ -2,6 +2,7 @@ import useSWR, { mutate } from 'swr';
 import { useMemo } from 'react';
 import { DateTime } from 'luxon';
 import { NarouApi } from './NarouApi';
+import { IsNoticeListItem } from './IsNoticeListItem';
 
 type IsNoticeListRecord = {
   base_url: string;
@@ -12,17 +13,6 @@ type IsNoticeListRecord = {
   author_name: string;
   completed?: boolean;
   is_notice?: boolean; // only in bookmark
-};
-
-export type IsNoticeListItem = {
-  base_url: string;
-  update_time: DateTime;
-  bookmark: number;
-  latest: number;
-  title: string;
-  author_name: string;
-  completed?: boolean;
-  isR18: boolean;
 };
 
 // login / logout したらキャッシュをすぐに消す

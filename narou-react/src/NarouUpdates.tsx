@@ -9,12 +9,7 @@ import {
   Button,
   CircularProgress,
   createStyles,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   FormControlLabel,
-  Link,
   List,
   ListItem,
   ListItemAvatar,
@@ -25,11 +20,12 @@ import {
   Toolbar,
 } from '@material-ui/core';
 import { Book } from '@material-ui/icons';
-import { clearCache, IsNoticeListItem, useIsNoticeList } from './useIsNoticeList';
+import { clearCache, useIsNoticeList } from './useIsNoticeList';
+import { IsNoticeListItem, itemSummary, nextLink, unread } from "./IsNoticeListItem";
 import { NarouLoginForm } from './NarouLoginForm';
 import { NarouApi } from './NarouApi';
 import scrollIntoView from 'scroll-into-view-if-needed';
-import { useNovelInfo } from './useNovelInfo';
+import { OpenConfirmDialog } from './OpenConfirmDialog';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -40,64 +36,11 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-function nextLink(item: IsNoticeListItem): string {
-  if (item.bookmark >= item.latest) {
-    return `${item.base_url}${item.latest}/`;
-  }
-  return `${item.base_url}${item.bookmark + 1}/`;
-}
-
-function hasUnread(item: IsNoticeListItem): boolean {
-  return item.latest > item.bookmark;
-}
-
-function itemSummary(item: IsNoticeListItem): string {
-  const fields = [item.title, ' ('];
-  if (hasUnread(item)) {
-    fields.push(`${item.bookmark}/`);
-  }
-  fields.push(`${item.latest})`);
-  if (item.completed) {
-    fields.push('[完結]');
-  }
-  return fields.join('');
-}
-
-function unread(item: IsNoticeListItem): number {
-  return Math.max(item.latest - item.bookmark, 0);
-}
-
 function badgeProps(item: IsNoticeListItem): BadgeTypeMap['props'] {
   if (item.latest < item.bookmark) {
     return { color: 'secondary', badgeContent: '!' };
   }
   return { color: 'primary', badgeContent: unread(item) };
-}
-
-function OpenConfirmDialog({ api, item, onClose }: {
-  api: NarouApi,
-  item?: IsNoticeListItem,
-  onClose: () => void,
-}) {
-  const { data } = useNovelInfo(api, item?.base_url);
-  return (
-    <Dialog open={!!item} onClose={onClose}>
-      <DialogTitle>{item?.title}</DialogTitle>
-      <DialogContent>作者:<Link href={data?.author_url} target="_blank">{item?.author_name}</Link></DialogContent>
-      <DialogActions>
-        <Button size="small" variant="contained" onClick={() => {
-          if (item) window.open(item.base_url, '_blank');
-          onClose();
-        }}>小説ページ</Button>
-        <Button size="small" variant="contained" onClick={() => {
-          if (item) window.open(nextLink(item), '_blank');
-          onClose();
-        }}>最新{item?.latest}部分</Button>
-        <Button size="small" variant="contained" onClick={() => onClose()
-        }>キャンセル</Button>
-      </DialogActions>
-    </Dialog>
-  );
 }
 
 function maxPageValue(sw: boolean): number {
