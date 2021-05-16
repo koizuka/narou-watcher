@@ -39,11 +39,10 @@ type FavNovelListTitleInfo struct {
 	AuthorName string     `find:"span.fn_name" re:".*（(.*)）.*"`
 }
 type FavNovelListUpdateInfo struct {
-	IsNotice    *string     `find:"span.isnotice"`
-	UpdateTime  time.Time   `find:"td.info p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
-	BookmarkURL *EpisodeURL `find:"span.no a:nth-of-type(1)" attr:"href"`
-	LatestURL   *EpisodeURL `find:"span.no a:nth-of-type(2)" attr:"href"`
-	Completed   *string     `find:"span.no a:last-of-type" re:"(最終)"`
+	IsNotice   *string      `find:"span.isnotice"`
+	UpdateTime time.Time    `find:"td.info p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
+	ItemURL    []EpisodeURL `find:"span.no a" attr:"href"`
+	Completed  *string      `find:"span.no a:last-of-type" re:"(最終)"`
 }
 type ParsedFavNovelList struct {
 	TitleInfo  FavNovelListTitleInfo  `find:"tr:nth-of-type(1)"`
@@ -117,11 +116,12 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage,
 		updateInfo := item.UpdateInfo
 		var bookmarkEpisode uint
 		var latestEpisode uint
-		if updateInfo.BookmarkURL != nil {
-			bookmarkEpisode = updateInfo.BookmarkURL.Episode
-		}
-		if updateInfo.LatestURL != nil {
-			latestEpisode = updateInfo.LatestURL.Episode
+		switch len(updateInfo.ItemURL) {
+		case 1:
+			latestEpisode = updateInfo.ItemURL[0].Episode
+		case 2:
+			bookmarkEpisode = updateInfo.ItemURL[0].Episode
+			latestEpisode = updateInfo.ItemURL[1].Episode
 		}
 
 		result.Items = append(result.Items, FavNovelList{

@@ -1,6 +1,7 @@
 package narou
 
 import (
+	"github.com/google/go-cmp/cmp"
 	"reflect"
 	"testing"
 	"time"
@@ -84,11 +85,40 @@ const FavNovelListTestHtml = `
 <table class="favnovel">
 <tr>
 <td rowspan="2" class="jyokyo1"></td>
-<td rowspan="2" class="check"><input type="checkbox" name="useridfavncode[]" value="xxxxxx_xxxxxxx" data-noveltype="2" /></td>
+<td rowspan="2" class="check"><input type="checkbox" name="useridfavncode[]" value="xxxxxx_xxxxxxx" data-noveltype="1" /></td>
 <td class="title">
-<a class="title" href="https://ncode.syosetu.com/novel3/">短篇</a>
+<a class="title" href="https://ncode.syosetu.com/novel3/">title3</a>
 <span class="fn_name">
 （author3）
+</span></td>
+</tr>
+<tr>
+<td class="info">
+<p>
+<span class="isnotice">チェック中</span>
+更新日：2001/02/03 04:06
+
+<span class="no">
+
+<a href="https://ncode.syosetu.com/novel3/5/">
+最新5部分</a></span>
+
+</p>
+<p class="right">
+<a href="/favnovelmain/updateinput/useridfavncode/xxxxxx_xxxxxxx/">設定</a>
+</p>
+</td>
+</tr>
+</table>
+
+<table class="favnovel">
+<tr>
+<td rowspan="2" class="jyokyo1"></td>
+<td rowspan="2" class="check"><input type="checkbox" name="useridfavncode[]" value="xxxxxx_xxxxxxx" data-noveltype="2" /></td>
+<td class="title">
+<a class="title" href="https://ncode.syosetu.com/short/">短篇</a>
+<span class="fn_name">
+（author_short）
 </span></td>
 </tr>
 <tr>
@@ -165,7 +195,8 @@ func TestParseFavNovelList(t *testing.T) {
 			Items: []FavNovelList{
 				{"ncode", "novel1", "title1", "author1", datetime("2000/01/02 03:04"), 1, 2, false, false},
 				{"ncode", "novel2", "title2", "author2", datetime("2001/02/03 04:05"), 3, 4, true, true},
-				{"ncode", "novel3", "短篇", "author3", datetime("2002/03/04 05:06"), 0, 0, false, false},
+				{"ncode", "novel3", "title3", "author3", datetime("2001/02/03 04:06"), 0, 5, true, false},
+				{"ncode", "short", "短篇", "author_short", datetime("2002/03/04 05:06"), 0, 0, false, false},
 			},
 		}, false},
 	}
@@ -182,7 +213,8 @@ func TestParseFavNovelList(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParseFavNovelList() got = %v, want %v", got, tt.want)
+				diff := cmp.Diff(tt.want, got)
+				t.Errorf("ParseFavNovelList() (-want +got)\n%v", diff)
 			}
 		})
 	}

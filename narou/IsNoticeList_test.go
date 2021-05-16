@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/google/go-cmp/cmp"
 	"github.com/koizuka/scraper"
 	"net/url"
 	"reflect"
@@ -192,7 +193,8 @@ func TestParseIsNoticeList(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParseIsNoticeList()\n got = %v,\n  want %v", got, tt.want)
+				diff := cmp.Diff(tt.want, got)
+				t.Errorf("ParseIsNoticeList() (-want +got)\n%v", diff)
 			}
 		})
 	}
