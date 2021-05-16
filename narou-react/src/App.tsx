@@ -6,7 +6,7 @@ import { NarouUpdates } from './NarouUpdates';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { useEffect, useMemo, useState } from 'react';
 import { CssBaseline, Link, Typography, useMediaQuery } from '@material-ui/core';
-import { NarouApi } from './NarouApi';
+import { NarouApi } from './narouApi/NarouApi';
 import { cyan } from '@material-ui/core/colors';
 
 const PollingInterval = 5 * 60 * 1000; // 5分ごとにポーリング

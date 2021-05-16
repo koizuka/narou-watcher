@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { Box, Button, Card, CardActions, CardContent, CardHeader, Container, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@material-ui/core';
-import { NarouApi } from './NarouApi';
+import { NarouApi } from './narouApi/NarouApi';
 
 export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
   const [userId, setUserId] = useState('');

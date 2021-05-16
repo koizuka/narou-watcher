@@ -20,10 +20,10 @@ import {
   Toolbar,
 } from '@material-ui/core';
 import { Book } from '@material-ui/icons';
-import { clearCache, useIsNoticeList } from './useIsNoticeList';
-import { IsNoticeListItem, itemSummary, nextLink, unread } from "./IsNoticeListItem";
+import { clearCache, useIsNoticeList } from './narouApi/useIsNoticeList';
+import { IsNoticeListItem, itemSummary, nextLink, unread } from "./narouApi/IsNoticeListItem";
 import { NarouLoginForm } from './NarouLoginForm';
-import { NarouApi } from './NarouApi';
+import { NarouApi } from './narouApi/NarouApi';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { OpenConfirmDialog } from './OpenConfirmDialog';
 

@@ -11,18 +11,18 @@ export type IsNoticeListItem = {
   isR18: boolean;
 };
 
-export function hasUnread(item: IsNoticeListItem): boolean {
+export function hasUnread(item: Pick<IsNoticeListItem, 'latest' | 'bookmark'>): boolean {
   return item.latest > item.bookmark;
 }
 
-export function nextLink(item: IsNoticeListItem): string {
+export function nextLink(item: Pick<IsNoticeListItem, 'latest' | 'bookmark' | 'base_url'>): string {
   if (hasUnread(item)) {
     return `${item.base_url}${item.bookmark + 1}/`;
   }
   return `${item.base_url}${item.latest}/`;
 }
 
-export function itemSummary(item: IsNoticeListItem): string {
+export function itemSummary(item: Pick<IsNoticeListItem, 'title' | 'bookmark' | 'latest' | 'completed'>): string {
   const fields = [item.title, ' ('];
   if (hasUnread(item)) {
     fields.push(`${item.bookmark}/`);
@@ -34,6 +34,6 @@ export function itemSummary(item: IsNoticeListItem): string {
   return fields.join('');
 }
 
-export function unread(item: IsNoticeListItem): number {
+export function unread(item: Pick<IsNoticeListItem, 'latest' | 'bookmark'>): number {
   return Math.max(item.latest - item.bookmark, 0);
 }

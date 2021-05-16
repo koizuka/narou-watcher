@@ -6,9 +6,9 @@ import {
   DialogTitle,
   Link
 } from '@material-ui/core';
-import { IsNoticeListItem, nextLink } from "./IsNoticeListItem";
-import { NarouApi } from './NarouApi';
-import { useNovelInfo } from './useNovelInfo';
+import { IsNoticeListItem, nextLink } from './narouApi/IsNoticeListItem';
+import { NarouApi } from './narouApi/NarouApi';
+import { useNovelInfo } from './narouApi/useNovelInfo';
 
 export function OpenConfirmDialog({ api, item, onClose }: {
   api: NarouApi;
