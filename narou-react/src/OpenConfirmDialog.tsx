@@ -6,8 +6,10 @@ import {
   DialogTitle,
   Link
 } from '@material-ui/core';
+import { useMemo } from 'react';
 import { IsNoticeListItem, nextLink } from './narouApi/IsNoticeListItem';
 import { NarouApi } from './narouApi/NarouApi';
+import { useBookmarkInfo } from './narouApi/useBookmarkInfo';
 import { useNovelInfo } from './narouApi/useNovelInfo';
 
 export function OpenConfirmDialog({ api, item, onClose }: {
@@ -15,11 +17,29 @@ export function OpenConfirmDialog({ api, item, onClose }: {
   item?: IsNoticeListItem;
   onClose: () => void;
 }) {
-  const { data } = useNovelInfo(api, item?.base_url);
+  const { data: novelInfo } = useNovelInfo(api, item?.base_url);
+  const { data: bookmarkInfo } = useBookmarkInfo(novelInfo?.bookmark_no ? api : null);
+
+  // WIP R18未対応。しかしそもそも小説ページからbookmarkが取れないとそもそも機能しない
+  const bookmark = useMemo(() => {
+    console.log('novelInfo:', novelInfo);
+    console.log('bookmarkInfo:', bookmarkInfo);
+    const bookmark_no = novelInfo?.bookmark_no
+    if (bookmarkInfo && bookmark_no) {
+      return {
+        no: bookmark_no,
+        name: bookmarkInfo[bookmark_no].name,
+        url: `https://syosetu.com/favnovelmain/list/?nowcategory=${bookmark_no}`,
+      };
+    }
+    return undefined;
+  }, [novelInfo, bookmarkInfo])
+
   return (
     <Dialog open={!!item} onClose={onClose}>
       <DialogTitle>{item?.title}</DialogTitle>
-      <DialogContent>作者:<Link href={data?.author_url} target="_blank">{item?.author_name}</Link></DialogContent>
+      <DialogContent>作者:<Link href={novelInfo?.author_url} target="_blank">{item?.author_name}</Link></DialogContent>
+      {bookmark && <DialogContent>ブックマーク:<Link href={bookmark.url} target="_blank">{bookmark.name}</Link></DialogContent>}
       <DialogActions>
         <Button size="small" variant="contained" onClick={() => {
           if (item)
