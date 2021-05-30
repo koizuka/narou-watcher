@@ -33,7 +33,7 @@ func (i *IsNoticeList) NextEpisode() EpisodeURL {
 type IsNoticelistTitleInfo struct {
 	Title      string     `find:"a.title"`
 	NovelURL   EpisodeURL `find:"a.title" attr:"href"`
-	AuthorName string     `find:"span.fn_name" re:".*（(.*)）.*"`
+	AuthorName string     `find:"span.fn_name" re:"[^（]*（(.*)）[^）]*"`
 }
 type IsNoticelistUpdateInfo struct {
 	UpdateTime time.Time    `find:"td.info2 p:nth-of-type(1)" re:"([0-9]{4}/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`

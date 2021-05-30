@@ -36,7 +36,7 @@ func (i *FavNovelList) NextEpisode() EpisodeURL {
 type FavNovelListTitleInfo struct {
 	Title      string     `find:"a.title"`
 	NovelURL   EpisodeURL `find:"a.title" attr:"href"`
-	AuthorName string     `find:"span.fn_name" re:".*（(.*)）.*"`
+	AuthorName string     `find:"span.fn_name" re:"[^（]*（(.*)）[^）]*"`
 }
 type FavNovelListUpdateInfo struct {
 	IsNotice   *string      `find:"span.isnotice"`
