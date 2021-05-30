@@ -219,6 +219,7 @@ func TestParseNovelInfo(t *testing.T) {
 	}
 	var episode uint = 3
 	var bookmark uint = 2
+	var bookmarkUrl = "https://syosetu.com/favnovelmain/list/?nowcategory=2"
 	tests := []struct {
 		name    string
 		args    args
@@ -232,6 +233,7 @@ func TestParseNovelInfo(t *testing.T) {
 
 			Abstract:        "ABSTRACT<br/>ABSTRACT\n",
 			AuthorURL:       "https://mypage.syosetu.com/AUTHORID/",
+			BookmarkURL:     &bookmarkUrl,
 			BookmarkNo:      &bookmark,
 			BookmarkEpisode: &episode,
 		}, false},

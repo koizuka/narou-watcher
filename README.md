@@ -76,11 +76,13 @@
       
       |key|type|説明|
       |---|---|---|
+      |base_url|string|小説のURL|
       |title|string|小説のタイトル|
       |abstract|string|小説の概要(HTML)|
       |author_name|string|著者の名前|
       |author_url|string|著者ページのURL|
       |keywords|[]string|キーワード|
+      |bookmark_url|string|ブックマークカテゴリURL(登録されていなければフィールドなし)|
       |bookmark_no|uint|ブックマークのカテゴリ番号(登録されていなければフィールドなし)|
       |bookmark_episode|uint|しおり部分(登録されていなければフィールドなし)|
 #### ログインセッションクッキー
