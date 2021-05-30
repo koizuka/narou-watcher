@@ -34,13 +34,16 @@ export function useNovelInfo(
 
   const info = useMemo(() => extractInfoPath(base_url), [base_url]);
   const key = useMemo(() => {
-    switch (info?.host) {
+    if (!info) {
+      return null;
+    }
+    switch (info.host) {
       case 'ncode.syosetu.com':
         return NarouApi.novelInfo(info.ncode);
       case 'novel18.syosetu.com':
         return NarouApi.novelInfoR18(info.ncode);
       default:
-        console.warn(`unknown host: ${info?.host}`);
+        console.warn(`unknown host: ${info.host}`);
         return null;
     }
   }, [info])
