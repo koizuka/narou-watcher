@@ -21,7 +21,7 @@ export function useBookmarkInfo(api: NarouApi | null, r18: boolean) {
             (r18 ? NarouApi.bookmarksR18() : NarouApi.bookmarks())
             :
             null,
-        key => api ? api.call(key) : [],
+        async key => api ? api.call(key) : [],
     )
 
     const info: BookmarkInfo | undefined = useMemo(() => {
