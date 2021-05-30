@@ -58,10 +58,10 @@ export class NarouApi {
     }
 
     static bookmarks(): NarouApiCallKey {
-        return `/narou/bookmarks`;
+        return `/narou/bookmarks/`;
     }
     static bookmarksR18(): NarouApiCallKey {
-        return `/r18/bookmarks`;
+        return `/r18/bookmarks/`;
     }
 
     static bookmark(no: number, { order }: { order: BookmarkOrder }): NarouApiCallKey {
