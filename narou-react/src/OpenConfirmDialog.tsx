@@ -18,18 +18,17 @@ export function OpenConfirmDialog({ api, item, onClose }: {
   onClose: () => void;
 }) {
   const { data: novelInfo } = useNovelInfo(api, item?.base_url);
-  const { data: bookmarkInfo } = useBookmarkInfo(novelInfo?.bookmark_no ? api : null);
+  const { data: bookmarkInfo } = useBookmarkInfo(novelInfo?.bookmark_no ? api : null, item?.isR18 || false);
 
-  // WIP R18未対応。しかしそもそも小説ページからbookmarkが取れないとそもそも機能しない
   const bookmark = useMemo(() => {
     console.log('novelInfo:', novelInfo);
     console.log('bookmarkInfo:', bookmarkInfo);
     const bookmark_no = novelInfo?.bookmark_no
-    if (bookmarkInfo && bookmark_no) {
+    if (bookmarkInfo && bookmark_no && novelInfo?.bookmark_url) {
       return {
         no: bookmark_no,
         name: bookmarkInfo[bookmark_no].name,
-        url: `https://syosetu.com/favnovelmain/list/?nowcategory=${bookmark_no}`,
+        url: novelInfo.bookmark_url,
       };
     }
     return undefined;

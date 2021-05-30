@@ -15,8 +15,12 @@ type BookmarkInfoRecord = {
     num_items: number;
 }
 
-export function useBookmarkInfo(api: NarouApi | null) {
-    const { data, error } = useSWR<BookmarkInfoRecord[]>(api ? NarouApi.bookmarks() : null,
+export function useBookmarkInfo(api: NarouApi | null, r18: boolean) {
+    const { data, error } = useSWR<BookmarkInfoRecord[]>(
+        api ?
+            (r18 ? NarouApi.bookmarksR18() : NarouApi.bookmarks())
+            :
+            null,
         key => api ? api.call(key) : [],
     )
 

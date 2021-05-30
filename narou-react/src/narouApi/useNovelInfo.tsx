@@ -3,11 +3,13 @@ import useSWR from 'swr';
 import { useMemo } from 'react';
 
 type NovelInfo = {
+  base_url: string;
   title: string;
   abstract: string;
   author_name: string;
   author_url: string;
   keywords: string[];
+  bookmark_url?: string;
   bookmark_no?: number;
   bookmark_episode?: number;
 };
@@ -17,9 +19,9 @@ function extractInfoPath(base_url?: string): { host: string, ncode: string } | n
     return null;
   }
 
-  const m = base_url.match(/https:\/\/([a-zA-Z.]+)\/([0-9a-z]+)\/?/);
+  const m = base_url.match(/https:\/\/([0-9a-zA-Z.]+)\/([0-9a-z]+)\/?/);
   if (!m) {
-    // base_url is invalid
+    console.warn(`base_url is invalid: ${base_url}`);
     return null;
   }
   const [, host, ncode] = m;
@@ -38,7 +40,7 @@ export function useNovelInfo(
       case 'novel18.syosetu.com':
         return NarouApi.novelInfoR18(info.ncode);
       default:
-        // unknown host
+        console.warn(`unknown host: ${info?.host}`);
         return null;
     }
   }, [info])
