@@ -10,16 +10,18 @@ import {
   CircularProgress,
   createStyles,
   FormControlLabel,
+  IconButton,
   List,
   ListItem,
   ListItemAvatar,
+  ListItemSecondaryAction,
   ListItemText,
   makeStyles,
   Switch,
   Theme,
   Toolbar,
 } from '@material-ui/core';
-import { Book } from '@material-ui/icons';
+import { Book, Info } from '@material-ui/icons';
 import { clearCache, useIsNoticeList } from './narouApi/useIsNoticeList';
 import { IsNoticeListItem, itemSummary, nextLink, unread } from "./narouApi/IsNoticeListItem";
 import { NarouLoginForm } from './NarouLoginForm';
@@ -218,6 +220,13 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
               <ListItemText
                 primary={itemSummary(item)}
                 secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
+              {unread(item) > 0 &&
+                <ListItemSecondaryAction>
+                  <IconButton edge="end" onClick={() => setConfirm(item)} disableRipple={true}>
+                    <Info />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              }
             </ListItem>)}
         </List>
       </Box >
