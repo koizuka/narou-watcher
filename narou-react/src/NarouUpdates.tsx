@@ -151,9 +151,9 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
         target: '_blank',
       };
     } else {
-      return { onClick: () => setConfirm(item) };
+      return { disabled: true };
     }
-  }, [setConfirm]);
+  }, []);
 
   if (error) {
     console.log('error =', error);
@@ -220,13 +220,11 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
               <ListItemText
                 primary={itemSummary(item)}
                 secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
-              {unread(item) > 0 &&
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" onClick={() => setConfirm(item)} disableRipple={true}>
-                    <Info />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              }
+              <ListItemSecondaryAction>
+                <IconButton edge="end" onClick={() => setConfirm(item)} disableRipple={true}>
+                  <Info />
+                </IconButton>
+              </ListItemSecondaryAction>
             </ListItem>)}
         </List>
       </Box >
