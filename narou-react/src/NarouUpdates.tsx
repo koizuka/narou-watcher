@@ -202,32 +202,34 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
             onClick={() => setSelectedIndex(defaultIndex)}>ESC</Button>
         </Toolbar>
       </AppBar>
-      <Box m={2} display="flex" flexDirection="column" bgcolor="background.paper">
-        <List>
-          {items?.map((item, index) =>
-            <ListItem key={item.base_url} button={true}
-              {...(index === selectedIndex ? { selected: true, ref: scrollIn } : {})}
-              disableRipple={true}
-              onFocusVisible={() => setSelectedIndex(index)}
-              {...buttonProps(item)} >
-              <ListItemAvatar>
-                <Badge overlap="circle" {...badgeProps(item)} >
-                  <Avatar>
-                    <Book color={item.isR18 ? "secondary" : undefined} />
-                  </Avatar>
-                </Badge>
-              </ListItemAvatar>
-              <ListItemText
-                primary={itemSummary(item)}
-                secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
-              <ListItemSecondaryAction>
-                <IconButton edge="end" onClick={() => setConfirm(item)} disableRipple={true}>
-                  <Info />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>)}
-        </List>
-      </Box >
+      <Box m={2} display="flex" alignItems="center" flexDirection="column" bgcolor="background.paper">
+        <Box maxWidth={600}>
+          <List>
+            {items?.map((item, index) =>
+              <ListItem key={item.base_url} button={true}
+                {...(index === selectedIndex ? { selected: true, ref: scrollIn } : {})}
+                disableRipple={true}
+                onFocusVisible={() => setSelectedIndex(index)}
+                {...buttonProps(item)} >
+                <ListItemAvatar>
+                  <Badge overlap="circle" {...badgeProps(item)} >
+                    <Avatar>
+                      <Book color={item.isR18 ? "secondary" : undefined} />
+                    </Avatar>
+                  </Badge>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={itemSummary(item)}
+                  secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
+                <ListItemSecondaryAction>
+                  <IconButton edge="end" onClick={() => setConfirm(item)} disableRipple={true}>
+                    <Info />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>)}
+          </List>
+        </Box>
+      </Box>
     </>
   );
 }
