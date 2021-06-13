@@ -51,11 +51,11 @@ function compare<T>(a: T, b: T, ...cmps: (((v: T) => any) | Reverse<T>)[]): -1 |
 
 export function useIsNoticeList(
   api: NarouApi,
-  { enableR18, maxPage = 1, bookmark1 = false }:
+  { enableR18, maxPage = 1, bookmark = 0 }:
     {
       enableR18: boolean,
       maxPage: number,
-      bookmark1: boolean,
+      bookmark: number,
     }
 ) {
   const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>(NarouApi.isnoticelist({ maxPage }),
@@ -67,9 +67,8 @@ export function useIsNoticeList(
     });
 
   // order: updated_at:ブクマ更新順, new:ブクマ追加順
-  const bookmark = 1;
   const order: 'updated_at' | 'new' = 'new';
-  const { data: bookmark_items, error: bookmark_error } = useSWR<IsNoticeListRecord[]>((!error && bookmark1) ? NarouApi.bookmark(bookmark, { order }) : null,
+  const { data: bookmark_items, error: bookmark_error } = useSWR<IsNoticeListRecord[]>((!error && bookmark) ? NarouApi.bookmark(bookmark, { order }) : null,
     async path => api.call(path),
   );
 

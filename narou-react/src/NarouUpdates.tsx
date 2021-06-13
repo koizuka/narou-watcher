@@ -29,6 +29,8 @@ import { NarouLoginForm } from './NarouLoginForm';
 import { NarouApi } from './narouApi/NarouApi';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { OpenConfirmDialog } from './OpenConfirmDialog';
+import { BookmarkInfo, useBookmarkInfo } from './narouApi/useBookmarkInfo';
+import BookmarkSelector from './BookmarkSelector';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -50,14 +52,25 @@ function maxPageValue(sw: boolean): number {
   return sw ? 2 : 1;
 }
 
+function nextBookmark(bookmarks: BookmarkInfo, cur: number): number {
+  const numbers = Object.keys(bookmarks).map(k => Number(k));
+  for (const i of numbers) {
+    if (i > cur) {
+      return i;
+    }
+  }
+  return 0;
+}
+
 function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnauthorized: () => void }) {
   const classes = useStyles();
 
   const [enableR18, setEnableR18] = useState(false);
   const [maxPage, setMaxPage] = useState(maxPageValue(false));
-  const [bookmark1, setBookmark1] = useState(false);
+  const [bookmark, setBookmark] = useState(0);
 
-  const { data: items, error } = useIsNoticeList(server, { enableR18, maxPage, bookmark1 });
+  const { data: items, error } = useIsNoticeList(server, { enableR18, maxPage, bookmark });
+  const { data: bookmarks } = useBookmarkInfo(server, false);
 
   const unreads = useMemo(() => items ? items.filter(i => i.bookmark < i.latest).length : null, [items]);
 
@@ -128,7 +141,9 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
             setEnableR18(v => !v);
             break;
           case 'b':
-            setBookmark1(v => !v);
+            if (bookmarks) {
+              setBookmark(nextBookmark(bookmarks, bookmark));
+            }
             break;
           case '1':
             setMaxPage(v => maxPageValue(v === maxPageValue(false)));
@@ -141,7 +156,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
         document.removeEventListener('keydown', onKeyDown);
       };
     }
-  }, [selectedIndex, defaultIndex, items]);
+  }, [selectedIndex, defaultIndex, items, bookmarks, bookmark]);
 
   const buttonProps = useCallback((item: IsNoticeListItem) => {
     if (unread(item) > 0) {
@@ -185,14 +200,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
             />
           </Box>
           <Box>
-            <FormControlLabel
-              label="BM1"
-              control={
-                <Switch
-                  checked={bookmark1}
-                  onChange={event => setBookmark1(event.target.checked)}
-                />}
-            />
+            <BookmarkSelector bookmarks={bookmarks} bookmark={bookmark} onChangeBookmark={setBookmark} />
           </Box>
           <Box m={2}>未読: {unreads ?? ''}</Box>
           <Button
