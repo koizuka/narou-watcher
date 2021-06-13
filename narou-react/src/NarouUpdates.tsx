@@ -9,6 +9,7 @@ import {
   Button,
   CircularProgress,
   createStyles,
+  Fab,
   FormControlLabel,
   IconButton,
   List,
@@ -228,6 +229,16 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
                 </ListItemSecondaryAction>
               </ListItem>)}
           </List>
+        </Box>
+        <Box position="fixed" right="20px" bottom="20px">
+          <Fab
+            variant="extended"
+            size="small"
+            disableRipple={true}
+            component="a"
+            href="https://syosetu.com/user/top/"
+            target="_blank"
+          >ユーザーホーム</Fab>
         </Box>
       </Box>
     </>
