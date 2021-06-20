@@ -3,7 +3,7 @@ module narou-watcher
 go 1.16
 
 require (
-	github.com/PuerkitoBio/goquery v1.6.1
+	github.com/PuerkitoBio/goquery v1.7.0
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/frankban/quicktest v1.11.3 // indirect
 	github.com/google/go-cmp v0.5.5
