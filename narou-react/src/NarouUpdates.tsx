@@ -32,6 +32,8 @@ import { OpenConfirmDialog } from './OpenConfirmDialog';
 import { BookmarkInfo, useBookmarkInfo } from './narouApi/useBookmarkInfo';
 import BookmarkSelector from './BookmarkSelector';
 
+const UserTopURL = 'https://syosetu.com/user/top/';
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     backdrop: {
@@ -148,7 +150,9 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
           case '1':
             setMaxPage(v => maxPageValue(v === maxPageValue(false)));
             break;
-
+          case 'h':
+            window.open(UserTopURL, '_blank');
+            break;
         }
       };
       document.addEventListener('keydown', onKeyDown, false);
@@ -244,7 +248,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
             size="small"
             disableRipple={true}
             component="a"
-            href="https://syosetu.com/user/top/"
+            href={UserTopURL}
             target="_blank"
           >ユーザーホーム</Fab>
         </Box>
