@@ -20,6 +20,8 @@ export class NarouApi {
         this.server = server.replace(/\/$/, '');
     }
 
+    get baseUrl(): string { return this.server; }
+
     async fetch(api: string): Promise<Response> {
         return fetch(`${this.server}${api}`, {
             credentials: 'include',
