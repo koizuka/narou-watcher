@@ -140,18 +140,26 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
             setSelectedIndex(defaultIndex);
             break;
           case 'r':
-            setEnableR18(v => !v);
+            if (!event.metaKey && !event.ctrlKey) {
+              setEnableR18(v => !v);
+            }
             break;
           case 'b':
-            if (bookmarks) {
-              setBookmark(nextBookmark(bookmarks, bookmark));
+            if (!event.metaKey && !event.ctrlKey) {
+              if (bookmarks) {
+                setBookmark(nextBookmark(bookmarks, bookmark));
+              }
             }
             break;
           case '1':
-            setMaxPage(v => maxPageValue(v === maxPageValue(false)));
+            if (!event.metaKey && !event.ctrlKey) {
+              setMaxPage(v => maxPageValue(v === maxPageValue(false)));
+            }
             break;
           case 'h':
-            window.open(UserTopURL, '_blank');
+            if (!event.metaKey && !event.ctrlKey) {
+              window.open(UserTopURL, '_blank');
+            }
             break;
         }
       };
