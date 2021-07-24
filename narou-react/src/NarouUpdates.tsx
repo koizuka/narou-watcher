@@ -64,6 +64,21 @@ function nextBookmark(bookmarks: BookmarkInfo, cur: number): number {
   return 0;
 }
 
+function prevBookmark(bookmarks: BookmarkInfo, cur: number): number {
+  const numbers = Object.keys(bookmarks).map(k => Number(k)).reverse();
+  if (numbers.length > 0) {
+    if (cur === 0) {
+      return numbers[0];
+    }
+    for (const i of numbers) {
+      if (i < cur) {
+        return i;
+      }
+    }
+  }
+  return 0;
+}
+
 function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnauthorized: () => void }) {
   const classes = useStyles();
 
@@ -145,9 +160,14 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
             }
             break;
           case 'b':
+          case 'B':
             if (!event.metaKey && !event.ctrlKey) {
               if (bookmarks) {
-                setBookmark(nextBookmark(bookmarks, bookmark));
+                setBookmark(
+                  event.shiftKey
+                    ? prevBookmark(bookmarks, bookmark)
+                    : nextBookmark(bookmarks, bookmark)
+                );
               }
             }
             break;
