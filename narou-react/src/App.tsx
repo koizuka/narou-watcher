@@ -3,7 +3,7 @@ import { SWRConfig } from 'swr';
 import { DateTime } from 'luxon';
 import preval from 'preval.macro'
 import { NarouUpdates } from './NarouUpdates';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { useEffect, useMemo, useState } from 'react';
 import { CssBaseline, Link, Typography, useMediaQuery } from '@material-ui/core';
 import { NarouApi } from './narouApi/NarouApi';
@@ -34,7 +34,7 @@ function App() {
 
   const theme = useMemo(
     () =>
-      createMuiTheme({
+      createTheme({
         palette: {
           type: prefersDarkMode ? 'dark' : 'light',
           primary: cyan,

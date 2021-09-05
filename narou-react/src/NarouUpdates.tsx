@@ -253,7 +253,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
                 onFocusVisible={() => setSelectedIndex(index)}
                 {...buttonProps(item)} >
                 <ListItemAvatar>
-                  <Badge overlap="circle" {...badgeProps(item)} >
+                  <Badge overlap="circular" {...badgeProps(item)} >
                     <Avatar>
                       <Book color={item.isR18 ? "secondary" : undefined} />
                     </Avatar>
