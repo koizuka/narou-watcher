@@ -48,7 +48,7 @@
     ]
   },
   "devDependencies": {
-    "@types/luxon": "^2.0.2",
+    "@types/luxon": "^2.0.3",
     "@types/preval.macro": "^3.0.0"
   }
 }
