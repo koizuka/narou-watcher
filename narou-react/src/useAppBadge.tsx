@@ -11,3 +11,18 @@ export function useAppBadge(): { setAppBadge: (count?: number) => Promise<void>;
     };
   }
 }
+
+export function useClientBadge(): { setClientBadge: (count?: number) => Promise<void>; clearClientBadge: () => Promise<void>; } {
+  if ('setClientBadge' in navigator && 'clearClientBadge' in navigator) {
+    return {
+      setClientBadge: (count) => (navigator as any).setClientBadge(count),
+      clearClientBadge: () => (navigator as any).clearClientBadge(),
+    };
+  } else {
+    return {
+      setClientBadge: () => Promise.resolve(),
+      clearClientBadge: () => Promise.resolve(),
+    };
+  }
+}
+
