@@ -31,6 +31,7 @@ import scrollIntoView from 'scroll-into-view-if-needed';
 import { OpenConfirmDialog } from './OpenConfirmDialog';
 import { BookmarkInfo, useBookmarkInfo } from './narouApi/useBookmarkInfo';
 import BookmarkSelector from './BookmarkSelector';
+import { useAppBadge } from './useAppBadge';
 
 const UserTopURL = 'https://syosetu.com/user/top/';
 
@@ -96,11 +97,18 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [defaultIndex, setDefaultIndex] = useState(-1);
 
+  const { setAppBadge, clearAppBadge } = useAppBadge();
+
   useEffect(() => {
     if (unreads !== null) {
       document.title = `なろう 未読:${unreads}`;
+      if (unreads) {
+        setAppBadge(unreads);
+      } else {
+        clearAppBadge();
+      }
     }
-  }, [unreads]);
+  }, [unreads, setAppBadge, clearAppBadge]);
 
   const scrollIn = useCallback(node => {
     if (node) {
