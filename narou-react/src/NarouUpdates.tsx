@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import {
   AppBar,
   Avatar,
@@ -55,7 +55,7 @@ function maxPageValue(sw: boolean): number {
   return sw ? 2 : 1;
 }
 
-function nextBookmark(bookmarks: BookmarkInfo, cur: number): number {
+export function nextBookmark(bookmarks: BookmarkInfo, cur: number): number {
   const numbers = Object.keys(bookmarks).map(k => Number(k));
   for (const i of numbers) {
     if (i > cur) {
@@ -65,19 +65,50 @@ function nextBookmark(bookmarks: BookmarkInfo, cur: number): number {
   return 0;
 }
 
-function prevBookmark(bookmarks: BookmarkInfo, cur: number): number {
-  const numbers = Object.keys(bookmarks).map(k => Number(k)).reverse();
-  if (numbers.length > 0) {
-    if (cur === 0) {
-      return numbers[0];
-    }
-    for (const i of numbers) {
-      if (i < cur) {
-        return i;
-      }
-    }
+export function prevBookmark(bookmarks: BookmarkInfo, cur: number): number {
+  const numbers = Object.keys(bookmarks).map(k => Number(k));
+  if (numbers.length === 0) {
+    return 0;
   }
-  return 0;
+  const i = numbers.findIndex(i => i >= cur);
+  if (i > 0) {
+    return numbers[i - 1];
+  }
+  return numbers[numbers.length - 1];
+}
+
+type ItemsState = {
+  items?: IsNoticeListItem[];
+  unreads: number | null;
+  selectedIndex: number;
+  defaultIndex: number;
+};
+
+type StateAction =
+  | { type: 'set', items: IsNoticeListItem[] | undefined }
+  | { type: 'select', index: number }
+
+function itemsStateReducer(state: ItemsState, action: StateAction) {
+  switch (action.type) {
+    case 'set':
+      {
+        const head = action.items && action.items[0];
+        const index = head && head.bookmark < head.latest ? 0 : -1;
+        return {
+          ...state,
+          items: action.items,
+          unreads: action.items ? action.items.filter(i => i.bookmark < i.latest).length : null,
+          selectedIndex: index,
+          defaultIndex: index,
+        };
+      }
+
+    case 'select':
+      return {
+        ...state,
+        selectedIndex: state.items ? Math.max(Math.min(action.index, state.items.length - 1), -1) : -1,
+      }
+  }
 }
 
 function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnauthorized: () => void }) {
@@ -87,15 +118,17 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   const [maxPage, setMaxPage] = useState(maxPageValue(false));
   const [bookmark, setBookmark] = useState(0);
 
-  const { data: items, error } = useIsNoticeList(server, { enableR18, maxPage, bookmark });
+  const { data: rawItems, error } = useIsNoticeList(server, { enableR18, maxPage, bookmark });
   const { data: bookmarks } = useBookmarkInfo(server, false);
 
-  const unreads = useMemo(() => items ? items.filter(i => i.bookmark < i.latest).length : null, [items]);
+  const [{items, unreads, selectedIndex, defaultIndex}, dispatch] = useReducer(itemsStateReducer, {unreads: null, selectedIndex: -1, defaultIndex: -1})
+
+  useEffect(() => {
+    dispatch({ type: 'set', items: rawItems })
+  }, [rawItems]);
+  const setSelectedIndex = (index: number) => dispatch({ type: 'select', index });
 
   const [confirm, setConfirm] = useState<IsNoticeListItem | undefined>(undefined);
-
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [defaultIndex, setDefaultIndex] = useState(-1);
 
   const { setAppBadge, clearAppBadge } = useAppBadge();
   const { setClientBadge, clearClientBadge } = useClientBadge();
@@ -120,17 +153,6 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
     }
   }, []);
 
-  useEffect(() => {
-    setSelectedIndex(-1);
-  }, [enableR18, maxPage]);
-
-  useEffect(() => {
-    const index = items && items.length > 0 && unread(items[0]) > 0 ? 0 : -1;
-
-    setDefaultIndex(index);
-    setSelectedIndex(index);
-  }, [items]);
-
   const defaultRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -147,14 +169,14 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
           case 'ArrowUp':
             if (selectedIndex > 0) {
               event.preventDefault();
+              dispatch({ type: 'select', index: selectedIndex - 1 });
             }
-            setSelectedIndex(i => i > 0 ? i - 1 : 0);
             break;
           case 'ArrowDown':
             if (selectedIndex < len - 1) {
               event.preventDefault();
+              dispatch({type: 'select', index: selectedIndex + 1 });
             }
-            setSelectedIndex(i => i < len ? i + 1 : len - 1);
             break;
           case 'Home':
             setSelectedIndex(0);
