@@ -67,10 +67,7 @@ export function nextBookmark(bookmarks: BookmarkInfo, cur: number): number {
 }
 
 export function prevBookmark(bookmarks: BookmarkInfo, cur: number): number {
-  const numbers = Object.keys(bookmarks).map(k => Number(k));
-  if (numbers.length === 0) {
-    return 0;
-  }
+  const numbers = [0, ...Object.keys(bookmarks).map(k => Number(k))];
   const i = numbers.findIndex(i => i >= cur);
   if (i > 0) {
     return numbers[i - 1];
