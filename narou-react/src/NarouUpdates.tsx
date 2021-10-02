@@ -32,6 +32,7 @@ import { OpenConfirmDialog } from './OpenConfirmDialog';
 import { BookmarkInfo, useBookmarkInfo } from './narouApi/useBookmarkInfo';
 import BookmarkSelector from './BookmarkSelector';
 import { useAppBadge, useClientBadge } from './useAppBadge';
+import { useHotKeys } from './useHotKeys';
 
 const UserTopURL = 'https://syosetu.com/user/top/';
 
@@ -161,67 +162,43 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
     }
   }, [selectedIndex]);
 
+  const [setHotKeys] = useHotKeys();
+
   useEffect(() => {
     if (items) {
-      const onKeyDown = (event: KeyboardEvent) => {
-        const len = items.length;
-        switch (event.key) {
-          case 'ArrowUp':
+      const len = items.length;
+      setHotKeys({
+        ...(selectedIndex > 0 && {
+          'ArrowUp': (event: KeyboardEvent) => {
             if (selectedIndex > 0) {
               event.preventDefault();
               dispatch({ type: 'select', index: selectedIndex - 1 });
             }
-            break;
-          case 'ArrowDown':
+          }
+        }),
+        ...(selectedIndex < len - 1 && {
+          'ArrowDown': (event: KeyboardEvent) => {
             if (selectedIndex < len - 1) {
               event.preventDefault();
-              dispatch({type: 'select', index: selectedIndex + 1 });
+              dispatch({ type: 'select', index: selectedIndex + 1 });
             }
-            break;
-          case 'Home':
-            setSelectedIndex(0);
-            break;
-          case 'End':
-            setSelectedIndex(len - 1);
-            break;
-          case 'Escape':
-            setSelectedIndex(defaultIndex);
-            break;
-          case 'r':
-            if (!event.metaKey && !event.ctrlKey) {
-              setEnableR18(v => !v);
-            }
-            break;
-          case 'b':
-          case 'B':
-            if (!event.metaKey && !event.ctrlKey) {
-              if (bookmarks) {
-                setBookmark(
-                  event.shiftKey
-                    ? prevBookmark(bookmarks, bookmark)
-                    : nextBookmark(bookmarks, bookmark)
-                );
-              }
-            }
-            break;
-          case '1':
-            if (!event.metaKey && !event.ctrlKey) {
-              setMaxPage(v => maxPageValue(v === maxPageValue(false)));
-            }
-            break;
-          case 'h':
-            if (!event.metaKey && !event.ctrlKey) {
-              window.open(UserTopURL, '_blank');
-            }
-            break;
-        }
-      };
-      document.addEventListener('keydown', onKeyDown, false);
-      return () => {
-        document.removeEventListener('keydown', onKeyDown);
-      };
+          }
+        }),
+        ...(len > 0 && {
+          'Home': () => setSelectedIndex(0),
+          'End': () => setSelectedIndex(len - 1),
+          'Escape': () => setSelectedIndex(defaultIndex),
+        }),
+        'r': () => setEnableR18(v => !v),
+        '1': () => setMaxPage(v => maxPageValue(v === maxPageValue(false))),
+        'h': () => window.open(UserTopURL, '_blank'),
+        ...(bookmarks && {
+          'b': () => setBookmark(nextBookmark(bookmarks, bookmark)),
+          'shift+B': () => setBookmark(prevBookmark(bookmarks, bookmark)),
+        })
+      });
     }
-  }, [selectedIndex, defaultIndex, items, bookmarks, bookmark]);
+  }, [selectedIndex, defaultIndex, items, bookmarks, bookmark, setHotKeys]);
 
   const buttonProps = useCallback((item: IsNoticeListItem) => {
     if (unread(item) > 0) {
