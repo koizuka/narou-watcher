@@ -164,22 +164,23 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   useEffect(() => {
     if (items) {
       const len = items.length;
+      const arrowUp = (event: KeyboardEvent) => {
+        event.preventDefault();
+        dispatch({ type: 'select', index: selectedIndex - 1 });
+      }
+      const arrowDown = (event: KeyboardEvent) => {
+        event.preventDefault();
+        dispatch({ type: 'select', index: selectedIndex + 1 });
+      }
+
       setHotKeys({
         ...(selectedIndex > 0 && {
-          'ArrowUp': (event: KeyboardEvent) => {
-            if (selectedIndex > 0) {
-              event.preventDefault();
-              dispatch({ type: 'select', index: selectedIndex - 1 });
-            }
-          }
+          'ArrowUp': arrowUp,
+          'k': arrowUp,
         }),
         ...(selectedIndex < len - 1 && {
-          'ArrowDown': (event: KeyboardEvent) => {
-            if (selectedIndex < len - 1) {
-              event.preventDefault();
-              dispatch({ type: 'select', index: selectedIndex + 1 });
-            }
-          }
+          'ArrowDown': arrowDown,
+          'j': arrowDown,
         }),
         ...(len > 0 && {
           'Home': () => setSelectedIndex(0),
