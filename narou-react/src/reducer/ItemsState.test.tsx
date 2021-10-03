@@ -55,7 +55,8 @@ describe('itemsStateReducer', () => {
       const date3 = dummyDateTime.plus({ minutes: 3 });
       const unread0 = { ...dummyItem, bookmark: 1, latest: 1 };
       const unread1 = { ...dummyItem, bookmark: 1, latest: 2 };
-      const unread2 = { ...dummyItem, bookmark: 1, latest: 3 };
+      const unread2 = { ...dummyItem, bookmark: 1, latest: 3, update_time: date1 };
+      const unreadMinus = { ...dummyItem, bookmark: 2, latest: 1 };
 
       const unread0date1 = { ...unread0, update_time: date1 };
       const unread0date2 = { ...unread0, update_time: date2 };
@@ -63,22 +64,25 @@ describe('itemsStateReducer', () => {
       const unread1date1 = { ...unread1, update_time: date1 };
       const unread1date2 = { ...unread1, update_time: date2 };
       const unread1date3 = { ...unread1, update_time: date3 };
-      const unread2date1 = { ...unread2, update_time: date1 };
+      const unread2url1 = { ...unread2, base_url: '1' };
+      const unread2url2 = { ...unread2, base_url: '2' };
 
       expect(itemsStateReducer(prevState, {
         type: 'set',
         items: [
           unread0date1, unread0date2, unread0date3,
           unread1date1, unread1date2, unread1date3,
-          unread2date1,
+          unread2url2, unread2url1,
+          unreadMinus,
         ],
       })).toEqual({
         items: [
           unread1date1, unread1date2, unread1date3,
-          unread2date1,
+          unread2url1, unread2url2,
+          unreadMinus,
           unread0date3, unread0date2, unread0date1,
         ],
-        unreads: 4,
+        unreads: 5,
         selectedIndex: 0,
         defaultIndex: 0,
       });
