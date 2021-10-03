@@ -33,6 +33,7 @@ import { BookmarkInfo, useBookmarkInfo } from './narouApi/useBookmarkInfo';
 import BookmarkSelector from './BookmarkSelector';
 import { useAppBadge, useClientBadge } from './useAppBadge';
 import { useHotKeys } from './useHotKeys';
+import { itemsStateReducer } from './reducer/ItemsState';
 
 const UserTopURL = 'https://syosetu.com/user/top/';
 
@@ -73,40 +74,6 @@ export function prevBookmark(bookmarks: BookmarkInfo, cur: number): number {
     return numbers[i - 1];
   }
   return numbers[numbers.length - 1];
-}
-
-export type ItemsState = {
-  items?: IsNoticeListItem[];
-  unreads: number | null;
-  selectedIndex: number;
-  defaultIndex: number;
-};
-
-export type StateAction =
-  | { type: 'set', items: IsNoticeListItem[] | undefined }
-  | { type: 'select', index: number }
-
-export function itemsStateReducer(state: ItemsState, action: StateAction) {
-  switch (action.type) {
-    case 'set':
-      {
-        const head = action.items && action.items[0];
-        const index = head && head.bookmark < head.latest ? 0 : -1;
-        return {
-          ...state,
-          items: action.items,
-          unreads: action.items ? action.items.filter(i => i.bookmark < i.latest).length : null,
-          selectedIndex: index,
-          defaultIndex: index,
-        };
-      }
-
-    case 'select':
-      return {
-        ...state,
-        selectedIndex: state.items ? Math.max(Math.min(action.index, state.items.length - 1), -1) : -1,
-      }
-  }
 }
 
 function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnauthorized: () => void }) {
