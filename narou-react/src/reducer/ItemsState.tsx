@@ -7,6 +7,12 @@ export type ItemsState = {
   defaultIndex: number;
 };
 
+export const InitialItemsState: ItemsState = {
+  unreads: null,
+  selectedIndex: -1,
+  defaultIndex: -1,
+};
+
 export type StateAction =
   | { type: 'set', items: IsNoticeListItem[] | undefined }
   | { type: 'select', index: number }
@@ -16,11 +22,7 @@ export function itemsStateReducer(state: ItemsState, action: StateAction) {
     case 'set':
       {
         if (!action.items) {
-          return {
-            unreads: null,
-            selectedIndex: -1,
-            defaultIndex: -1,
-          };
+          return InitialItemsState;
         }
 
         // 未読があって少ない順にし、未読がある場合、同じ未読数同士は更新日時昇順、未読がない場合は更新日時降順

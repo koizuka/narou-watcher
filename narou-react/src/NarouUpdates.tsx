@@ -33,7 +33,7 @@ import { BookmarkInfo, useBookmarkInfo } from './narouApi/useBookmarkInfo';
 import BookmarkSelector from './BookmarkSelector';
 import { useAppBadge, useClientBadge } from './useAppBadge';
 import { useHotKeys } from './useHotKeys';
-import { itemsStateReducer } from './reducer/ItemsState';
+import { InitialItemsState, itemsStateReducer } from './reducer/ItemsState';
 
 const UserTopURL = 'https://syosetu.com/user/top/';
 
@@ -86,7 +86,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   const { data: rawItems, error } = useIsNoticeList(server, { enableR18, maxPage, bookmark });
   const { data: bookmarks } = useBookmarkInfo(server, false);
 
-  const [{ items, unreads, selectedIndex, defaultIndex }, dispatch] = useReducer(itemsStateReducer, { unreads: null, selectedIndex: -1, defaultIndex: -1 })
+  const [{ items, unreads, selectedIndex, defaultIndex }, dispatch] = useReducer(itemsStateReducer, InitialItemsState)
 
   useEffect(() => {
     dispatch({ type: 'set', items: rawItems })
