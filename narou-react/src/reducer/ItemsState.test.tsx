@@ -21,9 +21,9 @@ describe('itemsStateReducer', () => {
 
     test('empty', () => {
       const items: IsNoticeListItem[] = [];
-      expect(itemsStateReducer(prevState, { type: 'set', items })).toEqual({
+      expect(itemsStateReducer(prevState, { type: 'set', items })).toEqual<ItemsState>({
         items,
-        unreads: 0,
+        numNewItems: 0,
         selectedIndex: -1,
         defaultIndex: -1,
       });
@@ -31,9 +31,9 @@ describe('itemsStateReducer', () => {
 
     test('one read item', () => {
       const items: IsNoticeListItem[] = [{ ...dummyItem, bookmark: 1, latest: 1 }];
-      expect(itemsStateReducer(prevState, { type: 'set', items })).toEqual({
+      expect(itemsStateReducer(prevState, { type: 'set', items })).toEqual<ItemsState>({
         items,
-        unreads: 0,
+        numNewItems: 0,
         selectedIndex: -1,
         defaultIndex: -1,
       });
@@ -41,9 +41,9 @@ describe('itemsStateReducer', () => {
 
     test('one unread item', () => {
       const items: IsNoticeListItem[] = [{ ...dummyItem, bookmark: 1, latest: 2 }];
-      expect(itemsStateReducer(prevState, { type: 'set', items })).toEqual({
+      expect(itemsStateReducer(prevState, { type: 'set', items })).toEqual<ItemsState>({
         items,
-        unreads: 1,
+        numNewItems: 1,
         selectedIndex: 0,
         defaultIndex: 0,
       });
@@ -75,14 +75,14 @@ describe('itemsStateReducer', () => {
           unread2url2, unread2url1,
           unreadMinus,
         ],
-      })).toEqual({
+      })).toEqual<ItemsState>({
         items: [
           unread1date1, unread1date2, unread1date3,
           unread2url1, unread2url2,
           unreadMinus,
           unread0date3, unread0date2, unread0date1,
         ],
-        unreads: 5,
+        numNewItems: 5,
         selectedIndex: 0,
         defaultIndex: 0,
       });
