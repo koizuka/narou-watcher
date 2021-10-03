@@ -2,7 +2,7 @@ import { BookmarkInfo } from './narouApi/useBookmarkInfo'
 import { nextBookmark, prevBookmark } from './NarouUpdates';
 
 test('nextBookmark', () => {
-  const state: BookmarkInfo = {
+	const state: BookmarkInfo = {
 		1: { name: '1', num_items: 1 },
 		3: { name: '3', num_items: 1 },
 	};

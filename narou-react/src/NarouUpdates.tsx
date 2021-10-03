@@ -119,7 +119,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   const { data: rawItems, error } = useIsNoticeList(server, { enableR18, maxPage, bookmark });
   const { data: bookmarks } = useBookmarkInfo(server, false);
 
-  const [{items, unreads, selectedIndex, defaultIndex}, dispatch] = useReducer(itemsStateReducer, {unreads: null, selectedIndex: -1, defaultIndex: -1})
+  const [{ items, unreads, selectedIndex, defaultIndex }, dispatch] = useReducer(itemsStateReducer, { unreads: null, selectedIndex: -1, defaultIndex: -1 })
 
   useEffect(() => {
     dispatch({ type: 'set', items: rawItems })

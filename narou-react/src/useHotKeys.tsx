@@ -4,7 +4,7 @@ export type HotKeys = {
   [key: string]: (event: KeyboardEvent) => void;
 }
 
-function toKeyString(event: { key: string; shiftKey: boolean; ctrlKey: boolean; altKey: boolean; metaKey: boolean}): string {
+function toKeyString(event: { key: string; shiftKey: boolean; ctrlKey: boolean; altKey: boolean; metaKey: boolean }): string {
   return [
     event.shiftKey ? 'shift' : undefined,
     event.ctrlKey ? 'ctrl' : undefined,
@@ -26,7 +26,7 @@ export function checkKeyString(keyString: string) {
   if (elems.some(s => !availableModifiers.includes(s))) {
     throw new Error(`HotKey(${keyString}): unknown modifiers: ${elems.filter(s => !availableModifiers.includes(s))}`);
   }
- 
+
   const shouldBe = toKeyString({
     key,
     shiftKey: elems.some(s => s === 'shift'),
