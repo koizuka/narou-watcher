@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import {
   AppBar,
   Avatar,
@@ -20,20 +19,21 @@ import {
   makeStyles,
   Switch,
   Theme,
-  Toolbar,
+  Toolbar
 } from '@material-ui/core';
 import { Book, Info } from '@material-ui/icons';
-import { clearCache, useIsNoticeList } from './narouApi/useIsNoticeList';
-import { IsNoticeListItem, itemSummary, nextLink, unread } from "./narouApi/IsNoticeListItem";
-import { NarouLoginForm } from './NarouLoginForm';
-import { NarouApi } from './narouApi/NarouApi';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
-import { OpenConfirmDialog } from './OpenConfirmDialog';
-import { BookmarkInfo, useBookmarkInfo } from './narouApi/useBookmarkInfo';
 import BookmarkSelector from './BookmarkSelector';
+import { IsNoticeListItem, itemSummary, nextLink, unread } from "./narouApi/IsNoticeListItem";
+import { NarouApi } from './narouApi/NarouApi';
+import { BookmarkInfo, useBookmarkInfo } from './narouApi/useBookmarkInfo';
+import { clearCache, useIsNoticeList } from './narouApi/useIsNoticeList';
+import { NarouLoginForm } from './NarouLoginForm';
+import { OpenConfirmDialog } from './OpenConfirmDialog';
+import { InitialItemsState, itemsStateReducer } from './reducer/ItemsState';
 import { useAppBadge, useClientBadge } from './useAppBadge';
 import { useHotKeys } from './useHotKeys';
-import { InitialItemsState, itemsStateReducer } from './reducer/ItemsState';
 
 const UserTopURL = 'https://syosetu.com/user/top/';
 
@@ -86,7 +86,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   const { data: rawItems, error } = useIsNoticeList(server, { enableR18, maxPage, bookmark });
   const { data: bookmarks } = useBookmarkInfo(server, false);
 
-  const [{ items, unreads, selectedIndex, defaultIndex }, dispatch] = useReducer(itemsStateReducer, InitialItemsState)
+  const [{ items, numNewItems, selectedIndex, defaultIndex }, dispatch] = useReducer(itemsStateReducer, InitialItemsState)
 
   useEffect(() => {
     dispatch({ type: 'set', items: rawItems })
@@ -99,17 +99,17 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   const { setClientBadge, clearClientBadge } = useClientBadge();
 
   useEffect(() => {
-    if (unreads !== null) {
-      document.title = `なろう 未読:${unreads}`;
-      if (unreads) {
-        setAppBadge(unreads);
-        setClientBadge(unreads);
+    if (numNewItems !== null) {
+      document.title = `なろう 未読:${numNewItems}`;
+      if (numNewItems) {
+        setAppBadge(numNewItems);
+        setClientBadge(numNewItems);
       } else {
         clearAppBadge();
         clearClientBadge();
       }
     }
-  }, [clearAppBadge, clearClientBadge, setAppBadge, setClientBadge, unreads]);
+  }, [clearAppBadge, clearClientBadge, numNewItems, setAppBadge, setClientBadge]);
 
   const scrollIn = useCallback(node => {
     if (node) {
@@ -209,7 +209,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
           <Box>
             <BookmarkSelector bookmarks={bookmarks} bookmark={bookmark} onChangeBookmark={setBookmark} />
           </Box>
-          <Box m={2}>未読: {unreads ?? ''}</Box>
+          <Box m={2}>未読: {numNewItems ?? ''}</Box>
           <Button
             variant="contained"
             disabled={selectedIndex === 0}

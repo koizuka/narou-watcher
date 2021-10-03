@@ -2,13 +2,13 @@ import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
 
 export type ItemsState = {
   items?: IsNoticeListItem[];
-  unreads: number | null;
+  numNewItems: number | null;
   selectedIndex: number;
   defaultIndex: number;
 };
 
 export const InitialItemsState: ItemsState = {
-  unreads: null,
+  numNewItems: null,
   selectedIndex: -1,
   defaultIndex: -1,
 };
@@ -17,7 +17,7 @@ export type StateAction =
   | { type: 'set', items: IsNoticeListItem[] | undefined }
   | { type: 'select', index: number }
 
-export function itemsStateReducer(state: ItemsState, action: StateAction) {
+export function itemsStateReducer(state: ItemsState, action: StateAction): ItemsState {
   switch (action.type) {
     case 'set':
       {
@@ -41,7 +41,7 @@ export function itemsStateReducer(state: ItemsState, action: StateAction) {
         return {
           ...state,
           items,
-          unreads: items.filter(i => i.bookmark < i.latest).length,
+          numNewItems: items.filter(i => i.bookmark < i.latest).length,
           selectedIndex: index,
           defaultIndex: index,
         };

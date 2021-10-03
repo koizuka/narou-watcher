@@ -14,7 +14,7 @@ describe('itemsStateReducer', () => {
 
   describe('set', () => {
     const prevState: ItemsState = {
-      unreads: null,
+      numNewItems: null,
       selectedIndex: -1,
       defaultIndex: -1,
     };
@@ -95,7 +95,7 @@ describe('itemsStateReducer', () => {
         { ...dummyItem, bookmark: 1, latest: 2 },
         { ...dummyItem, bookmark: 2, latest: 2 },
       ],
-      unreads: 1,
+      numNewItems: 1,
       selectedIndex: -1,
       defaultIndex: -1,
     };
