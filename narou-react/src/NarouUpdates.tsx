@@ -75,18 +75,18 @@ export function prevBookmark(bookmarks: BookmarkInfo, cur: number): number {
   return numbers[numbers.length - 1];
 }
 
-type ItemsState = {
+export type ItemsState = {
   items?: IsNoticeListItem[];
   unreads: number | null;
   selectedIndex: number;
   defaultIndex: number;
 };
 
-type StateAction =
+export type StateAction =
   | { type: 'set', items: IsNoticeListItem[] | undefined }
   | { type: 'select', index: number }
 
-function itemsStateReducer(state: ItemsState, action: StateAction) {
+export function itemsStateReducer(state: ItemsState, action: StateAction) {
   switch (action.type) {
     case 'set':
       {
