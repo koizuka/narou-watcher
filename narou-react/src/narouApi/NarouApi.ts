@@ -9,9 +9,16 @@
 type BookmarkOrder = 'updated_at' | 'new' | 'ncode' | 'newlist';
 
 /**
- * SWRのキーとして与え、 SWRのfetcharとして `key => NarouApi.call(key)` として渡す値。
+ * SWRのキーとして与え、 SWRのfetcherとして `key => NarouApi.call(key)` として渡す値。
  */
 type NarouApiCallKey = string;
+
+export class ApiError extends Error {
+    constructor(public status: number, message: string) {
+        super(message);
+        this.name = 'ApiError';
+    }
+}
 
 export class NarouApi {
     private server: string;
@@ -47,7 +54,7 @@ export class NarouApi {
     async call(key: NarouApiCallKey) {
         const res = await this.fetch(key);
         if (!res.ok) {
-            throw res;
+            throw new ApiError(res.status, await res.text());
         }
         return res.json();
     }

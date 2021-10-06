@@ -183,7 +183,11 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
     if (error.status === 401) {
       onUnauthorized();
     }
-    return <div onClick={() => window.location.reload()}>Server({JSON.stringify(server.baseUrl)}) is not working...? status: {error.status}</div>;
+    return <div onClick={() => window.location.reload()}>
+      <p>Server({JSON.stringify(server.baseUrl)}) is not working...?</p>
+      <p>status: {error.status}</p>
+      <code>{error.message}</code>
+    </div>;
   }
   if (!items) {
     return <Backdrop className={classes.backdrop} open={true}>
