@@ -101,8 +101,8 @@ github.com/juju/testing v0.0.0-20190429233213-dfc56b8c09fc/go.mod h1:63prj8cnj0t
 github.com/juju/utils v0.0.0-20180808125547-9dfc6dbfb02b/go.mod h1:6/KLg8Wz/y2KVGWEpkK9vMNGkOnu4k/cqs8Z1fKjTOk=
 github.com/juju/version v0.0.0-20180108022336-b64dbd566305/go.mod h1:kE8gK5X0CImdr7qpSKl3xB2PmpySSmfj7zVbkZFs81U=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
-github.com/koizuka/scraper v0.0.16 h1:hpnyGQkK34M6V3RpYGv21CothP90SwyAkpXC6k4+vB4=
-github.com/koizuka/scraper v0.0.16/go.mod h1:MzA0MkNt183X03vCjY0MNVhGE0nZQUlEknh8WYKv/s4=
+github.com/koizuka/scraper v0.0.20 h1:E/hU8zfoWtZOBktsGADjW76XAjIRu+Zu+r55cym5fhw=
+github.com/koizuka/scraper v0.0.20/go.mod h1:MzA0MkNt183X03vCjY0MNVhGE0nZQUlEknh8WYKv/s4=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.1 h1:Fmg33tUaq4/8ym9TJN1x7sLJnHVwhP33CNkpYV/7rwI=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
