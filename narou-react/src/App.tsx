@@ -1,13 +1,18 @@
 //import './App.css';
-import { SWRConfig } from 'swr';
+import { CssBaseline, Link, Typography, useMediaQuery } from '@mui/material';
+import { cyan } from '@mui/material/colors';
+import { createTheme, StyledEngineProvider, Theme, ThemeProvider } from '@mui/material/styles';
 import { DateTime } from 'luxon';
-import preval from 'preval.macro'
-import { NarouUpdates } from './NarouUpdates';
-import { createTheme, ThemeProvider } from '@material-ui/core/styles';
+import preval from 'preval.macro';
 import { useEffect, useMemo, useState } from 'react';
-import { CssBaseline, Link, Typography, useMediaQuery } from '@material-ui/core';
+import { SWRConfig } from 'swr';
 import { NarouApi } from './narouApi/NarouApi';
-import { cyan } from '@material-ui/core/colors';
+import { NarouUpdates } from './NarouUpdates';
+
+declare module '@mui/styles/defaultTheme' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface DefaultTheme extends Theme { }
+}
 
 const PollingInterval = 5 * 60 * 1000; // 5分ごとにポーリング
 
@@ -36,7 +41,7 @@ function App() {
     () =>
       createTheme({
         palette: {
-          type: prefersDarkMode ? 'dark' : 'light',
+          mode: prefersDarkMode ? 'dark' : 'light',
           primary: cyan,
         },
       }),
@@ -56,30 +61,34 @@ function App() {
 
   if (hostError) {
     return (
-      <ThemeProvider theme={theme}>
-        <Typography>http以外の場合は必ず server クエリパラメータにサーバーアドレスを指定してください</Typography>
-        <Link href="https://github.com/koizuka/narou-watcher/">GitHub</Link>
-      </ThemeProvider>
+      <StyledEngineProvider injectFirst>
+        <ThemeProvider theme={theme}>
+          <Typography>http以外の場合は必ず server クエリパラメータにサーバーアドレスを指定してください</Typography>
+          <Link href="https://github.com/koizuka/narou-watcher/">GitHub</Link>
+        </ThemeProvider>
+      </StyledEngineProvider>
     );
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <SWRConfig value={{
-        refreshInterval: PollingInterval,
-      }}>
-        {api && <NarouUpdates api={api} />}
-      </SWRConfig>
-      <div style={{
-        display: "inline-block",
-        position: "fixed",
-        bottom: 0,
-        right: 0,
-        fontSize: "small",
-        fontStyle: "italic",
-      }}>narou-react: {DateTime.fromISO(buildDate).toISO()}</div>
-    </ThemeProvider>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <SWRConfig value={{
+          refreshInterval: PollingInterval,
+        }}>
+          {api && <NarouUpdates api={api} />}
+        </SWRConfig>
+        <div style={{
+          display: "inline-block",
+          position: "fixed",
+          bottom: 0,
+          right: 0,
+          fontSize: "small",
+          fontStyle: "italic",
+        }}>narou-react: {DateTime.fromISO(buildDate).toISO()}</div>
+      </ThemeProvider>
+    </StyledEngineProvider>
   );
 }
 

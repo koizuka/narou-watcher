@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   Link
-} from '@material-ui/core';
+} from '@mui/material';
 import { useMemo } from 'react';
 import { IsNoticeListItem, nextLink } from './narouApi/IsNoticeListItem';
 import { NarouApi } from './narouApi/NarouApi';

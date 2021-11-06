@@ -1,3 +1,4 @@
+import { Book, Info } from '@mui/icons-material';
 import {
   AppBar,
   Avatar,
@@ -7,7 +8,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  createStyles,
   Fab,
   FormControlLabel,
   IconButton,
@@ -16,15 +16,15 @@ import {
   ListItemAvatar,
   ListItemSecondaryAction,
   ListItemText,
-  makeStyles,
   Switch,
   Theme,
   Toolbar
-} from '@material-ui/core';
-import { Book, Info } from '@material-ui/icons';
+} from '@mui/material';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
-import BookmarkSelector from './BookmarkSelector';
+import { BookmarkSelector } from './BookmarkSelector';
 import { IsNoticeListItem, itemSummary, nextLink, unread } from "./narouApi/IsNoticeListItem";
 import { NarouApi } from './narouApi/NarouApi';
 import { BookmarkInfo, useBookmarkInfo } from './narouApi/useBookmarkInfo';
@@ -195,73 +195,75 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
     </Backdrop>
   }
 
-  return (
-    <>
-      <OpenConfirmDialog api={server} item={confirm} onClose={() => setConfirm(undefined)} />
-      <AppBar position="sticky">
-        <Toolbar>
-          <Box>
-            <FormControlLabel
-              label="R18"
-              control={
-                <Switch
-                  checked={enableR18}
-                  onChange={event => setEnableR18(event.target.checked)}
-                />}
-            />
-          </Box>
-          <Box>
-            <BookmarkSelector bookmarks={bookmarks} bookmark={bookmark} onChangeBookmark={setBookmark} />
-          </Box>
-          <Box m={2}>未読: {numNewItems ?? ''}</Box>
-          <Button
-            variant="contained"
-            disabled={selectedIndex === 0}
-            disableRipple={true}
-            ref={defaultRef}
-            onClick={() => setSelectedIndex(defaultIndex)}>ESC</Button>
-        </Toolbar>
-      </AppBar>
-      <Box m={2} display="flex" alignItems="center" flexDirection="column" bgcolor="background.paper">
-        <Box maxWidth={600}>
-          <List>
-            {items?.map((item, index) =>
-              <ListItem key={item.base_url} button={true}
-                {...(index === selectedIndex ? { selected: true, ref: scrollIn } : {})}
-                disableRipple={true}
-                onFocusVisible={() => setSelectedIndex(index)}
-                {...buttonProps(item)} >
-                <ListItemAvatar>
-                  <Badge overlap="circular" {...badgeProps(item)} >
-                    <Avatar>
-                      <Book color={item.isR18 ? "secondary" : undefined} />
-                    </Avatar>
-                  </Badge>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={itemSummary(item)}
-                  secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" onClick={() => setConfirm(item)} disableRipple={true}>
-                    <Info />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>)}
-          </List>
+  return <>
+    <OpenConfirmDialog api={server} item={confirm} onClose={() => setConfirm(undefined)} />
+    <AppBar position="sticky">
+      <Toolbar>
+        <Box>
+          <FormControlLabel
+            label="R18"
+            control={
+              <Switch
+                checked={enableR18}
+                onChange={event => setEnableR18(event.target.checked)}
+              />}
+          />
         </Box>
-        <Box position="fixed" right="20px" bottom="20px">
-          <Fab
-            variant="extended"
-            size="small"
-            disableRipple={true}
-            component="a"
-            href={UserTopURL}
-            target="_blank"
-          >ユーザーホーム</Fab>
+        <Box>
+          <BookmarkSelector bookmarks={bookmarks} bookmark={bookmark} onChangeBookmark={setBookmark} />
         </Box>
+        <Box m={2}>未読: {numNewItems ?? ''}</Box>
+        <Button
+          variant="contained"
+          disabled={selectedIndex === 0}
+          disableRipple={true}
+          ref={defaultRef}
+          onClick={() => setSelectedIndex(defaultIndex)}>ESC</Button>
+      </Toolbar>
+    </AppBar>
+    <Box m={2} display="flex" alignItems="center" flexDirection="column" bgcolor="background.paper">
+      <Box maxWidth={600}>
+        <List>
+          {items?.map((item, index) =>
+            <ListItem key={item.base_url} button={true}
+              {...(index === selectedIndex ? { selected: true, ref: scrollIn } : {})}
+              disableRipple={true}
+              onFocusVisible={() => setSelectedIndex(index)}
+              {...buttonProps(item)} >
+              <ListItemAvatar>
+                <Badge overlap="circular" {...badgeProps(item)} >
+                  <Avatar>
+                    <Book color={item.isR18 ? "secondary" : undefined} />
+                  </Avatar>
+                </Badge>
+              </ListItemAvatar>
+              <ListItemText
+                primary={itemSummary(item)}
+                secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
+              <ListItemSecondaryAction>
+                <IconButton
+                  edge="end"
+                  onClick={() => setConfirm(item)}
+                  disableRipple={true}
+                  size="large">
+                  <Info />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>)}
+        </List>
       </Box>
-    </>
-  );
+      <Box position="fixed" right="20px" bottom="20px">
+        <Fab
+          variant="extended"
+          size="small"
+          disableRipple={true}
+          component="a"
+          href={UserTopURL}
+          target="_blank"
+        >ユーザーホーム</Fab>
+      </Box>
+    </Box>
+  </>;
 }
 
 export function NarouUpdates({ api }: { api: NarouApi }) {

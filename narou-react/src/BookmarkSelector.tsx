@@ -1,36 +1,23 @@
+import { MenuItem, Select, useMediaQuery } from '@mui/material';
+import { Breakpoint, useTheme } from '@mui/material/styles';
 import { useState } from 'react';
-import {
-  isWidthUp, makeStyles, MenuItem,
-  Select,
-  withWidth
-} from '@material-ui/core';
 import { BookmarkInfo } from './narouApi/useBookmarkInfo';
-import { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
 
-// prevent text/icon color to white when darkMode (since this Select is on the AppBar)
-const useStyles = makeStyles({
-  root: {
-    color: 'black',
-  },
-  icon: {
-    fill: 'black',
-  },
-});
+function useIsWidthUp(breakpoint: Breakpoint) {
+  const theme = useTheme();
+  return useMediaQuery(theme.breakpoints.up(breakpoint));
+}
 
-function BookmarkSelector({ bookmarks, bookmark, onChangeBookmark: setBookmark, width }: {
+export function BookmarkSelector({ bookmarks, bookmark, onChangeBookmark: setBookmark }: {
   bookmarks: BookmarkInfo | undefined;
   bookmark: number;
   onChangeBookmark: (newBookmark: number) => void;
-  width: Breakpoint;
 }) {
-  const classes = useStyles();
-
   const [open, setOpen] = useState(false);
-  const large = isWidthUp('sm', width);
+  const large = useIsWidthUp('sm');
 
   return (
     <Select
-      classes={{ root: classes.root, icon: classes.icon }}
       disableUnderline={true}
       open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)}
       value={bookmark} onChange={event => setBookmark(Number(event.target.value))}>
@@ -39,5 +26,3 @@ function BookmarkSelector({ bookmarks, bookmark, onChangeBookmark: setBookmark, 
     </Select>
   );
 }
-
-export default withWidth()(BookmarkSelector);
