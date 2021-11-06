@@ -19,6 +19,7 @@ export function BookmarkSelector({ bookmarks, bookmark, onChangeBookmark: setBoo
   return (
     <Select
       disableUnderline={true}
+      variant="standard"
       open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)}
       value={bookmark} onChange={event => setBookmark(Number(event.target.value))}>
       <MenuItem key={0} value={0}>{open || large ? 'ブックマークなし' : 'BM-'}</MenuItem>
