@@ -36,7 +36,7 @@ export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
     </Dialog>
     <Container maxWidth="sm">
       <Card raised={true} >
-        <CardHeader title="小説家になろうのログイン情報">
+        <CardHeader title="小説家になろうのログイン情報" data-testid="login-page">
         </CardHeader>
         <CardContent>
           <Box display="flex" flexDirection="column" justifyContent="center">
@@ -46,18 +46,18 @@ export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
                 if (e.key === 'Enter') {
                   passwordRef.current?.focus();
                 }
-              }} />
+              }} data-testid="id" />
             <TextField id="password" name="password" label="password" type="password"
               value={password} onChange={e => setPassword(e.target.value)}
               inputRef={passwordRef} onKeyPress={e => {
                 if (e.key === 'Enter') {
                   postLogin();
                 }
-              }} />
+              }} data-testid="password" />
           </Box>
         </CardContent>
         <CardActions style={{ justifyContent: "center" }}>
-          <Button variant="contained" onClick={postLogin}>login</Button>
+          <Button variant="contained" onClick={postLogin} data-testid="login">login</Button>
         </CardActions>
       </Card>
     </Container>

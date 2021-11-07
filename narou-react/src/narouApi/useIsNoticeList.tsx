@@ -34,7 +34,7 @@ export function useIsNoticeList(
     async path => api.call(path),
     {
       onErrorRetry: (error) => {
-        console.log('onErrorRetry:', error, error.status);
+        console.log(`onErrorRetry: ${error.status}: ${error}`);
       },
     });
 

@@ -1,3 +1,4 @@
+import { ApiError } from "./ApiError";
 
 /**
  * bookmarkの並びを指定する
@@ -12,13 +13,6 @@ type BookmarkOrder = 'updated_at' | 'new' | 'ncode' | 'newlist';
  * SWRのキーとして与え、 SWRのfetcherとして `key => NarouApi.call(key)` として渡す値。
  */
 type NarouApiCallKey = string;
-
-export class ApiError extends Error {
-    constructor(public status: number, message: string) {
-        super(message);
-        this.name = 'ApiError';
-    }
-}
 
 export class NarouApi {
     private server: string;
@@ -60,6 +54,7 @@ export class NarouApi {
     }
 
     static isnoticelist({ maxPage = 1 }: { maxPage: number }): NarouApiCallKey {
+        console.log('NarouApi.isnoticelist'); // DEBUG
         return `/narou/isnoticelist?max_page=${maxPage}`;
     }
     static isnoticelistR18({ maxPage = 1 }: { maxPage: number }): NarouApiCallKey {

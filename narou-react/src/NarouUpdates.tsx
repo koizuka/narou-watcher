@@ -179,7 +179,7 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   }, []);
 
   if (error) {
-    console.log('error =', error);
+    console.log(`error = ${error}`);
     if (error.status === 401) {
       onUnauthorized();
     }
@@ -269,6 +269,13 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
 export function NarouUpdates({ api }: { api: NarouApi }) {
   const [loginMode, setLoginMode] = useState(false);
 
+  const onUnauthorized = useCallback(() => {
+    setTimeout(() => {
+      clearCache();
+      setLoginMode(true)
+    }, 0);
+  }, []);
+
   if (loginMode) {
     return <NarouLoginForm api={api} onLogin={() => {
       console.log('logged in!');
@@ -280,10 +287,7 @@ export function NarouUpdates({ api }: { api: NarouApi }) {
   return (
     <>
       <NarouUpdateList server={api}
-        onUnauthorized={() => {
-          clearCache();
-          setLoginMode(true)
-        }} />
+        onUnauthorized={onUnauthorized} />
       <Button onClick={async () => {
         await api.logout();
         clearCache();
