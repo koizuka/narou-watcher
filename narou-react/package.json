@@ -16,7 +16,7 @@
     "@types/node": "^16.11.6",
     "@types/react": "^17.0.34",
     "@types/react-dom": "^17.0.11",
-    "luxon": "^2.0.2",
+    "luxon": "^2.1.1",
     "preval.macro": "^5.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -51,7 +51,7 @@
     ]
   },
   "devDependencies": {
-    "@types/luxon": "^2.0.5",
+    "@types/luxon": "^2.0.6",
     "@types/preval.macro": "^3.0.0"
   }
 }
