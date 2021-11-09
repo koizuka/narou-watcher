@@ -86,7 +86,7 @@ func NewNarouWatcher(opt Options) (*NarouWatcher, error) {
 	}, nil
 }
 
-const NarouLoginFormSelector = "div#login_box>form"
+const NarouLoginFormSelector = "form[action='/login/login/']"
 
 func isNarouLoginPage(page *scraper.Page) bool {
 	forms := page.Find(NarouLoginFormSelector)
