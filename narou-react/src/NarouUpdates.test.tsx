@@ -115,6 +115,6 @@ test('empty', async () => {
 	});
 
 	expect(mockCall).toHaveBeenCalled();
-	console.log(prettyDOM());
+	// console.log(prettyDOM());
 	// TODO
 });
