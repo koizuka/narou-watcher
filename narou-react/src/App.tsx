@@ -83,7 +83,7 @@ function App() {
           right: 0,
           fontSize: "small",
           fontStyle: "italic",
-        }}>narou-react: {import.meta.env.BUILD_DATE}</div>
+        }}>narou-react: {DateTime.fromISO(import.meta.env.BUILD_DATE as string).toISO()}</div>
       </ThemeProvider>
     </StyledEngineProvider>
   );
