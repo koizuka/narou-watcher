@@ -3,8 +3,7 @@ import { CssBaseline, Link, Typography, useMediaQuery } from '@mui/material';
 import { cyan } from '@mui/material/colors';
 import { createTheme, StyledEngineProvider, Theme, ThemeProvider } from '@mui/material/styles';
 import { DateTime } from 'luxon';
-import preval from 'preval.macro';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { SWRConfig } from 'swr';
 import { NarouApi } from './narouApi/NarouApi';
 import { NarouUpdates } from './NarouUpdates';
@@ -15,8 +14,6 @@ declare module '@mui/styles/defaultTheme' {
 }
 
 const PollingInterval = 5 * 60 * 1000; // 5分ごとにポーリング
-
-const buildDate: string = preval`module.exports = new Date().toISOString();`
 
 function getServerAddress(location: Location): string {
   const server = new URLSearchParams(location.search).get('server')
@@ -86,7 +83,7 @@ function App() {
           right: 0,
           fontSize: "small",
           fontStyle: "italic",
-        }}>narou-react: {DateTime.fromISO(buildDate).toISO()}</div>
+        }}>narou-react: {import.meta.env.BUILD_DATE}</div>
       </ThemeProvider>
     </StyledEngineProvider>
   );
