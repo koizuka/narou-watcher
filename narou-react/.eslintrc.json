@@ -1,0 +1,50 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "react-app",
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": [
+    "react",
+    "jest",
+    "testing-library",
+    "@typescript-eslint"
+  ],
+  "rules": {
+    // from "react-app/jest"
+    // https://github.com/jest-community/eslint-plugin-jest
+    "jest/no-conditional-expect": "error",
+    "jest/no-identical-title": "error",
+    "jest/no-interpolation-in-snapshots": "error",
+    "jest/no-jasmine-globals": "error",
+    "jest/no-jest-import": "error",
+    "jest/no-mocks-import": "error",
+    "jest/valid-describe-callback": "error",
+    "jest/valid-expect": "error",
+    "jest/valid-expect-in-promise": "error",
+    "jest/valid-title": "warn",
+    // https://github.com/testing-library/eslint-plugin-testing-library
+    "testing-library/await-async-query": "error",
+    "testing-library/await-async-utils": "error",
+    "testing-library/no-await-sync-query": "warn",
+    "testing-library/no-dom-import": [
+      "error",
+      "react"
+    ],
+    "testing-library/no-wait-for-empty-callback": "error",
+    "testing-library/no-wait-for-snapshot": "error"
+  }
+}
