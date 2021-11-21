@@ -2,10 +2,10 @@
 import { CssBaseline, Link, Typography, useMediaQuery } from '@mui/material';
 import { cyan } from '@mui/material/colors';
 import { createTheme, StyledEngineProvider, Theme, ThemeProvider } from '@mui/material/styles';
-import { DateTime } from 'luxon';
 import React, { useEffect, useMemo, useState } from 'react';
 import { SWRConfig } from 'swr';
 import { NarouApi } from '../narouApi/NarouApi';
+import { BuildTimestamp } from './BuildTimestamp';
 import { NarouUpdates } from './NarouUpdates';
 
 declare module '@mui/styles/defaultTheme' {
@@ -76,14 +76,7 @@ function App() {
         }}>
           {api && <NarouUpdates api={api} />}
         </SWRConfig>
-        <div style={{
-          display: "inline-block",
-          position: "fixed",
-          bottom: 0,
-          right: 0,
-          fontSize: "small",
-          fontStyle: "italic",
-        }}>narou-react: {DateTime.fromISO(import.meta.env.BUILD_DATE as string).toISO()}</div>
+        <BuildTimestamp name="narou-react" />
       </ThemeProvider>
     </StyledEngineProvider>
   );
