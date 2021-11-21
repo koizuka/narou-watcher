@@ -1,12 +1,12 @@
 //import './App.css';
-import { CssBaseline, Link, Typography, useMediaQuery } from '@mui/material';
-import { cyan } from '@mui/material/colors';
-import { createTheme, StyledEngineProvider, Theme, ThemeProvider } from '@mui/material/styles';
-import React, { useEffect, useMemo, useState } from 'react';
+import { CssBaseline, Link, Typography } from '@mui/material';
+import { StyledEngineProvider, Theme, ThemeProvider } from '@mui/material/styles';
+import React from 'react';
 import { SWRConfig } from 'swr';
-import { NarouApi } from '../narouApi/NarouApi';
+import { useNarouApi } from '../hooks/useNarouApi';
 import { BuildTimestamp } from './BuildTimestamp';
 import { NarouUpdates } from './NarouUpdates';
+import { useAutoDarkMode } from '../hooks/useAutoDarkMode';
 
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -15,46 +15,9 @@ declare module '@mui/styles/defaultTheme' {
 
 const PollingInterval = 5 * 60 * 1000; // 5分ごとにポーリング
 
-function getServerAddress(location: Location): string {
-  const server = new URLSearchParams(location.search).get('server')
-  if (server) {
-    return server;
-  }
-  if (location.protocol === 'http:') {
-    return 'http://localhost:7676';
-  }
-  // github.io であればAPIは置けないから除外
-  if (!/.*\.github\.io$/.test(location.hostname)) {
-    // 置いてるサイトにAPIがあると期待する
-    return location.protocol + '//' + location.host + location.pathname;
-  }
-  return '';
-}
-
 function App() {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: prefersDarkMode ? 'dark' : 'light',
-          primary: cyan,
-        },
-      }),
-    [prefersDarkMode],
-  );
-
-  const [api, setApi] = useState<NarouApi | null>(null);
-  const [hostError, setHostError] = useState(false);
-  useEffect(() => {
-    const host = getServerAddress(document.location);
-    if (host) {
-      setApi(new NarouApi(host));
-    } else {
-      setHostError(true);
-    }
-  }, [])
+  const theme = useAutoDarkMode();
+  const [api, hostError] = useNarouApi();
 
   if (hostError) {
     return (
