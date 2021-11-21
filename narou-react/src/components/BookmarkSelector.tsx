@@ -1,7 +1,7 @@
 import { MenuItem, Select, useMediaQuery } from '@mui/material';
 import { Breakpoint, useTheme } from '@mui/material/styles';
 import React, { useState } from 'react';
-import { BookmarkInfo } from './narouApi/useBookmarkInfo';
+import { BookmarkInfo } from '../narouApi/useBookmarkInfo';
 
 function useIsWidthUp(breakpoint: Breakpoint) {
   const theme = useTheme();

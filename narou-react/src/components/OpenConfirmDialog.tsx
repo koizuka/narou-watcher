@@ -7,10 +7,10 @@ import {
   Link
 } from '@mui/material';
 import React, { useMemo } from 'react';
-import { IsNoticeListItem, nextLink } from './narouApi/IsNoticeListItem';
-import { NarouApi } from './narouApi/NarouApi';
-import { useBookmarkInfo } from './narouApi/useBookmarkInfo';
-import { useNovelInfo } from './narouApi/useNovelInfo';
+import { IsNoticeListItem, nextLink } from '../narouApi/IsNoticeListItem';
+import { NarouApi } from '../narouApi/NarouApi';
+import { useBookmarkInfo } from '../narouApi/useBookmarkInfo';
+import { useNovelInfo } from '../narouApi/useNovelInfo';
 
 export function OpenConfirmDialog({ api, item, onClose }: {
   api: NarouApi;

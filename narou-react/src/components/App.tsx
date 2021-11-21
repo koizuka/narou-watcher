@@ -5,7 +5,7 @@ import { createTheme, StyledEngineProvider, Theme, ThemeProvider } from '@mui/ma
 import { DateTime } from 'luxon';
 import React, { useEffect, useMemo, useState } from 'react';
 import { SWRConfig } from 'swr';
-import { NarouApi } from './narouApi/NarouApi';
+import { NarouApi } from '../narouApi/NarouApi';
 import { NarouUpdates } from './NarouUpdates';
 
 declare module '@mui/styles/defaultTheme' {

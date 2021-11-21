@@ -1,11 +1,11 @@
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { fireEvent, prettyDOM, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { SWRConfig } from 'swr';
-import { ApiError } from "./narouApi/ApiError";
-import { NarouApi } from './narouApi/NarouApi';
-import { BookmarkInfo } from './narouApi/useBookmarkInfo';
+import { ApiError } from "../narouApi/ApiError";
+import { NarouApi } from '../narouApi/NarouApi';
+import { BookmarkInfo } from '../narouApi/useBookmarkInfo';
 import { NarouUpdates, nextBookmark, prevBookmark } from './NarouUpdates';
 
 describe('bookmark', () => {
@@ -43,7 +43,7 @@ function sleep(period: number) {
 	return new Promise(resolve => setTimeout(resolve, period));
 }
 
-jest.mock('./narouApi/NarouApi');
+jest.mock('../narouApi/NarouApi');
 const NarouApiMock = NarouApi as unknown as jest.Mock;
 
 function setup() {
