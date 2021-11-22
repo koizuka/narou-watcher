@@ -1,43 +1,31 @@
-import { useEffect, useState } from 'react';
-import { useHotKeys } from './useHotKeys';
+import { useEffect, useReducer } from 'react';
 import { NarouApi } from '../narouApi/NarouApi';
 import { BookmarkInfo, useBookmarkInfo } from '../narouApi/useBookmarkInfo';
-
-export function nextBookmark(bookmarks: BookmarkInfo, cur: number): number {
-  const numbers = Object.keys(bookmarks).map(k => Number(k));
-  for (const i of numbers) {
-    if (i > cur) {
-      return i;
-    }
-  }
-  return 0;
-}
-
-export function prevBookmark(bookmarks: BookmarkInfo, cur: number): number {
-  const numbers = [0, ...Object.keys(bookmarks).map(k => Number(k))];
-  const i = numbers.findIndex(i => i >= cur);
-  if (i > 0) {
-    return numbers[i - 1];
-  }
-  return numbers[numbers.length - 1];
-}
+import { bookmarkStateReducer, InitialBookmarkState } from '../reducer/BookmarkState';
+import { useHotKeys } from './useHotKeys';
 
 export function useBookmark(server: NarouApi): [number, (cur: number) => void, BookmarkInfo | undefined] {
-  const [bookmark, setBookmark] = useState(0);
-  const { data: bookmarks } = useBookmarkInfo(server, false);
+  const [{ bookmarks, selected }, dispatch] = useReducer(bookmarkStateReducer, InitialBookmarkState);
+
+  const { data } = useBookmarkInfo(server, false);
+  useEffect(() => dispatch({ type: 'set', bookmarks: data }), [data]);
 
   const [setHotKeys] = useHotKeys();
 
   useEffect(() => {
     if (bookmarks) {
       setHotKeys({
-        'b': () => setBookmark(nextBookmark(bookmarks, bookmark)),
-        'shift+B': () => setBookmark(prevBookmark(bookmarks, bookmark)),
+        'b': () => dispatch({ type: 'next' }),
+        'shift+B': () => dispatch({ type: 'prev' }),
       });
     } else {
       setHotKeys({});
     }
-  }, [bookmark, bookmarks, setHotKeys]);
+  }, [bookmarks, setHotKeys]);
 
-  return [bookmark, setBookmark, bookmarks];
+  return [
+    selected,
+    (selected: number) => dispatch({ type: 'select', selected }),
+    bookmarks,
+  ];
 }
