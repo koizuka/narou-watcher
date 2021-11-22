@@ -16,6 +16,7 @@ export const InitialItemsState: ItemsState = {
 export type StateAction =
   | { type: 'set', items: IsNoticeListItem[] | undefined }
   | { type: 'select', index: number }
+  | { type: 'default' }
 
 export function itemsStateReducer(state: ItemsState, action: StateAction): ItemsState {
   switch (action.type) {
@@ -51,7 +52,13 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
       return {
         ...state,
         selectedIndex: state.items ? Math.max(Math.min(action.index, state.items.length - 1), -1) : -1,
-      }
+      };
+
+    case 'default':
+      return {
+        ...state,
+        selectedIndex: state.defaultIndex,
+      };
   }
 }
 

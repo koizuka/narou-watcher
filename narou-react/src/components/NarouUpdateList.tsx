@@ -21,11 +21,11 @@ function badgeProps(item: IsNoticeListItem): BadgeTypeMap['props'] {
   return { color: 'primary', badgeContent: unread(item) };
 }
 
-export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, defaultIndex, onClick }: {
+export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, selectDefault, onClick }: {
   items: IsNoticeListItem[];
   selectedIndex: number;
   setSelectedIndex: (index: number) => void;
-  defaultIndex: number;
+  selectDefault: () => void;
   onClick: (item: IsNoticeListItem) => void;
 }) {
   const scrollIn = useCallback(node => {
@@ -61,13 +61,13 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, defaul
         ...(len > 0 && {
           'Home': () => setSelectedIndex(0),
           'End': () => setSelectedIndex(len - 1),
-          'Escape': () => setSelectedIndex(defaultIndex),
+          'Escape': () => selectDefault(),
         }),
       });
     } else {
       setHotKeys({});
     }
-  }, [defaultIndex, items, selectedIndex, setHotKeys, setSelectedIndex]);
+  }, [items, selectDefault, selectedIndex, setHotKeys, setSelectedIndex]);
 
   const buttonProps = useCallback((item: IsNoticeListItem) => {
     if (unread(item) > 0) {

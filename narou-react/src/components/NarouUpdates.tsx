@@ -35,12 +35,13 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   const [bookmark, setBookmark, bookmarks] = useBookmark(server);
   const { data: rawItems, error } = useIsNoticeList(server, { enableR18, maxPage, bookmark });
 
-  const [{ items, numNewItems, selectedIndex, defaultIndex }, dispatch] = useReducer(itemsStateReducer, InitialItemsState)
+  const [{ items, numNewItems, selectedIndex }, dispatch] = useReducer(itemsStateReducer, InitialItemsState)
 
   useEffect(() => {
     dispatch({ type: 'set', items: rawItems })
   }, [rawItems]);
   const setSelectedIndex = (index: number) => dispatch({ type: 'select', index });
+  const selectDefault = () => dispatch({ type: 'default' });
 
   const [confirm, setConfirm] = useState<IsNoticeListItem | undefined>(undefined);
 
@@ -118,14 +119,14 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
           disabled={selectedIndex === 0}
           disableRipple={true}
           ref={defaultRef}
-          onClick={() => setSelectedIndex(defaultIndex)}>ESC</Button>
+          onClick={() => selectDefault()}>ESC</Button>
       </Toolbar>
     </AppBar>
     <Box m={2} display="flex" alignItems="center" flexDirection="column" bgcolor="background.paper">
       <Box maxWidth={600}>
         <NarouUpdateList items={items}
           selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex}
-          defaultIndex={defaultIndex}
+          selectDefault={selectDefault}
           onClick={setConfirm}
         />
       </Box>
