@@ -4,8 +4,8 @@ import {
   Backdrop,
   Badge, BadgeTypeMap, CircularProgress, IconButton,
   List,
-  ListItem,
   ListItemAvatar,
+  ListItemButton,
   ListItemSecondaryAction,
   ListItemText
 } from '@mui/material';
@@ -28,7 +28,7 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
   selectDefault: () => void;
   onSecondaryAction: (item: IsNoticeListItem) => void;
 }) {
-  const scrollIn = useCallback(node => {
+  const scrollIn = useCallback((node: HTMLDivElement | null) => {
     if (node) {
       scrollIntoView(node, { behavior: 'smooth', scrollMode: 'if-needed' });
       node.focus();
@@ -92,7 +92,7 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
 
   return (
     <List>
-      {items?.map((item, index) => <ListItem key={item.base_url} button={true}
+      {items?.map((item, index) => <ListItemButton key={item.base_url}
         {...(index === selectedIndex ? { selected: true, ref: scrollIn } : {})}
         disableRipple={true}
         onFocusVisible={() => setSelectedIndex(index)}
@@ -117,7 +117,7 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
             <Info />
           </IconButton>
         </ListItemSecondaryAction>
-      </ListItem>)}
+      </ListItemButton>)}
     </List>
   );
 }
