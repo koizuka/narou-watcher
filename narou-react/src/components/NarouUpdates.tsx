@@ -1,76 +1,39 @@
-import { Book, Info } from '@mui/icons-material';
 import {
   AppBar,
-  Avatar,
   Backdrop,
-  Badge,
-  BadgeTypeMap,
   Box,
   Button,
   CircularProgress,
   Fab,
   FormControlLabel,
-  IconButton,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemSecondaryAction,
-  ListItemText,
   Switch,
   Toolbar
 } from '@mui/material';
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import scrollIntoView from 'scroll-into-view-if-needed';
 import { useAppBadge, useClientBadge } from '../hooks/useAppBadge';
 import { useHotKeys } from '../hooks/useHotKeys';
-import { IsNoticeListItem, itemSummary, nextLink, unread } from "../narouApi/IsNoticeListItem";
+import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
 import { NarouApi } from '../narouApi/NarouApi';
-import { BookmarkInfo, useBookmarkInfo } from '../narouApi/useBookmarkInfo';
 import { clearCache, useIsNoticeList } from '../narouApi/useIsNoticeList';
 import { InitialItemsState, itemsStateReducer } from '../reducer/ItemsState';
 import { BookmarkSelector } from './BookmarkSelector';
 import { NarouLoginForm } from './NarouLoginForm';
+import { NarouUpdateList } from './NarouUpdateList';
 import { OpenConfirmDialog } from './OpenConfirmDialog';
+import { useBookmark } from '../hooks/useBookmark';
 
 const UserTopURL = 'https://syosetu.com/user/top/';
-
-function badgeProps(item: IsNoticeListItem): BadgeTypeMap['props'] {
-  if (item.latest < item.bookmark) {
-    return { color: 'secondary', badgeContent: '!' };
-  }
-  return { color: 'primary', badgeContent: unread(item) };
-}
 
 function maxPageValue(sw: boolean): number {
   return sw ? 2 : 1;
 }
 
-export function nextBookmark(bookmarks: BookmarkInfo, cur: number): number {
-  const numbers = Object.keys(bookmarks).map(k => Number(k));
-  for (const i of numbers) {
-    if (i > cur) {
-      return i;
-    }
-  }
-  return 0;
-}
-
-export function prevBookmark(bookmarks: BookmarkInfo, cur: number): number {
-  const numbers = [0, ...Object.keys(bookmarks).map(k => Number(k))];
-  const i = numbers.findIndex(i => i >= cur);
-  if (i > 0) {
-    return numbers[i - 1];
-  }
-  return numbers[numbers.length - 1];
-}
-
-function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnauthorized: () => void }) {
+function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUnauthorized: () => void }) {
   const [enableR18, setEnableR18] = useState(false);
   const [maxPage, setMaxPage] = useState(maxPageValue(false));
-  const [bookmark, setBookmark] = useState(0);
 
+  const [bookmark, setBookmark, bookmarks] = useBookmark(server);
   const { data: rawItems, error } = useIsNoticeList(server, { enableR18, maxPage, bookmark });
-  const { data: bookmarks } = useBookmarkInfo(server, false);
 
   const [{ items, numNewItems, selectedIndex, defaultIndex }, dispatch] = useReducer(itemsStateReducer, InitialItemsState)
 
@@ -97,13 +60,6 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
     }
   }, [clearAppBadge, clearClientBadge, numNewItems, setAppBadge, setClientBadge]);
 
-  const scrollIn = useCallback(node => {
-    if (node) {
-      scrollIntoView(node, { behavior: 'smooth', scrollMode: 'if-needed' });
-      node.focus();
-    }
-  }, []);
-
   const defaultRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -115,54 +71,12 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
   const [setHotKeys] = useHotKeys();
 
   useEffect(() => {
-    if (items) {
-      const len = items.length;
-      const arrowUp = (event: KeyboardEvent) => {
-        event.preventDefault();
-        dispatch({ type: 'select', index: selectedIndex - 1 });
-      }
-      const arrowDown = (event: KeyboardEvent) => {
-        event.preventDefault();
-        dispatch({ type: 'select', index: selectedIndex + 1 });
-      }
-
-      setHotKeys({
-        ...(selectedIndex > 0 && {
-          'ArrowUp': arrowUp,
-          'k': arrowUp,
-        }),
-        ...(selectedIndex < len - 1 && {
-          'ArrowDown': arrowDown,
-          'j': arrowDown,
-        }),
-        ...(len > 0 && {
-          'Home': () => setSelectedIndex(0),
-          'End': () => setSelectedIndex(len - 1),
-          'Escape': () => setSelectedIndex(defaultIndex),
-        }),
-        'r': () => setEnableR18(v => !v),
-        '1': () => setMaxPage(v => maxPageValue(v === maxPageValue(false))),
-        'h': () => window.open(UserTopURL, '_blank'),
-        ...(bookmarks && {
-          'b': () => setBookmark(nextBookmark(bookmarks, bookmark)),
-          'shift+B': () => setBookmark(prevBookmark(bookmarks, bookmark)),
-        })
-      });
-    }
-  }, [selectedIndex, defaultIndex, items, bookmarks, bookmark, setHotKeys]);
-
-  const buttonProps = useCallback((item: IsNoticeListItem) => {
-    if (unread(item) > 0) {
-      return {
-        component: 'a',
-        href: nextLink(item),
-        onClick: () => setSelectedIndex(-1), // workaround against remaining focus style
-        target: '_blank',
-      };
-    } else {
-      return { disabled: true };
-    }
-  }, []);
+    setHotKeys({
+      'r': () => setEnableR18(v => !v),
+      '1': () => setMaxPage(v => maxPageValue(v === maxPageValue(false))),
+      'h': () => window.open(UserTopURL, '_blank'),
+    });
+  }, [setHotKeys]);
 
   if (error) {
     console.log(`error = ${error}`);
@@ -209,34 +123,11 @@ function NarouUpdateList({ server, onUnauthorized }: { server: NarouApi, onUnaut
     </AppBar>
     <Box m={2} display="flex" alignItems="center" flexDirection="column" bgcolor="background.paper">
       <Box maxWidth={600}>
-        <List>
-          {items?.map((item, index) =>
-            <ListItem key={item.base_url} button={true}
-              {...(index === selectedIndex ? { selected: true, ref: scrollIn } : {})}
-              disableRipple={true}
-              onFocusVisible={() => setSelectedIndex(index)}
-              {...buttonProps(item)} >
-              <ListItemAvatar>
-                <Badge overlap="circular" {...badgeProps(item)} >
-                  <Avatar>
-                    <Book color={item.isR18 ? "secondary" : undefined} />
-                  </Avatar>
-                </Badge>
-              </ListItemAvatar>
-              <ListItemText
-                primary={itemSummary(item)}
-                secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  onClick={() => setConfirm(item)}
-                  disableRipple={true}
-                  size="large">
-                  <Info />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>)}
-        </List>
+        <NarouUpdateList items={items}
+          selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex}
+          defaultIndex={defaultIndex}
+          onClick={setConfirm}
+        />
       </Box>
       <Box position="fixed" right="20px" bottom="20px">
         <Fab
@@ -272,7 +163,7 @@ export function NarouUpdates({ api }: { api: NarouApi }) {
 
   return (
     <>
-      <NarouUpdateList server={api}
+      <NarouUpdateScreen server={api}
         onUnauthorized={onUnauthorized} />
       <Button onClick={async () => {
         await api.logout();

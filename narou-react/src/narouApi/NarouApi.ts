@@ -54,7 +54,6 @@ export class NarouApi {
     }
 
     static isnoticelist({ maxPage = 1 }: { maxPage: number }): NarouApiCallKey {
-        console.log('NarouApi.isnoticelist'); // DEBUG
         return `/narou/isnoticelist?max_page=${maxPage}`;
     }
     static isnoticelistR18({ maxPage = 1 }: { maxPage: number }): NarouApiCallKey {
