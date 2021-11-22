@@ -127,7 +127,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
         <NarouUpdateList items={items}
           selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex}
           selectDefault={selectDefault}
-          onClick={setConfirm}
+          onSecondaryAction={setConfirm}
         />
       </Box>
       <Box position="fixed" right="20px" bottom="20px">

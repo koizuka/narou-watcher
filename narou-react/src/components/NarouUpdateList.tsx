@@ -21,12 +21,12 @@ function badgeProps(item: IsNoticeListItem): BadgeTypeMap['props'] {
   return { color: 'primary', badgeContent: unread(item) };
 }
 
-export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, selectDefault, onClick }: {
+export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, selectDefault, onSecondaryAction }: {
   items: IsNoticeListItem[];
   selectedIndex: number;
   setSelectedIndex: (index: number) => void;
   selectDefault: () => void;
-  onClick: (item: IsNoticeListItem) => void;
+  onSecondaryAction: (item: IsNoticeListItem) => void;
 }) {
   const scrollIn = useCallback(node => {
     if (node) {
@@ -62,12 +62,13 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
           'Home': () => setSelectedIndex(0),
           'End': () => setSelectedIndex(len - 1),
           'Escape': () => selectDefault(),
+          'i': () => onSecondaryAction(items[selectedIndex]),
         }),
       });
     } else {
       setHotKeys({});
     }
-  }, [items, selectDefault, selectedIndex, setHotKeys, setSelectedIndex]);
+  }, [items, onSecondaryAction, selectDefault, selectedIndex, setHotKeys, setSelectedIndex]);
 
   const buttonProps = useCallback((item: IsNoticeListItem) => {
     if (unread(item) > 0) {
@@ -76,6 +77,7 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
         href: nextLink(item),
         onClick: () => setSelectedIndex(-1),
         target: '_blank',
+        tabIndex: 0,
       };
     } else {
       return { disabled: true };
@@ -108,9 +110,10 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
         <ListItemSecondaryAction>
           <IconButton
             edge="end"
-            onClick={() => onClick(item)}
+            onClick={() => onSecondaryAction(item)}
             disableRipple={true}
-            size="large">
+            size="large"
+            tabIndex={-1}>
             <Info />
           </IconButton>
         </ListItemSecondaryAction>
