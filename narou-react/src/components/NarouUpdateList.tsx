@@ -116,6 +116,8 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
             }}
             disableRipple={true}
             size="large"
+            disabled={false}
+            sx={{ pointerEvents: 'auto', cursor: 'pointer' }}
             tabIndex={-1}>
             <Info />
           </IconButton>
