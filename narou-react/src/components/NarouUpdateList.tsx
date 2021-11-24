@@ -75,14 +75,14 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
       return {
         component: 'a',
         href: nextLink(item),
-        onClick: () => setSelectedIndex(-1),
+        onClick: () => selectDefault(),
         target: '_blank',
         tabIndex: 0,
       };
     } else {
       return { disabled: true };
     }
-  }, [setSelectedIndex]);
+  }, [selectDefault]);
 
   if (!items) {
     return <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={true}>
@@ -110,7 +110,10 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
         <ListItemSecondaryAction>
           <IconButton
             edge="end"
-            onClick={() => onSecondaryAction(item)}
+            onClick={(event) => {
+              event.preventDefault();
+              onSecondaryAction(item);
+            }}
             disableRipple={true}
             size="large"
             tabIndex={-1}>
