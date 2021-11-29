@@ -92,7 +92,7 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
   }
 
   return (
-    <List>
+    <List dense>
       {items?.map((item, index) => <ListItem key={item.base_url}
         {...(index === selectedIndex ? { selected: true, ref: scrollIn } : {})}
       >
