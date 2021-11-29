@@ -39,7 +39,7 @@ export function useIsNoticeList(
     });
 
   // order: updated_at:ブクマ更新順, new:ブクマ追加順
-  const order: 'updated_at' | 'new' = 'new';
+  const order: 'updated_at' | 'new' = 'updated_at';
   const { data: bookmark_items, error: bookmark_error } = useSWR<IsNoticeListRecord[]>((!error && bookmark) ? NarouApi.bookmark(bookmark, { order }) : null,
     async path => api.call(path),
   );
