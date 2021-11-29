@@ -100,7 +100,7 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
           disableRipple={true}
           onFocusVisible={() => setSelectedIndex(index)}
           {...buttonProps(item)}
-          sx={{ paddingRight: "0px" }}
+          disableGutters
         >
           <ListItemAvatar>
             <Badge overlap="circular" {...badgeProps(item)}>
