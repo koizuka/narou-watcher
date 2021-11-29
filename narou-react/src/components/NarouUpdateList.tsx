@@ -4,10 +4,9 @@ import {
   Backdrop,
   Badge, BadgeTypeMap, CircularProgress, IconButton,
   List,
+  ListItem,
   ListItemAvatar,
-  ListItemButton,
-  ListItemSecondaryAction,
-  ListItemText
+  ListItemButton, ListItemSecondaryAction, ListItemText
 } from '@mui/material';
 import React, { useCallback, useEffect } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
@@ -60,7 +59,9 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
         }),
         ...(len > 0 && {
           'Home': () => setSelectedIndex(0),
+          'g': () => setSelectedIndex(0),
           'End': () => setSelectedIndex(len - 1),
+          'shift+G': () => setSelectedIndex(len - 1),
           'Escape': () => selectDefault(),
           'i': () => onSecondaryAction(items[selectedIndex]),
         }),
@@ -92,37 +93,36 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
 
   return (
     <List>
-      {items?.map((item, index) => <ListItemButton key={item.base_url}
-        {...(index === selectedIndex ? { selected: true, ref: scrollIn } : {})}
-        disableRipple={true}
-        onFocusVisible={() => setSelectedIndex(index)}
-        {...buttonProps(item)}>
-        <ListItemAvatar>
-          <Badge overlap="circular" {...badgeProps(item)}>
-            <Avatar>
-              <Book color={item.isR18 ? "secondary" : undefined} />
-            </Avatar>
-          </Badge>
-        </ListItemAvatar>
-        <ListItemText
-          primary={itemSummary(item)}
-          secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
+      {items?.map((item, index) => <ListItem key={item.base_url} >
+        <ListItemButton
+          {...(index === selectedIndex ? { selected: true, ref: scrollIn } : {})}
+          disableRipple={true}
+          onFocusVisible={() => setSelectedIndex(index)}
+          {...buttonProps(item)}
+          sx={{ paddingRight: "0px" }}
+        >
+          <ListItemAvatar>
+            <Badge overlap="circular" {...badgeProps(item)}>
+              <Avatar>
+                <Book color={item.isR18 ? "secondary" : undefined} />
+              </Avatar>
+            </Badge>
+          </ListItemAvatar>
+          <ListItemText
+            primary={itemSummary(item)}
+            secondary={`${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`} />
+        </ListItemButton>
         <ListItemSecondaryAction>
           <IconButton
             edge="end"
-            onClick={(event) => {
-              event.preventDefault();
-              onSecondaryAction(item);
-            }}
+            onClick={() => { onSecondaryAction(item); }}
             disableRipple={true}
             size="large"
-            disabled={false}
-            sx={{ pointerEvents: 'auto', cursor: 'pointer' }}
             tabIndex={-1}>
             <Info />
           </IconButton>
         </ListItemSecondaryAction>
-      </ListItemButton>)}
-    </List>
+      </ListItem>)}
+    </List >
   );
 }
