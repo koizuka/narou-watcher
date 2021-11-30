@@ -122,7 +122,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
           onClick={() => selectDefault()}>ESC</Button>
       </Toolbar>
     </AppBar>
-    <Box m={2} display="flex" alignItems="center" flexDirection="column" bgcolor="background.paper">
+    <Box display="flex" alignItems="center" flexDirection="column" bgcolor="background.paper">
       <Box maxWidth={600}>
         <NarouUpdateList items={items}
           selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex}
