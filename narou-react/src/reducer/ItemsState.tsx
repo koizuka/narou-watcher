@@ -31,8 +31,8 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
           return compare(a, b,
             i => score(i),
             a.bookmark < a.latest ?
-              i => i.update_time :
-              reverse(i => i.update_time),
+              i => i.update_time.toMillis() :
+              reverse(i => i.update_time.toMillis()),
             i => i.base_url);
         })
           .slice(0, 30);
@@ -63,7 +63,7 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
 }
 
 // sort用の比較関数
-function ascend<T>(a: T, b: T, f: (v: T) => any): -1 | 0 | 1 {
+function ascend<T>(a: T, b: T, f: (v: T) => (number | string)): -1 | 0 | 1 {
   const fa = f(a), fb = f(b);
   if (fa < fb) return -1;
   if (fa > fb) return 1;
@@ -71,13 +71,13 @@ function ascend<T>(a: T, b: T, f: (v: T) => any): -1 | 0 | 1 {
 }
 
 type Reverse<T> = {
-  f: (v: T) => any
+  f: (v: T) => number | string
 }
-function reverse<T>(f: (v: T) => any): Reverse<T> {
+function reverse<T>(f: (v: T) => (number | string)): Reverse<T> {
   return { f };
 }
 
-function compare<T>(a: T, b: T, ...cmps: (((v: T) => any) | Reverse<T>)[]): -1 | 0 | 1 {
+function compare<T>(a: T, b: T, ...cmps: (((v: T) => (number | string)) | Reverse<T>)[]): -1 | 0 | 1 {
   for (const f of cmps) {
     let c;
     if (typeof f === 'object') {
