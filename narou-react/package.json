@@ -23,7 +23,7 @@
     "scroll-into-view-if-needed": "^2.2.29",
     "swr": "^1.2.2",
     "typescript": "^4.6.2",
-    "vite": "^2.8.4",
+    "vite": "^2.8.5",
     "vite-tsconfig-paths": "^3.4.1",
     "web-vitals": "^2.1.4"
   },
