@@ -14,14 +14,26 @@
     -->
   <link rel="manifest" href="/narou/manifest.json" />
   <title>narou-watcher</title>
-  <script type="module" crossorigin src="/narou/assets/index.45a984d0.js"></script>
+  <script type="module" crossorigin src="/narou/assets/index.e1bac593.js"></script>
   <link rel="modulepreload" href="/narou/assets/vendor.2b297a62.js">
   <link rel="stylesheet" href="/narou/assets/index.a88b26d2.css">
 </head>
 
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
-  <div id="root"><span onclick="location.reload()">Maybe URL of the script has changed? click to reload.</span></div>
+  <div id="root">
+    <form id="reload" action="javascript:void(0)">
+      <span>Maybe URL of the script has changed?</span>
+      <input type="checkbox" id="auto_reload" checked /><label for="auto_reload">reload in 3 sec</label>
+      <script>setTimeout(() => {
+          console.log('timeout')
+          if (document.querySelector('#auto_reload').checked) {
+            document.querySelector('#reload').click();
+          }
+        }, 3000);</script>
+      <input type="submit" value="reload" id="submit" onclick="location.reload()" />
+    </form>
+  </div>
   <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
