@@ -19,17 +19,8 @@
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root">
-    <form id="reload" action="javascript:void(0)">
-      <span>Maybe URL of the script has changed?</span>
-      <input type="checkbox" id="auto_reload" checked /><label for="auto_reload">reload in 3 sec</label>
-      <script>setTimeout(() => {
-          console.log('timeout')
-          if (document.querySelector('#auto_reload').checked) {
-            document.querySelector('#reload').click();
-          }
-        }, 3000);</script>
-      <input type="submit" value="reload" id="submit" onclick="location.reload()" />
-    </form>
+    <span>Maybe URL of the script has changed?</span>
+    <button onclick="location.reload()">reload</button>
   </div>
   <!--
       This HTML file is a template.
