@@ -39,6 +39,19 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
   useEffect(() => {
     if (items) {
       const len = items.length;
+      const guard = (f: (event: KeyboardEvent) => void) => (event: KeyboardEvent) => {
+        const ignoreClasses = [
+          'MuiDialog-container',
+          'MuiInputBase-input',
+          'MuiMenuItem-root',
+        ];
+        const classList = (event.target as HTMLElement).classList;
+        if (ignoreClasses.some(c => classList.contains(c))) {
+          return;
+        }
+        f(event);
+      };
+
       const arrowUp = (event: KeyboardEvent) => {
         event.preventDefault();
         setSelectedIndex(selectedIndex - 1);
@@ -50,20 +63,20 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
 
       setHotKeys({
         ...(selectedIndex > 0 && {
-          'ArrowUp': arrowUp,
-          'k': arrowUp,
+          'ArrowUp': guard(arrowUp),
+          'k': guard(arrowUp),
         }),
         ...(selectedIndex < len - 1 && {
-          'ArrowDown': arrowDown,
-          'j': arrowDown,
+          'ArrowDown': guard(arrowDown),
+          'j': guard(arrowDown),
         }),
         ...(len > 0 && {
-          'Home': () => setSelectedIndex(0),
-          'g': () => setSelectedIndex(0),
-          'End': () => setSelectedIndex(len - 1),
-          'shift+G': () => setSelectedIndex(len - 1),
-          'Escape': () => selectDefault(),
-          'i': () => onSecondaryAction(items[selectedIndex]),
+          'Home': guard(() => setSelectedIndex(0)),
+          'g': guard(() => setSelectedIndex(0)),
+          'End': guard(() => setSelectedIndex(len - 1)),
+          'shift+G': guard(() => setSelectedIndex(len - 1)),
+          'Escape': guard(() => selectDefault()),
+          'i': guard(() => onSecondaryAction(items[selectedIndex])),
         }),
       });
     } else {
