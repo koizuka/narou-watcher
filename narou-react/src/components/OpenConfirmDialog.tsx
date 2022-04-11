@@ -3,8 +3,9 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
-  Link
+  Link, Typography
 } from '@mui/material';
 import React, { useMemo } from 'react';
 import { IsNoticeListItem, nextLink } from '../narouApi/IsNoticeListItem';
@@ -34,11 +35,17 @@ export function OpenConfirmDialog({ api, item, onClose }: {
     return undefined;
   }, [novelInfo, bookmarkInfo])
 
+  const abstract = useMemo(() => novelInfo?.abstract.replaceAll('\n', '').replaceAll('<br/>', '\n').split('\n'), [novelInfo]);
+
   return (
     <Dialog open={!!item} onClose={onClose}>
       <DialogTitle>{item?.title}</DialogTitle>
       <DialogContent>作者:<Link href={novelInfo?.author_url} target="_blank">{item?.author_name}</Link></DialogContent>
       {bookmark && <DialogContent>ブックマーク:<Link href={bookmark.url} target="_blank">{bookmark.name}</Link></DialogContent>}
+      <DialogContent>
+        <Typography variant="h5">あらすじ</Typography>
+        {abstract?.map((line, i) => <DialogContentText key={i}>{line}</DialogContentText>)}
+      </DialogContent>
       <DialogActions>
         <Button size="small" variant="contained" onClick={() => {
           if (item)
