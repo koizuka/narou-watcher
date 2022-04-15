@@ -84,8 +84,9 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
     if (error.status === 401) {
       onUnauthorized();
     }
-    return <div onClick={() => window.location.reload()}>
-      <p>Server({JSON.stringify(server.baseUrl)}) is not working...?</p>
+    return <div>
+      Server({JSON.stringify(server.baseUrl)}) is not working...?
+      <button onClick={() => window.location.reload()}>reload</button>
       <p>status: {error.status}</p>
       <code>{error.message}</code>
     </div>;
