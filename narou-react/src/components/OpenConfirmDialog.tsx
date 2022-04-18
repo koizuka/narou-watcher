@@ -38,7 +38,7 @@ export function OpenConfirmDialog({ api, item, onClose }: {
   const abstract = useMemo(() => novelInfo?.abstract.replaceAll('\n', '').replaceAll('<br/>', '\n').split('\n'), [novelInfo]);
 
   return (
-    <Dialog open={!!item} onClose={onClose}>
+    <Dialog open={!!item} onClose={onClose} fullWidth>
       <DialogTitle>{item?.title}</DialogTitle>
       <DialogContent>作者:<Link href={novelInfo?.author_url} target="_blank">{item?.author_name}</Link></DialogContent>
       {bookmark && <DialogContent>ブックマーク:<Link href={bookmark.url} target="_blank">{bookmark.name}</Link></DialogContent>}
