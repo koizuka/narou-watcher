@@ -5,6 +5,7 @@ import (
 	"github.com/koizuka/scraper"
 	"net/http"
 	"net/url"
+	"regexp"
 	"time"
 )
 
@@ -150,7 +151,7 @@ func (narou *NarouWatcher) Login(credentials *Credentials) error {
 }
 
 func (narou *NarouWatcher) Logout() error {
-	page, err := narou.session.GetPage("https://ssl.syosetu.com/user/top/")
+	page, err := narou.session.GetPage(UserTopURL)
 	if err != nil {
 		return err
 	}
@@ -158,7 +159,16 @@ func (narou *NarouWatcher) Logout() error {
 		return nil // already logged out
 	}
 
-	_, err = narou.session.FollowLink(page, "a#logout", "href")
+	info, err := ParseUserTop(page)
+	if err != nil {
+		return err
+	}
+	form := &scraper.Form{
+		Action: info.Logout.URL,
+		Method: "post",
+	}
+	_ = form.Set("token", info.Logout.Token)
+	_, err = narou.session.Submit(form)
 	if err != nil {
 		return err
 	}
@@ -205,4 +215,42 @@ func (narou *NarouWatcher) GetPage(url string) (*scraper.Page, error) {
 	}
 
 	return page, nil
+}
+
+func (narou *NarouWatcher) GetJSONP(URL string, callback string) (string, error) {
+	u, err := url.Parse(URL)
+	if err != nil {
+		return "", fmt.Errorf("GetJSONP(%v): url.Parse error: %v", URL, err)
+	}
+	q := u.Query()
+	q.Add("callback", callback)
+	u.RawQuery = q.Encode()
+	URL = u.String()
+
+	response, err := narou.session.Get(u.String())
+	if err != nil {
+		return "", fmt.Errorf("GetJSONP(%v): Get error: %v", URL, err)
+	}
+	regex := regexp.MustCompile(`\b` + `application/javascript` + `\b`)
+	if !regex.MatchString(response.ContentType) {
+		return "", fmt.Errorf("GetJSONP(%v): Content-Type missmatch: %v", URL, response.ContentType)
+	}
+
+	bytes, err := response.Body()
+	if err != nil {
+		return "", fmt.Errorf("GetJSONP(%v): get body failed: %v", URL, err)
+	}
+	body := string(bytes)
+	extractor := regexp.MustCompile(`\s*(\w+)\s*\(\s*(\S.*\S)\s*\)\s*;`)
+	matched := extractor.FindStringSubmatch(body)
+	if matched == nil {
+		return "", fmt.Errorf("GetJSONP(%v): invalid response", URL)
+	}
+	funcName := matched[1]
+	json := matched[2]
+	if funcName != callback {
+		return "", fmt.Errorf("GetJSONP(%v): returned callback '%v' is not '%v'", URL, funcName, callback)
+	}
+
+	return json, nil
 }

@@ -1,6 +1,9 @@
 package narou
 
 import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -226,6 +229,63 @@ func Test_isNarouLoginPage(t *testing.T) {
 			}
 			if got := isNarouLoginPage(page); got != tt.want {
 				t.Errorf("isNarouLoginPage() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNarouWatcher_GetJSONP(t *testing.T) {
+	tests := []struct {
+		name        string
+		options     Options
+		response    string
+		contentType string
+		callback    string
+		want        string
+		wantErr     bool
+	}{
+		{
+			name:        "normal",
+			response:    `func({"answer":42});`,
+			contentType: "application/javascript",
+			callback:    "func",
+			want:        `{"answer":42}`,
+		},
+		{
+			name:        "content-type mismatch",
+			response:    `func({"answer":42});`,
+			contentType: "application/json",
+			callback:    "func",
+			wantErr:     true,
+		},
+		{
+			name:        "func mismatch",
+			response:    `func({"answer":42});`,
+			contentType: "application/javascript",
+			callback:    "func2",
+			wantErr:     true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("content-type", tt.contentType)
+				_, _ = fmt.Fprint(w, tt.response)
+			}))
+			defer ts.Close()
+
+			narou, err := NewNarouWatcher(tt.options)
+			if err != nil {
+				t.Errorf("NewNarouWatcher returns err %v", err)
+			}
+
+			got, err := narou.GetJSONP(ts.URL, tt.callback)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetJSONP() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetJSONP() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

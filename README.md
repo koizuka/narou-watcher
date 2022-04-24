@@ -33,23 +33,23 @@
     * ログイン状態で、新着更新チェック中小説一覧の1ページ目を取得して以下のオブジェクトを配列にしてJSONにして返します。
     * クエリパラメータ `max_page` は指定分、次ページを合成する。1(初期値)なら指定ページのみ。
 
-    |key|type|説明|
-    |---|---|---|
-    |base_url|string|小説自体のURL|
-    |update_time|ISO8601形式の日時|更新時刻(分解能は分まで)|
-    |bookmark|uint|しおりの部分番号|
-    |latest|uint|最終更新の部分番号|
-    |title|string|小説のタイトル|
-    |author_name|string|著者の名前|
+|key|type|説明|
+|---|---|---|
+|base_url|string|小説自体のURL|
+|update_time|ISO8601形式の日時|更新時刻(分解能は分まで)|
+|bookmark|uint|しおりの部分番号|
+|latest|uint|最終更新の部分番号|
+|title|string|小説のタイトル|
+|author_name|string|著者の名前|
 
 * `GET /narou/bookmarks` `GET /r18/bookmarks`
     * ブックマーク名一覧。以下のオブジェクトが登録分並ぶ。
       
-      |key|type|説明|
-      |---|---|---|
-      |no|number|1〜10|
-      |name|string|ブックマーク名|
-      |num_items|number|登録アイテム数|
+|key|type|説明|
+|---|---|---|
+|no|number|1〜10|
+|name|string|ブックマーク名|
+|num_items|number|登録アイテム数|
     
 * `GET /narou/bookmarks/:no` `GET /r18/bookmarsk/:no`
     * ブックマークの内容の1ページ
@@ -60,31 +60,42 @@
       * `new` はブックマーク追加順
     * クエリパラメータ `max_page` は指定分、次ページを合成する。1(初期値)なら指定ページのみ。
       
-      |key|type|説明|
-      |---|---|---|
-      |base_url|string|小説自体のURL|
-      |update_time|ISO8601形式の日時|更新時刻(分解能は分まで)|
-      |bookmark|uint|しおりの部分番号(短篇なら0)|
-      |latest|uint|最終更新の部分番号(短篇なら0)|
-      |title|string|小説のタイトル|
-      |author_name|string|著者の名前|
-      |is_notice|boolean|更新チェック中ならtrue|
-      |completed|boolean|完結ならtrue|
+|key|type|説明|
+|---|---|---|
+|base_url|string|小説自体のURL|
+|update_time|ISO8601形式の日時|更新時刻(分解能は分まで)|
+|bookmark|uint|しおりの部分番号(短篇なら0)|
+|latest|uint|最終更新の部分番号(短篇なら0)|
+|title|string|小説のタイトル|
+|author_name|string|著者の名前|
+|is_notice|boolean|更新チェック中ならtrue|
+|completed|boolean|完結ならtrue|
     
 * `GET /narou/novels/:ncode` `GET /r18/novels/:ncode`
     * 小説のncodeから概要ページの内容の抜粋を得る
       
-      |key|type|説明|
-      |---|---|---|
-      |base_url|string|小説のURL|
-      |title|string|小説のタイトル|
-      |abstract|string|小説の概要(HTML)|
-      |author_name|string|著者の名前|
-      |author_url|string|著者ページのURL|
-      |keywords|[]string|キーワード|
-      |bookmark_url|string|ブックマークカテゴリURL(登録されていなければフィールドなし)|
-      |bookmark_no|uint|ブックマークのカテゴリ番号(登録されていなければフィールドなし)|
-      |bookmark_episode|uint|しおり部分(登録されていなければフィールドなし)|
+|key|type|説明|
+|---|---|---|
+|base_url|string|小説のURL|
+|title|string|小説のタイトル|
+|abstract|string|小説の概要(HTML)|
+|author_name|string|著者の名前|
+|author_url|string|著者ページのURL|
+|keywords|[]string|キーワード|
+|bookmark_url|string|ブックマークカテゴリURL(登録されていなければフィールドなし)|
+|bookmark_no|uint|ブックマークのカテゴリ番号(登録されていなければフィールドなし)|
+|bookmark_episode|uint|しおり部分(登録されていなければフィールドなし)|
+ 
+* `GET /narou/fav-user-updates`
+  * お気に入りユーザーの更新情報
+
+| key              | type   | 説明           |
+|------------------|--------|--------------|
+| r18passive_count | int    | 不明           |
+| blog_list_html   | string | WIP(現在はHTML) |
+| novel_list_html  | string | WIP(現在はHTML) |
+| passive_count    | int    | 不明           |
+
 #### ログインセッションクッキー
 小説家になろうのサイトが Set-Cookieしてきたものの名前の前に `narou-` をつけてこちらのクッキーとして Set-Cookie にして返し、ブラウザに覚えさせます。
 

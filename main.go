@@ -153,6 +153,42 @@ func GetIsNoticeList(watcher *narou.NarouWatcher, url string, maxPage uint) ([]m
 	return result, nil
 }
 
+func GetFavUserUpdates(watcher *narou.NarouWatcher, URL string) (*model.FavUserUpdatesRecord, error) {
+	j, err := watcher.GetJSONP(URL, "func")
+	if err != nil {
+		return nil, err
+	}
+
+	info, err := narou.ParseUserTopApiJson(j)
+	if err != nil {
+		return nil, err
+	}
+	// TODO BLogListHTML, NovelListHTML を分解する
+	// 構造
+	// BlogListHTML
+	//  h3
+	//  ul
+	//    li アイテム一つ
+	//      a タイトル
+	//      a 作者
+	// NovelListHTML
+	//  h3
+	//  div#fanusernovel_list アイテム一つ
+	//    div#fanusernovel_title
+	//      a タイトル
+	//    div#fanusernovel_type
+	//      div#fanusernovel_info 月日時分
+	//      a 作者
+	result := &model.FavUserUpdatesRecord{
+		R18PassiveCount: info.R18PassiveCount,
+		BlogListHTML:    info.BlogListHTML,
+		NovelListHTML:   info.NovelListHTML,
+		PassiveCount:    info.PassiveCount,
+	}
+
+	return result, nil
+}
+
 func parseURLForCookie(url *url.URL) (isHttps bool, cookiePath string) {
 	isHttps = url.Scheme == "https"
 	cookiePath = url.Path
@@ -474,6 +510,37 @@ func isNoticeListHandler(url string) NarouApiHandlerType {
 	}
 }
 
+func favUserUpdatesHandler(URL string) NarouApiHandlerType {
+	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+		query := r.URL.Query()
+		token, ok := query["token"]
+		if !ok {
+			page, err := watcher.GetPage(narou.UserTopURL)
+			if err != nil {
+				return nil, err
+			}
+			info, err := narou.ParseUserTop(page)
+			if err != nil {
+				return nil, err
+			}
+			token = []string{info.Logout.Token}
+			w.Set("token", token[0])
+		}
+		u, err := url.Parse(URL)
+		if err != nil {
+			return nil, err
+		}
+		q := u.Query()
+		q.Add("token", token[0])
+		u.RawQuery = q.Encode()
+		result, err := GetFavUserUpdates(watcher, u.String())
+		if err != nil {
+			return nil, err
+		}
+		return ReturnJson(w, result)
+	}
+}
+
 func getProjectDirectory() (string, error) {
 	out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
 	if err != nil {
@@ -588,6 +655,8 @@ func main() {
 
 	setHandler("/narou/isnoticelist", isNoticeListHandler(narou.IsNoticeListURL))
 	setHandler("/r18/isnoticelist", isNoticeListHandler(narou.IsNoticeListR18URL))
+
+	setHandler("/narou/fav-user-updates", favUserUpdatesHandler(narou.UserTopApiURL))
 
 	setHandler("/narou/login", NarouLoginHandler)
 	setHandler("/narou/logout", NarouLogoutHandler)
