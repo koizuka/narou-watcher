@@ -74,20 +74,37 @@
 * `GET /narou/novels/:ncode` `GET /r18/novels/:ncode`
     * 小説のncodeから概要ページの内容の抜粋を得る
       
-|key|type|説明|
-|---|---|---|
-|base_url|string|小説のURL|
-|title|string|小説のタイトル|
-|abstract|string|小説の概要(HTML)|
-|author_name|string|著者の名前|
-|author_url|string|著者ページのURL|
-|keywords|[]string|キーワード|
-|bookmark_url|string|ブックマークカテゴリURL(登録されていなければフィールドなし)|
-|bookmark_no|uint|ブックマークのカテゴリ番号(登録されていなければフィールドなし)|
-|bookmark_episode|uint|しおり部分(登録されていなければフィールドなし)|
- 
-* `GET /narou/fav-user-updates`
-  * お気に入りユーザーの更新情報
+|key|type| 説明                               |
+|---|---|----------------------------------|
+|base_url|string| 小説のURL                           |
+|title|string| 小説のタイトル                          |
+|abstract|string| 小説の概要(HTML)                      |
+|author_name|string| 著者の名前                            |
+|author_url|string| 著者ページのURL                        |
+|keywords|[]string| キーワード                            |
+|bookmark_url|string| ブックマークカテゴリURL(登録されていなければフィールドなし) |
+|bookmark_no|uint| ブックマークのカテゴリ番号(登録されていなければフィールドなし) |
+|bookmark_episode|uint| しおり部分(登録されていなければフィールドなし)         |
+|contents|[]chapter| 章一覧                              |
+
+  * chapter
+
+| key      | type      | 説明                             |
+|----------|-----------|--------------------------------|
+| chapter  | string    | 章のタイトル。章設定をしていない作品にはこのキーは付かない。 |
+| episodes | []episode | エピソード一覧                        |
+
+  * episode
+
+| key      | type    | 説明                  |
+|----------|---------|---------------------|
+| subtitle | string  | サブタイトル              |
+| no       | uint    | エピソード番号(1〜)         |
+| date     | ISO8601 | 投稿日時                |
+| update   | ISO8601 | 改稿日時(改稿されていない場合は省略) |
+
+  * `GET /narou/fav-user-updates`
+    * お気に入りユーザーの更新情報
 
 | key              | type   | 説明           |
 |------------------|--------|--------------|

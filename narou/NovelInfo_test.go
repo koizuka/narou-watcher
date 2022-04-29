@@ -4,6 +4,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"reflect"
 	"testing"
+	"time"
 )
 
 const html = `<html>
@@ -82,7 +83,7 @@ const html = `<html>
  
 <dl class="novel_sublist2">
 <dd class="subtitle">
-<a href="/NCODE/1/">第1話</a>
+<a href="/NCODE/1/">第1-1話</a>
 </dd>
 <dt class="long_update">
 2021/05/03 23:44<span title="2021/05/07 15:54 改稿">（<u>改</u>）</span></dt>
@@ -90,7 +91,7 @@ const html = `<html>
  
 <dl class="novel_sublist2">
 <dd class="subtitle">
-<a href="/NCODE/2/">第2話</a>
+<a href="/NCODE/2/">第1-2話</a>
 </dd>
 <dt class="long_update">
 2021/05/03 23:58<span title="2021/05/07 15:55 改稿">（<u>改</u>）</span></dt>
@@ -99,7 +100,7 @@ const html = `<html>
  
 <dl class="novel_sublist2">
 <dd class="subtitle">
-<a href="/NCODE/3/">第1話</a>
+<a href="/NCODE/3/">第2-1話</a>
 <span class="bookmarker_now">　</span></dd>
 <dt class="long_update">
 2021/05/06 19:00</dt>
@@ -220,6 +221,32 @@ func TestParseNovelInfo(t *testing.T) {
 	var episode uint = 3
 	var bookmark uint = 2
 	var bookmarkUrl = "https://syosetu.com/favnovelmain/list/?nowcategory=2"
+
+	Ep1UpdateTime := time.Date(2021, time.May, 7, 15, 54, 0, 0, NarouLocation)
+	Ep1 := SubList2{
+		SubTitle:    "第1-1話",
+		Link:        "/NCODE/1/",
+		No:          1,
+		PublishTime: time.Date(2021, time.May, 3, 23, 44, 0, 0, NarouLocation),
+		UpdateTime:  &Ep1UpdateTime,
+	}
+
+	Ep2UpdateTime := time.Date(2021, time.May, 7, 15, 55, 0, 0, NarouLocation)
+	Ep2 := SubList2{
+		SubTitle:    "第1-2話",
+		Link:        "/NCODE/2/",
+		No:          2,
+		PublishTime: time.Date(2021, time.May, 3, 23, 58, 0, 0, NarouLocation),
+		UpdateTime:  &Ep2UpdateTime,
+	}
+	Ep3 := SubList2{
+		SubTitle:    "第2-1話",
+		Link:        "/NCODE/3/",
+		No:          3,
+		PublishTime: time.Date(2021, time.May, 6, 19, 00, 0, 0, NarouLocation),
+		UpdateTime:  nil,
+	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -236,6 +263,12 @@ func TestParseNovelInfo(t *testing.T) {
 			BookmarkURL:     &bookmarkUrl,
 			BookmarkNo:      &bookmark,
 			BookmarkEpisode: &episode,
+
+			Index: &NovelIndex{
+				Chapters:     []string{"CHAPTER1", "CHAPTER2"},
+				ChapterHeads: []SubList2{Ep1, Ep3},
+				Episodes:     []SubList2{Ep1, Ep2, Ep3},
+			},
 		}, false},
 	}
 	for _, tt := range tests {

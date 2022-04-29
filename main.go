@@ -476,6 +476,54 @@ func novelInfoHandler(ncode, baseUrl string, r18 bool) NarouApiHandlerType {
 			return nil, fmt.Errorf("%#v: %v", getUrl, err)
 		}
 
+		var contents []model.NovelInfoChapter
+		if len(novelInfo.Index.ChapterHeads) == 0 {
+			episodes := make([]model.NovelInfoEpisode, 0, len(novelInfo.Index.Episodes))
+			for _, ep := range novelInfo.Index.Episodes {
+				episodes = append(episodes, model.NovelInfoEpisode{
+					SubTitle: ep.SubTitle,
+					No:       ep.No,
+					Date:     ep.PublishTime,
+					Update:   ep.UpdateTime,
+				})
+			}
+			contents = append(contents, model.NovelInfoChapter{
+				Episodes: episodes,
+			})
+		} else {
+			var indexes []int
+			cur := 0
+			for _, n := range novelInfo.Index.ChapterHeads {
+				for ; cur < len(novelInfo.Index.Episodes); cur++ {
+					if novelInfo.Index.Episodes[cur].Link == n.Link {
+						indexes = append(indexes, cur)
+						break
+					}
+				}
+			}
+			indexes = append(indexes, len(novelInfo.Index.Episodes))
+			fmt.Printf("indexes: %v¥n", indexes) // DEBUG
+
+			for c := range novelInfo.Index.ChapterHeads {
+				start := indexes[c]
+				end := indexes[c+1]
+				episodes := make([]model.NovelInfoEpisode, end-start)
+				for i := 0; i < end-start; i++ {
+					ep := novelInfo.Index.Episodes[start+i]
+					episodes[i] = model.NovelInfoEpisode{
+						SubTitle: ep.SubTitle,
+						No:       ep.No,
+						Date:     ep.PublishTime,
+						Update:   ep.UpdateTime,
+					}
+				}
+				contents = append(contents, model.NovelInfoChapter{
+					Chapter:  novelInfo.Index.Chapters[c],
+					Episodes: episodes,
+				})
+			}
+		}
+
 		return ReturnJson(w, model.NovelInfoRecord{
 			BaseURL:         getUrl,
 			Title:           novelInfo.Title,
@@ -486,6 +534,7 @@ func novelInfoHandler(ncode, baseUrl string, r18 bool) NarouApiHandlerType {
 			BookmarkURL:     novelInfo.BookmarkURL,
 			BookmarkNo:      novelInfo.BookmarkNo,
 			BookmarkEpisode: novelInfo.BookmarkEpisode,
+			Contents:        contents,
 		})
 	}
 }
