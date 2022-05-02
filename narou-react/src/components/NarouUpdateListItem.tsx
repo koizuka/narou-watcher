@@ -26,8 +26,10 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
 
   const ref = useRef<HTMLLIElement | null>(null);
   useEffect(() => {
-    if (isSelected && ref.current) {
-      ref.current.focus();
+    if (isSelected) {
+      ref.current?.focus();
+    } else {
+      ref.current?.blur();
     }
   }, [isSelected]);
 
