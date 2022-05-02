@@ -67,7 +67,7 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
 
   return (
     <List dense>
-      {items?.map((item, index) => <NarouUpdateListItem
+      {items.map((item, index) => <NarouUpdateListItem
         key={item.base_url}
         item={item} index={index} isSelected={index === selectedIndex}
         setSelectedIndex={setSelectedIndex}
