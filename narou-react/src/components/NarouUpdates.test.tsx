@@ -15,8 +15,8 @@ jest.mock('../narouApi/NarouApi');
 const NarouApiMock = NarouApi as unknown as jest.Mock;
 
 function setup() {
-	const mockCall = jest.fn<Promise<any>, [string]>();
-	const mockLogin = jest.fn(async (id: string, password: string): Promise<Response> => {
+	const mockCall = jest.fn<Promise<unknown>, [string]>();
+	const mockLogin = jest.fn(async (): Promise<Response> => {
 		return new Response();
 	});
 

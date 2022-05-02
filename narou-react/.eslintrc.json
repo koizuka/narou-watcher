@@ -4,9 +4,9 @@
     "es2021": true
   },
   "extends": [
-    "react-app",
     "eslint:recommended",
     "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
     "plugin:@typescript-eslint/recommended"
   ],
   "parser": "@typescript-eslint/parser",
@@ -23,6 +23,12 @@
     "testing-library",
     "@typescript-eslint"
   ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "root": true,
   "rules": {
     // from "react-app/jest"
     // https://github.com/jest-community/eslint-plugin-jest
