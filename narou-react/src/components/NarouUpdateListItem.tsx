@@ -4,7 +4,7 @@ import {
   ListItemAvatar,
   ListItemButton, ListItemSecondaryAction, ListItemText
 } from '@mui/material';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { IsNoticeListItem, itemSummary, nextLink, unread } from "../narouApi/IsNoticeListItem";
 
@@ -24,6 +24,13 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
     }
   }, []);
 
+  const ref = useRef<HTMLLIElement | null>(null);
+  useEffect(() => {
+    if (isSelected && ref.current) {
+      ref.current.focus();
+    }
+  }, [isSelected]);
+
   const buttonProps = useMemo<ButtonTypeMap['props']>(() => {
     if (unread(item) > 0) {
       return {
@@ -32,6 +39,7 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
         onClick: () => selectDefault(),
         target: '_blank',
         tabIndex: 0,
+        ref: ref,
       };
     } else {
       return { disabled: true };
