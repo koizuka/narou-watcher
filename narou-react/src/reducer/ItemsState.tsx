@@ -77,8 +77,8 @@ function reverse<T>(f: (v: T) => (number | string)): Reverse<T> {
   return { f };
 }
 
-function compare<T>(a: T, b: T, ...cmps: (((v: T) => (number | string)) | Reverse<T>)[]): -1 | 0 | 1 {
-  for (const f of cmps) {
+function compare<T>(a: T, b: T, ...comparators: (((v: T) => (number | string)) | Reverse<T>)[]): -1 | 0 | 1 {
+  for (const f of comparators) {
     let c;
     if (typeof f === 'object') {
       c = ascend(b, a, (f as Reverse<T>).f);

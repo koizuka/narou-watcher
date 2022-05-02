@@ -13,7 +13,8 @@ import { NarouApi } from '../narouApi/NarouApi';
 import { useBookmarkInfo } from '../narouApi/useBookmarkInfo';
 import { useNovelInfo } from '../narouApi/useNovelInfo';
 
-export function OpenConfirmDialog({ api, item, onClose }: {
+export const OpenConfirmDialog = React.memo(OpenConfirmDialogRaw);
+function OpenConfirmDialogRaw({ api, item, onClose }: {
   api: NarouApi;
   item?: IsNoticeListItem;
   onClose: () => void;

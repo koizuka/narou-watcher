@@ -28,6 +28,23 @@ function maxPageValue(sw: boolean): number {
   return sw ? 2 : 1;
 }
 
+function R18SwitchRaw({ enableR18, setEnableR18 }: {
+  enableR18: boolean;
+  setEnableR18: (enableR18: boolean) => void;
+}) {
+  return (
+    <FormControlLabel
+      label="R18"
+      control={
+        <Switch
+          checked={enableR18}
+          onChange={event => setEnableR18(event.target.checked)}
+        />}
+    />
+  );
+}
+const R18Switch = React.memo(R18SwitchRaw);
+
 function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUnauthorized: () => void }) {
   const [enableR18, setEnableR18] = useState(false);
   const [maxPage, setMaxPage] = useState(maxPageValue(false));
@@ -40,8 +57,8 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   useEffect(() => {
     dispatch({ type: 'set', items: rawItems })
   }, [rawItems]);
-  const setSelectedIndex = (index: number) => dispatch({ type: 'select', index });
-  const selectDefault = () => dispatch({ type: 'default' });
+  const setSelectedIndex = useCallback((index: number) => dispatch({ type: 'select', index }), []);
+  const selectDefault = useCallback(() => dispatch({ type: 'default' }), []);
 
   const [confirm, setConfirm] = useState<IsNoticeListItem | undefined>(undefined);
 
@@ -75,6 +92,8 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
     'h': () => window.open(UserTopURL, '_blank'),
   }), []));
 
+  const onClose = useCallback(() => setConfirm(undefined), []);
+
   if (error) {
     console.log(`error = ${error}`);
     if (error.status === 401) {
@@ -94,18 +113,11 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   }
 
   return <>
-    <OpenConfirmDialog api={server} item={confirm} onClose={() => setConfirm(undefined)} />
+    <OpenConfirmDialog api={server} item={confirm} onClose={onClose} />
     <AppBar position="sticky">
       <Toolbar>
         <Box>
-          <FormControlLabel
-            label="R18"
-            control={
-              <Switch
-                checked={enableR18}
-                onChange={event => setEnableR18(event.target.checked)}
-              />}
-          />
+          <R18Switch enableR18={enableR18} setEnableR18={setEnableR18} />
         </Box>
         <Box>
           <BookmarkSelector bookmarks={bookmarks} bookmark={bookmark} onChangeBookmark={setBookmark} />
@@ -116,7 +128,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
           disabled={selectedIndex === 0}
           disableRipple={true}
           ref={defaultRef}
-          onClick={() => selectDefault()}>ESC</Button>
+          onClick={selectDefault}>ESC</Button>
       </Toolbar>
     </AppBar>
     <Box display="flex" alignItems="center" flexDirection="column" bgcolor="background.paper">

@@ -8,7 +8,8 @@ function useIsWidthUp(breakpoint: Breakpoint) {
   return useMediaQuery(theme.breakpoints.up(breakpoint));
 }
 
-export function BookmarkSelector({ bookmarks, bookmark, onChangeBookmark: setBookmark }: {
+export const BookmarkSelector = React.memo(BookmarkSelectorRaw);
+function BookmarkSelectorRaw({ bookmarks, bookmark, onChangeBookmark: setBookmark }: {
   bookmarks: BookmarkInfo | undefined;
   bookmark: number;
   onChangeBookmark: (newBookmark: number) => void;

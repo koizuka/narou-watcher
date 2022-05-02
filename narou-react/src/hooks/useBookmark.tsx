@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { NarouApi } from '../narouApi/NarouApi';
 import { BookmarkInfo, useBookmarkInfo } from '../narouApi/useBookmarkInfo';
 import { bookmarkStateReducer, InitialBookmarkState } from '../reducer/BookmarkState';
@@ -23,7 +23,7 @@ export function useBookmark(server: NarouApi): [number, (cur: number) => void, B
 
   return [
     selected,
-    (selected: number) => dispatch({ type: 'select', selected }),
+    useCallback((selected: number) => dispatch({ type: 'select', selected }), []),
     bookmarks,
   ];
 }
