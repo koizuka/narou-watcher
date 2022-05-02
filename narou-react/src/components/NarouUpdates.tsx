@@ -9,8 +9,9 @@ import {
   Switch,
   Toolbar
 } from '@mui/material';
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useAppBadge, useClientBadge } from '../hooks/useAppBadge';
+import { useBookmark } from '../hooks/useBookmark';
 import { useHotKeys } from '../hooks/useHotKeys';
 import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
 import { NarouApi } from '../narouApi/NarouApi';
@@ -20,7 +21,6 @@ import { BookmarkSelector } from './BookmarkSelector';
 import { NarouLoginForm } from './NarouLoginForm';
 import { NarouUpdateList } from './NarouUpdateList';
 import { OpenConfirmDialog } from './OpenConfirmDialog';
-import { useBookmark } from '../hooks/useBookmark';
 
 const UserTopURL = 'https://syosetu.com/user/top/';
 
@@ -69,15 +69,11 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
     }
   }, [selectedIndex]);
 
-  const [setHotKeys] = useHotKeys();
-
-  useEffect(() => {
-    setHotKeys({
-      'r': () => setEnableR18(v => !v),
-      '1': () => setMaxPage(v => maxPageValue(v === maxPageValue(false))),
-      'h': () => window.open(UserTopURL, '_blank'),
-    });
-  }, [setHotKeys]);
+  useHotKeys(useMemo(() => ({
+    'r': () => setEnableR18(v => !v),
+    '1': () => setMaxPage(v => maxPageValue(v === maxPageValue(false))),
+    'h': () => window.open(UserTopURL, '_blank'),
+  }), []));
 
   if (error) {
     console.log(`error = ${error}`);

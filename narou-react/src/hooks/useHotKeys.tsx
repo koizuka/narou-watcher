@@ -1,10 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export type HotKeys = {
   [key: string]: (event: KeyboardEvent) => void;
 }
 
-function toKeyString(event: { key: string; shiftKey: boolean; ctrlKey: boolean; altKey: boolean; metaKey: boolean }): string {
+type KeyCombination = {
+  key: string;
+  shiftKey?: boolean;
+  ctrlKey?: boolean;
+  altKey?: boolean;
+  metaKey?: boolean;
+};
+
+function toKeyString(event: KeyCombination): string {
   return [
     event.shiftKey ? 'shift' : undefined,
     event.ctrlKey ? 'ctrl' : undefined,
@@ -15,7 +23,7 @@ function toKeyString(event: { key: string; shiftKey: boolean; ctrlKey: boolean; 
 }
 
 export function checkKeyString(keyString: string) {
-  const [key, ...elems] =
+  const [key, ...modifiers] =
     keyString === '+'
       ? ['+']
       : keyString.endsWith('++')
@@ -23,26 +31,25 @@ export function checkKeyString(keyString: string) {
         : keyString.split('+').reverse();
 
   const availableModifiers = ['shift', 'ctrl', 'alt', 'meta'];
-  if (elems.some(s => !availableModifiers.includes(s))) {
-    throw new Error(`HotKey(${keyString}): unknown modifiers: ${elems.filter(s => !availableModifiers.includes(s))}`);
+  if (modifiers.some(s => !availableModifiers.includes(s))) {
+    throw new Error(`HotKey(${keyString}): unknown modifiers: ${modifiers.filter(s => !availableModifiers.includes(s))}`);
   }
 
-  const shouldBe = toKeyString({
+  const combination: KeyCombination = {
     key,
-    shiftKey: elems.some(s => s === 'shift'),
-    ctrlKey: elems.some(s => s === 'ctrl'),
-    altKey: elems.some(s => s === 'alt'),
-    metaKey: elems.some(s => s === 'meta'),
-  });
+    shiftKey: modifiers.some(s => s === 'shift'),
+    ctrlKey: modifiers.some(s => s === 'ctrl'),
+    altKey: modifiers.some(s => s === 'alt'),
+    metaKey: modifiers.some(s => s === 'meta'),
+  };
+  const shouldBe = toKeyString(combination);
 
   if (shouldBe !== keyString) {
     throw new Error(`HotKey(${keyString}): invalid order: must be ${shouldBe} `);
   }
 }
 
-export function useHotKeys() {
-  const [hotkeys, setHotkeys] = useState<HotKeys>({});
-
+export function useHotKeys(hotkeys: HotKeys) {
   useEffect(() => {
     const keys = Object.keys(hotkeys);
     if (keys.length > 0) {
@@ -60,6 +67,4 @@ export function useHotKeys() {
       };
     }
   }, [hotkeys]);
-
-  return [setHotkeys];
 }

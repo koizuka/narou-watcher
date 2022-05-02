@@ -8,9 +8,9 @@ import {
   ListItemAvatar,
   ListItemButton, ListItemSecondaryAction, ListItemText
 } from '@mui/material';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
-import { useHotKeys } from '../hooks/useHotKeys';
+import { HotKeys, useHotKeys } from '../hooks/useHotKeys';
 import { IsNoticeListItem, itemSummary, nextLink, unread } from "../narouApi/IsNoticeListItem";
 
 function badgeProps(item: IsNoticeListItem): BadgeTypeMap['props'] {
@@ -34,9 +34,7 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
     }
   }, []);
 
-  const [setHotKeys] = useHotKeys();
-
-  useEffect(() => {
+  useHotKeys(useMemo((): HotKeys => {
     if (items) {
       const len = items.length;
       const guard = (f: (event: KeyboardEvent) => void) => (event: KeyboardEvent) => {
@@ -61,7 +59,7 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
         setSelectedIndex(selectedIndex + 1);
       };
 
-      setHotKeys({
+      return {
         ...(selectedIndex > 0 && {
           'ArrowUp': guard(arrowUp),
           'k': guard(arrowUp),
@@ -78,11 +76,11 @@ export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, select
           'Escape': guard(() => selectDefault()),
           'i': guard(() => onSecondaryAction(items[selectedIndex])),
         }),
-      });
+      };
     } else {
-      setHotKeys({});
+      return {};
     }
-  }, [items, onSecondaryAction, selectDefault, selectedIndex, setHotKeys, setSelectedIndex]);
+  }, [items, onSecondaryAction, selectDefault, selectedIndex, setSelectedIndex]));
 
   const buttonProps = useCallback((item: IsNoticeListItem) => {
     if (unread(item) > 0) {
