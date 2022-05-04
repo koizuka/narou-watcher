@@ -143,7 +143,6 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
         <Fab
           variant="extended"
           size="small"
-          disableRipple={true}
           component="a"
           href={UserTopURL}
           target="_blank"
