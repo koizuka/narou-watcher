@@ -51,27 +51,39 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
       }
 
     case 'select':
-      return {
-        ...state,
-        selectedIndex: state.items ? Math.max(Math.min(action.index, state.items.length - 1), -1) : -1,
-      };
+      if (state.items !== undefined) {
+        const selectedIndex = Math.max(Math.min(action.index, state.items.length - 1), -1);
+        if (selectedIndex !== state.selectedIndex) {
+          return { ...state, selectedIndex };
+        }
+      }
+      return state;
 
     case 'select-command':
-      if (!state.items) {
-        return state;
+      if (state.items !== undefined) {
+        let selectedIndex = state.selectedIndex;
+        switch (action.command) {
+          case 'up':
+            selectedIndex = Math.max(state.selectedIndex - 1, 0);
+            break;
+          case 'down':
+            selectedIndex = Math.min(state.selectedIndex + 1, state.items.length - 1);
+            break;
+          case 'home':
+            selectedIndex = 0;
+            break;
+          case 'end':
+            selectedIndex = state.items.length - 1;
+            break;
+          case 'default':
+            selectedIndex = state.defaultIndex;
+            break;
+        }
+        if (selectedIndex !== state.selectedIndex) {
+          return { ...state, selectedIndex };
+        }
       }
-      switch (action.command) {
-        case 'up':
-          return { ...state, selectedIndex: Math.max(state.selectedIndex - 1, 0) };
-        case 'down':
-          return { ...state, selectedIndex: Math.min(state.selectedIndex + 1, state.items.length - 1) };
-        case 'home':
-          return { ...state, selectedIndex: 0 };
-        case 'end':
-          return { ...state, selectedIndex: state.items.length - 1 };
-        case 'default':
-          return { ...state, selectedIndex: state.defaultIndex };
-      }
+      return state;
   }
 }
 
