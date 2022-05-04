@@ -16,7 +16,7 @@ import { useHotKeys } from '../hooks/useHotKeys';
 import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
 import { NarouApi } from '../narouApi/NarouApi';
 import { clearCache, useIsNoticeList } from '../narouApi/useIsNoticeList';
-import { InitialItemsState, itemsStateReducer } from '../reducer/ItemsState';
+import { InitialItemsState, itemsStateReducer, SelectCommand } from '../reducer/ItemsState';
 import { BookmarkSelector } from './BookmarkSelector';
 import { NarouLoginForm } from './NarouLoginForm';
 import { NarouUpdateList } from './NarouUpdateList';
@@ -58,7 +58,8 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
     dispatch({ type: 'set', items: rawItems })
   }, [rawItems]);
   const setSelectedIndex = useCallback((index: number) => dispatch({ type: 'select', index }), []);
-  const selectDefault = useCallback(() => dispatch({ type: 'default' }), []);
+  const selectCommand = useCallback((command: SelectCommand) => dispatch({ type: 'select-command', command }), []);
+  const selectDefault = useCallback(() => selectCommand('default'), [selectCommand]);
 
   const [confirm, setConfirm] = useState<IsNoticeListItem | undefined>(undefined);
 
@@ -135,7 +136,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
       <Box maxWidth={600}>
         <NarouUpdateList items={items}
           selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex}
-          selectDefault={selectDefault}
+          selectCommand={selectCommand}
           onSecondaryAction={setConfirm}
         />
       </Box>

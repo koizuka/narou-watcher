@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
-import { ItemsState, itemsStateReducer } from "./ItemsState";
+import { ItemsState, itemsStateReducer, SelectCommand } from "./ItemsState";
 
 describe('itemsStateReducer', () => {
   const dummyDateTime = DateTime.fromISO('2021-10-03T16:59:00+0900');
@@ -108,6 +108,36 @@ describe('itemsStateReducer', () => {
       [2, 1],
     ])('%d -> %d', (index, expected) => {
       expect(itemsStateReducer(prevState, { type: 'select', index }).selectedIndex).toBe(expected);
+    });
+  })
+
+  describe('select-command', () => {
+    const prevState: ItemsState = {
+      items: [
+        { ...dummyItem, bookmark: 1, latest: 2 },
+        { ...dummyItem, bookmark: 2, latest: 2 },
+      ],
+      numNewItems: 1,
+      selectedIndex: -1,
+      defaultIndex: -1,
+    };
+
+    test.each<[SelectCommand, number, number]>([
+      ['up', 1, 0],
+      ['up', 0, 0],
+      ['down', 0, 1],
+      ['down', 1, 1],
+      ['home', 0, 0],
+      ['home', 1, 0],
+      ['end', 0, 1],
+      ['end', 1, 1],
+      ['default', 0, -1],
+      ['default', 1, -1],
+    ])('%s %d -> %d', (command, selectedIndex, expected) => {
+      expect(itemsStateReducer(
+        { ...prevState, selectedIndex },
+        { type: 'select-command', command }).selectedIndex
+      ).toBe(expected);
     });
   })
 });

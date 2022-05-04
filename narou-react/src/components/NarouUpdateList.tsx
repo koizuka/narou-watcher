@@ -1,63 +1,56 @@
 import { Backdrop, CircularProgress, List } from '@mui/material';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { HotKeys, useHotKeys } from '../hooks/useHotKeys';
 import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
+import { SelectCommand } from '../reducer/ItemsState';
 import { NarouUpdateListItem } from './NarouUpdateListItem';
 
-export function NarouUpdateList({ items, selectedIndex, setSelectedIndex, selectDefault, onSecondaryAction }: {
+const guard = (f: (event: KeyboardEvent) => void) => (event: KeyboardEvent) => {
+  const ignoreClasses = [
+    'MuiDialog-container',
+    'MuiInputBase-input',
+    'MuiMenuItem-root',
+  ];
+  const classList = (event.target as HTMLElement).classList;
+  if (ignoreClasses.some(c => classList.contains(c))) {
+    return;
+  }
+  event.preventDefault();
+  f(event);
+};
+
+export function NarouUpdateList({
+  items,
+  selectedIndex, setSelectedIndex,
+  selectCommand,
+  onSecondaryAction,
+}: {
   items: IsNoticeListItem[];
   selectedIndex: number;
   setSelectedIndex: (index: number) => void;
-  selectDefault: () => void;
+  selectCommand: (command: SelectCommand) => void;
   onSecondaryAction: (item: IsNoticeListItem) => void;
 }) {
   useHotKeys(useMemo((): HotKeys => {
-    if (items) {
-      const len = items.length;
-      const guard = (f: (event: KeyboardEvent) => void) => (event: KeyboardEvent) => {
-        const ignoreClasses = [
-          'MuiDialog-container',
-          'MuiInputBase-input',
-          'MuiMenuItem-root',
-        ];
-        const classList = (event.target as HTMLElement).classList;
-        if (ignoreClasses.some(c => classList.contains(c))) {
-          return;
-        }
-        f(event);
-      };
+    return {
+      'ArrowUp': guard(() => selectCommand('up')),
+      'k': guard(() => selectCommand('up')),
+      'ArrowDown': guard(() => selectCommand('down')),
+      'j': guard(() => selectCommand('down')),
+      'Home': guard(() => selectCommand('home')),
+      'g': guard(() => selectCommand('home')),
+      'End': guard(() => selectCommand('end')),
+      'shift+G': guard(() => selectCommand('end')),
+      'Escape': guard(() => selectCommand('default')),
+    };
+  }, [selectCommand]));
 
-      const arrowUp = (event: KeyboardEvent) => {
-        event.preventDefault();
-        setSelectedIndex(selectedIndex - 1);
-      };
-      const arrowDown = (event: KeyboardEvent) => {
-        event.preventDefault();
-        setSelectedIndex(selectedIndex + 1);
-      };
+  const currentItem = items[selectedIndex];
+  useHotKeys(useMemo((): HotKeys => ({
+    'i': guard(() => onSecondaryAction(currentItem)),
+  }), [currentItem, onSecondaryAction]));
 
-      return {
-        ...(selectedIndex > 0 && {
-          'ArrowUp': guard(arrowUp),
-          'k': guard(arrowUp),
-        }),
-        ...(selectedIndex < len - 1 && {
-          'ArrowDown': guard(arrowDown),
-          'j': guard(arrowDown),
-        }),
-        ...(len > 0 && {
-          'Home': guard(() => setSelectedIndex(0)),
-          'g': guard(() => setSelectedIndex(0)),
-          'End': guard(() => setSelectedIndex(len - 1)),
-          'shift+G': guard(() => setSelectedIndex(len - 1)),
-          'Escape': guard(() => selectDefault()),
-          'i': guard(() => onSecondaryAction(items[selectedIndex])),
-        }),
-      };
-    } else {
-      return {};
-    }
-  }, [items, onSecondaryAction, selectDefault, selectedIndex, setSelectedIndex]));
+  const selectDefault = useCallback(() => selectCommand('default'), [selectCommand]);
 
   if (!items) {
     return <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={true}>

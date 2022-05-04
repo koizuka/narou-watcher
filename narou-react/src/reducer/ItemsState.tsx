@@ -13,10 +13,12 @@ export const InitialItemsState: ItemsState = {
   defaultIndex: -1,
 };
 
+export type SelectCommand = 'up' | 'down' | 'home' | 'end' | 'default';
+
 export type StateAction =
   | { type: 'set', items: IsNoticeListItem[] | undefined }
   | { type: 'select', index: number }
-  | { type: 'default' }
+  | { type: 'select-command', command: SelectCommand }
 
 export function itemsStateReducer(state: ItemsState, action: StateAction): ItemsState {
   switch (action.type) {
@@ -54,11 +56,22 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
         selectedIndex: state.items ? Math.max(Math.min(action.index, state.items.length - 1), -1) : -1,
       };
 
-    case 'default':
-      return {
-        ...state,
-        selectedIndex: state.defaultIndex,
-      };
+    case 'select-command':
+      if (!state.items) {
+        return state;
+      }
+      switch (action.command) {
+        case 'up':
+          return { ...state, selectedIndex: Math.max(state.selectedIndex - 1, 0) };
+        case 'down':
+          return { ...state, selectedIndex: Math.min(state.selectedIndex + 1, state.items.length - 1) };
+        case 'home':
+          return { ...state, selectedIndex: 0 };
+        case 'end':
+          return { ...state, selectedIndex: state.items.length - 1 };
+        case 'default':
+          return { ...state, selectedIndex: state.defaultIndex };
+      }
   }
 }
 
