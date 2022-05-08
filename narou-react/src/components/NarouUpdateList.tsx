@@ -7,9 +7,7 @@ import { NarouUpdateListItem } from './NarouUpdateListItem';
 
 const guard = (f: (event: KeyboardEvent) => void) => (event: KeyboardEvent) => {
   const ignoreClasses = [
-    'MuiDialog-container',
     'MuiInputBase-input',
-    'MuiMenuItem-root',
   ];
   const classList = (event.target as HTMLElement).classList;
   if (ignoreClasses.some(c => classList.contains(c))) {

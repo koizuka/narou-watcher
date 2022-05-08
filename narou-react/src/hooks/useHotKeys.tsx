@@ -19,7 +19,7 @@ function toKeyString(event: KeyboardEvent | KeyCombination): string {
     event.altKey && 'alt',
     event.metaKey && 'meta',
     event.key.toLowerCase(),
-  ].filter(s => s !== false).join('+');
+  ].filter(Boolean).join('+');
 }
 
 export function checkKeyString(keyString: string): string {
@@ -27,7 +27,7 @@ export function checkKeyString(keyString: string): string {
   if (match === null) {
     throw new Error(`Invalid key string: ${keyString}`);
   }
-  const [_, modifiers, key] = match;
+  const [, modifiers, key] = match;
 
   return toKeyString({
     key,
@@ -45,6 +45,13 @@ export function useHotKeys(hotkeys: HotKeys) {
       const table = Object.fromEntries(keys.map(key => [checkKeyString(key), hotkeys[key]]));
 
       const onKeyDown = (event: KeyboardEvent) => {
+        // Material UIの modal 要素(dialog, menuなど)が親に含まれる場合は処理しない
+        if (event.composedPath().some(elem =>
+          elem instanceof HTMLElement && elem.matches('.MuiModal-root')
+        )) {
+          return;
+        }
+
         const handler = table[toKeyString(event)];
         if (handler) {
           handler(event);
