@@ -502,7 +502,6 @@ func novelInfoHandler(ncode, baseUrl string, r18 bool) NarouApiHandlerType {
 				}
 			}
 			indexes = append(indexes, len(novelInfo.Index.Episodes))
-			fmt.Printf("indexes: %v¥n", indexes) // DEBUG
 
 			for c := range novelInfo.Index.ChapterHeads {
 				start := indexes[c]
