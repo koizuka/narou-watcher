@@ -39,13 +39,15 @@ function OpenConfirmDialogRaw({ api, item, onClose }: {
   const abstract = useMemo(() => novelInfo?.abstract.replaceAll('\n', '').replaceAll('<br/>', '\n').split('\n'), [novelInfo]);
 
   return (
-    <Dialog open={!!item} onClose={onClose} fullWidth>
-      <DialogTitle>{item?.title}</DialogTitle>
+    <Dialog open={!!item} onClose={onClose} fullWidth aria-labelledby="title" aria-describedby='abstract'>
+      <DialogTitle id="title">{item?.title}</DialogTitle>
       <DialogContent>作者:<Link href={novelInfo?.author_url} target="_blank">{item?.author_name}</Link></DialogContent>
       {bookmark && <DialogContent>ブックマーク:<Link href={bookmark.url} target="_blank">{bookmark.name}</Link></DialogContent>}
       <DialogContent>
         <Typography variant="h5">あらすじ</Typography>
-        {abstract?.map((line, i) => <DialogContentText key={i}>{line}</DialogContentText>)}
+        <div id="abstract">
+          {abstract?.map((line, i) => <DialogContentText key={i}>{line}</DialogContentText>)}
+        </div>
       </DialogContent>
       <DialogActions>
         <Button size="small" variant="contained" onClick={() => {
