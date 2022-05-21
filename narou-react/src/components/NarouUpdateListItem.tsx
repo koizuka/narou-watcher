@@ -4,18 +4,21 @@ import {
   ListItemAvatar,
   ListItemButton, ListItemSecondaryAction, ListItemText
 } from '@mui/material';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { IsNoticeListItem, itemSummary, nextLink, unread } from "../narouApi/IsNoticeListItem";
 
+export const BEWARE_TIME = 3 * 60 * 1000;
+
 export const NarouUpdateListItem = React.memo(NarouUpdateListItemRaw);
-function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onSecondaryAction, selectDefault }: {
+function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onSecondaryAction, selectDefault, 'data-testid': testId }: {
   item: IsNoticeListItem;
   index: number;
   isSelected: boolean;
   setSelectedIndex: (index: number) => void;
   selectDefault: () => void;
   onSecondaryAction: (item: IsNoticeListItem) => void;
+  'data-testid'?: string;
 }) {
   const scrollIn = useCallback((node: HTMLLIElement | null) => {
     if (node) {
@@ -60,13 +63,29 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
   const onFocusVisible = useCallback(() => setSelectedIndex(index), [index, setSelectedIndex]);
   const onClick = useCallback(() => onSecondaryAction(item), [item, onSecondaryAction]);
 
+  const [bewareTooNew, setBewareTooNew] = useState(false);
+  useEffect(() => {
+    const past = -item.update_time.diffNow('milliseconds').milliseconds;
+    if (past < BEWARE_TIME) {
+      setBewareTooNew(true);
+      const handle = setTimeout(() => {
+        setBewareTooNew(false);
+      }, BEWARE_TIME - past);
+      return () => {
+        clearTimeout(handle);
+      }
+    } else {
+      setBewareTooNew(false);
+    }
+  }, [bewareTooNew, item.update_time]);
+
   const [firstLine, secondLine] = useMemo(() => [
     itemSummary(item),
-    `${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`,
-  ], [item]);
+    `${item.update_time.toFormat('yyyy/LL/dd HH:mm')}${bewareTooNew ? '(注意)' : ''} 更新  作者:${item.author_name}`,
+  ], [bewareTooNew, item]);
 
   return (
-    <ListItem
+    <ListItem data-testid={testId}
       {...(isSelected ? { selected: true, ref: scrollIn } : {})}
     >
       <ListItemButton
