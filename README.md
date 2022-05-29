@@ -60,16 +60,17 @@
       * `new` はブックマーク追加順
     * クエリパラメータ `max_page` は指定分、次ページを合成する。1(初期値)なら指定ページのみ。
       
-|key|type|説明|
-|---|---|---|
-|base_url|string|小説自体のURL|
-|update_time|ISO8601形式の日時|更新時刻(分解能は分まで)|
-|bookmark|uint|しおりの部分番号(短篇なら0)|
-|latest|uint|最終更新の部分番号(短篇なら0)|
-|title|string|小説のタイトル|
-|author_name|string|著者の名前|
-|is_notice|boolean|更新チェック中ならtrue|
-|completed|boolean|完結ならtrue|
+| key         | type         | 説明               |
+|-------------|--------------|------------------|
+| base_url    | string       | 小説自体のURL         |
+| update_time | ISO8601形式の日時 | 更新時刻(分解能は分まで)    |
+| bookmark    | uint         | しおりの部分番号(短篇なら0)  |
+| latest      | uint         | 最終更新の部分番号(短篇なら0) |
+| title       | string       | 小説のタイトル          |
+| author_name | string       | 著者の名前            |
+| is_notice   | boolean      | 更新チェック中ならtrue    |
+| completed   | boolean      | 完結ならtrue         |
+| memo        | string       | メモ(存在する場合のみ)     |
     
 * `GET /narou/novels/:ncode` `GET /r18/novels/:ncode`
     * 小説のncodeから概要ページの内容の抜粋を得る

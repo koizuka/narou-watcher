@@ -23,6 +23,7 @@ type FavNovelList struct {
 	LatestEpisode   uint
 	IsNotice        bool
 	Completed       bool
+	Memo            string
 }
 
 func (i *FavNovelList) NextEpisode() EpisodeURL {
@@ -40,13 +41,14 @@ type FavNovelListTitleInfo struct {
 }
 type FavNovelListUpdateInfo struct {
 	IsNotice   *string      `find:"span.isnotice"`
-	UpdateTime time.Time    `find:"td.info p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
+	UpdateTime time.Time    `find:"p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
 	ItemURL    []EpisodeURL `find:"span.no a" attr:"href"`
 	Completed  *string      `find:"span.no a:last-of-type" re:"(最終)"`
 }
 type ParsedFavNovelList struct {
 	TitleInfo  FavNovelListTitleInfo  `find:"tr:nth-of-type(1)"`
-	UpdateInfo FavNovelListUpdateInfo `find:"tr:nth-of-type(2)"`
+	Memo       *string                `find:"td.bkm_memo" re:"メモ(.*)"`
+	UpdateInfo FavNovelListUpdateInfo `find:"td.info"`
 }
 
 type ParsedFavNovelListPage struct {
@@ -114,6 +116,10 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage,
 	for _, item := range parsed.Items {
 		titleInfo := item.TitleInfo
 		updateInfo := item.UpdateInfo
+		var memo string
+		if item.Memo != nil {
+			memo = *item.Memo
+		}
 		var bookmarkEpisode uint
 		var latestEpisode uint
 		switch len(updateInfo.ItemURL) {
@@ -134,6 +140,7 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage,
 			LatestEpisode:   latestEpisode,
 			IsNotice:        updateInfo.IsNotice != nil,
 			Completed:       updateInfo.Completed != nil,
+			Memo:            memo,
 		})
 	}
 

@@ -32,6 +32,11 @@ const FavNovelListTestHtml = `
 </span></td>
 </tr>
 <tr>
+<td class="bkm_memo">
+<span>メモ</span>楽しい
+</td>
+</tr>
+<tr>
 <td class="info">
 <p>
 
@@ -193,10 +198,10 @@ func TestParseFavNovelList(t *testing.T) {
 			TotalItems:   832,
 			NextPageLink: "http://localhost/index.php?p=2",
 			Items: []FavNovelList{
-				{"ncode", "novel1", "title1", "author1", datetime("2000/01/02 03:04"), 1, 2, false, false},
-				{"ncode", "novel2", "title2", "author2（test）", datetime("2001/02/03 04:05"), 3, 4, true, true},
-				{"ncode", "novel3", "title3", "author3", datetime("2001/02/03 04:06"), 0, 5, true, false},
-				{"ncode", "short", "短篇", "author_short", datetime("2002/03/04 05:06"), 0, 0, false, false},
+				{"ncode", "novel1", "title1", "author1", datetime("2000/01/02 03:04"), 1, 2, false, false, "楽しい"},
+				{"ncode", "novel2", "title2", "author2（test）", datetime("2001/02/03 04:05"), 3, 4, true, true, ""},
+				{"ncode", "novel3", "title3", "author3", datetime("2001/02/03 04:06"), 0, 5, true, false, ""},
+				{"ncode", "short", "短篇", "author_short", datetime("2002/03/04 05:06"), 0, 0, false, false, ""},
 			},
 		}, false},
 	}
