@@ -81,7 +81,7 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
 
   const [firstLine, secondLine] = useMemo(() => [
     itemSummary(item),
-    `${item.update_time.toFormat('yyyy/LL/dd HH:mm')}${bewareTooNew ? '(注意)' : ''} 更新  作者:${item.author_name}`,
+    `${item.update_time.toFormat('yyyy/LL/dd HH:mm')}${bewareTooNew ? '(注意)' : ''} 更新  作者:${item.author_name}${item.memo ? `  メモ:${item.memo}` : ''}`,
   ], [bewareTooNew, item]);
 
   return (

@@ -52,10 +52,11 @@ export function useIsNoticeList(
   const raw_items2 = useMemo(() => {
     if (raw_items) {
       if (bookmark_items) {
-        const keys = new Set(raw_items.map(i => i.base_url));
-        const adds = bookmark_items.filter(i => i.is_notice && !keys.has(i.base_url));
+        // メモがbookmarkにしかないため、bookmarkにあるものを優先する
+        const keys = new Set(bookmark_items.filter(i => i.is_notice).map(i => i.base_url));
+        const adds = raw_items.filter(i => !keys.has(i.base_url));
         if (adds.length > 0) {
-          return [...raw_items, ...adds];
+          return [...bookmark_items, ...adds];
         }
       }
     }

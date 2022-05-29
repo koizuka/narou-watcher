@@ -8,10 +8,11 @@ export type IsNoticeListItem = {
   title: string;
   author_name: string;
   completed?: boolean;
+  memo?: string;
   isR18: boolean;
 };
 
- export function hasUnread(item: Pick<IsNoticeListItem, 'latest' | 'bookmark'>): boolean {
+export function hasUnread(item: Pick<IsNoticeListItem, 'latest' | 'bookmark'>): boolean {
   return item.latest > item.bookmark;
 }
 
