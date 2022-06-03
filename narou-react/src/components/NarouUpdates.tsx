@@ -23,6 +23,9 @@ import { NarouUpdateList } from './NarouUpdateList';
 import { OpenConfirmDialog } from './OpenConfirmDialog';
 
 const UserTopURL = 'https://syosetu.com/user/top/';
+const UserTopName = 'ユーザーホーム';
+const R18UserTopURL = 'https://syosetu.com/xuser/top/';
+const R18UserTopName = 'Xユーザーホーム';
 
 function maxPageValue(sw: boolean): number {
   return sw ? 2 : 1;
@@ -66,6 +69,8 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   const { setAppBadge, clearAppBadge } = useAppBadge();
   const { setClientBadge, clearClientBadge } = useClientBadge();
 
+  const userTopURL = enableR18 ? R18UserTopURL : UserTopURL;
+
   useEffect(() => {
     if (numNewItems !== null) {
       document.title = `なろう 未読:${numNewItems}`;
@@ -90,8 +95,8 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   useHotKeys(useMemo(() => ({
     'r': () => setEnableR18(v => !v),
     '1': () => setMaxPage(v => maxPageValue(v === maxPageValue(false))),
-    'h': () => window.open(UserTopURL, '_blank'),
-  }), []));
+    'h': () => window.open(userTopURL, '_blank'),
+  }), [userTopURL]));
 
   const onClose = useCallback(() => setConfirm(undefined), []);
 
@@ -145,9 +150,9 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
           variant="extended"
           size="small"
           component="a"
-          href={UserTopURL}
+          href={userTopURL}
           target="_blank"
-        >ユーザーホーム</Fab>
+        >{enableR18 ? R18UserTopName : UserTopName}</Fab>
       </Box>
     </Box>
   </>;
