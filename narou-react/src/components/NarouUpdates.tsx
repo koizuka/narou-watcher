@@ -58,8 +58,8 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   const [{ items, numNewItems, selectedIndex }, dispatch] = useReducer(itemsStateReducer, InitialItemsState)
 
   useEffect(() => {
-    dispatch({ type: 'set', items: rawItems })
-  }, [rawItems]);
+    dispatch({ type: 'set', items: rawItems, bookmark: bookmark !== 0 })
+  }, [bookmark, rawItems]);
   const setSelectedIndex = useCallback((index: number) => dispatch({ type: 'select', index }), []);
   const selectCommand = useCallback((command: SelectCommand) => dispatch({ type: 'select-command', command }), []);
   const selectDefault = useCallback(() => selectCommand('default'), [selectCommand]);

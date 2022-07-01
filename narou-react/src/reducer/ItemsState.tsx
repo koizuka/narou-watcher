@@ -16,7 +16,7 @@ export const InitialItemsState: ItemsState = {
 export type SelectCommand = 'up' | 'down' | 'home' | 'end' | 'default';
 
 export type StateAction =
-  | { type: 'set', items: IsNoticeListItem[] | undefined }
+  | { type: 'set', items: IsNoticeListItem[] | undefined; bookmark?: boolean }
   | { type: 'select', index: number }
   | { type: 'select-command', command: SelectCommand }
 
@@ -29,14 +29,14 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
         }
 
         // 未読があって少ない順にし、未読がある場合、同じ未読数同士は更新日時昇順、未読がない場合は更新日時降順
-        const items = action.items.sort((a, b) => {
+        const items = (action.bookmark ? action.items : action.items.sort((a, b) => {
           return compare(a, b,
             i => score(i),
             a.bookmark < a.latest ?
               i => i.update_time.toMillis() :
               reverse(i => i.update_time.toMillis()),
             i => i.base_url);
-        })
+        }))
           .slice(0, 30);
 
         const head = items[0];

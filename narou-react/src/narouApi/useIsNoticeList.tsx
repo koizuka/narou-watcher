@@ -48,16 +48,10 @@ export function useIsNoticeList(
     async path => api.call(path),
   );
 
-  // merge bookmark
   const raw_items2 = useMemo(() => {
     if (raw_items) {
       if (bookmark_items) {
-        // メモがbookmarkにしかないため、bookmarkにあるものを優先する
-        const keys = new Set(bookmark_items.filter(i => i.is_notice).map(i => i.base_url));
-        const adds = raw_items.filter(i => !keys.has(i.base_url));
-        if (adds.length > 0) {
-          return [...bookmark_items, ...adds];
-        }
+        return bookmark_items;
       }
     }
     return raw_items;
