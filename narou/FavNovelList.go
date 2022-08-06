@@ -53,7 +53,8 @@ type ParsedFavNovelList struct {
 
 type ParsedFavNovelListPage struct {
 	NumItems     uint                 `find:"div#sub ul.category_box li.now a" re:".*\\(([0-9]+)\\)$"`
-	TotalItems   uint                 `find:"div#main div.nowcategory" re:"\\(全([0-9]+)件\\)"`
+	TotalItems1  *uint                `find:"div#main div.nowcategory" re:"\\(全([0-9]+)件\\)"`
+	TotalItems2  *uint                `find:"div#contents h2" re:"\\(全([0-9]+)件\\)"`
 	NextPageLink *string              `find:"div#main form div:nth-of-type(1) a[title='next page']" attr:"href"`
 	Items        []ParsedFavNovelList `find:"div#main table.favnovel"`
 }
@@ -105,7 +106,14 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage,
 	}
 
 	result.NumItems = parsed.NumItems
-	result.TotalItems = parsed.TotalItems
+	if parsed.TotalItems1 == nil && parsed.TotalItems2 == nil {
+		return nil, fmt.Errorf("Total Items not found")
+	}
+	if parsed.TotalItems1 != nil {
+		result.TotalItems = *parsed.TotalItems1
+	} else {
+		result.TotalItems = *parsed.TotalItems2
+	}
 	if parsed.NextPageLink != nil {
 		result.NextPageLink, err = page.ResolveLink(*parsed.NextPageLink)
 		if err != nil {

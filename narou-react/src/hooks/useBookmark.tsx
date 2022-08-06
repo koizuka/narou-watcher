@@ -4,10 +4,10 @@ import { BookmarkInfo, useBookmarkInfo } from '../narouApi/useBookmarkInfo';
 import { bookmarkStateReducer, InitialBookmarkState } from '../reducer/BookmarkState';
 import { HotKeys, useHotKeys } from './useHotKeys';
 
-export function useBookmark(server: NarouApi): [number, (cur: number) => void, BookmarkInfo | undefined] {
+export function useBookmark(server: NarouApi, isR18: boolean): [number, (cur: number) => void, BookmarkInfo | undefined] {
   const [{ bookmarks, selected }, dispatch] = useReducer(bookmarkStateReducer, InitialBookmarkState);
 
-  const { data } = useBookmarkInfo(server, false);
+  const { data } = useBookmarkInfo(server, isR18);
   useEffect(() => dispatch({ type: 'set', bookmarks: data }), [data]);
 
   useHotKeys(useMemo((): HotKeys => {
