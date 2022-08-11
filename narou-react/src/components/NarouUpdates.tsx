@@ -53,7 +53,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   const [maxPage, setMaxPage] = useState(maxPageValue(false));
 
   const [bookmark, setBookmark, bookmarks] = useBookmark(server, enableR18);
-  const { data: rawItems, error } = useIsNoticeList(server, { enableR18, maxPage, bookmark });
+  const { data: rawItems, error } = useIsNoticeList(server, { isR18: enableR18, maxPage, bookmark });
 
   const [{ items, numNewItems, selectedIndex }, dispatch] = useReducer(itemsStateReducer, InitialItemsState)
 
