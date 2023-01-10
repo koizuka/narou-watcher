@@ -10,7 +10,7 @@
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@mui/icons-material": "^5.11.0",
-    "@mui/material": "^5.11.3",
+    "@mui/material": "^5.11.4",
     "@types/jest": "^27.5.0",
     "@types/luxon": "^3.2.0",
     "@types/react": "^18.0.26",
