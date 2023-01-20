@@ -66,7 +66,7 @@
     "eslint-plugin-testing-library": "^5.9.1",
     "jest": "^27.5.1",
     "ts-jest": "^27.1.4",
-    "vite-tsconfig-paths": "^4.0.3",
+    "vite-tsconfig-paths": "^4.0.5",
     "whatwg-fetch": "^3.6.2"
   }
 }
