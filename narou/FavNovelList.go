@@ -70,7 +70,7 @@ type FavNovelListPage struct {
 func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage, error) {
 	title := page.Find("title").Text()
 	if title != wantTitle {
-		return nil, fmt.Errorf("favnobel title mismatch: got:'%v', want:'%v'", title, wantTitle)
+		return nil, TitleMismatchError{title, wantTitle}
 	}
 	//
 	// table.favnovel
@@ -102,7 +102,7 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage,
 		scraper.UnmarshalOption{Loc: NarouLocation},
 	)
 	if err != nil {
-		return result, fmt.Errorf("favnovel unmarshal failed: %v", err)
+		return result, UnmarshalError{err}
 	}
 
 	result.NumItems = parsed.NumItems

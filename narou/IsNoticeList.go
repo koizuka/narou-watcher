@@ -62,9 +62,13 @@ type IsNoticeListPage struct {
  */
 func ParseIsNoticeList(page *scraper.Page) (*IsNoticeListPage, error) {
 	const wantTitle = "更新通知チェック中一覧"
+	const maintenanceTitle = "メンテナンス中 | 小説家になろうグループ"
 	title := page.Find("title").Text()
+	if title == maintenanceTitle {
+		return nil, fmt.Errorf("under maintenance")
+	}
 	if title != wantTitle {
-		return nil, fmt.Errorf("title mismatch: got:'%v', want:'%v'", title, wantTitle)
+		return nil, TitleMismatchError{title, wantTitle}
 	}
 	//
 	// table.favnovel
@@ -96,7 +100,7 @@ func ParseIsNoticeList(page *scraper.Page) (*IsNoticeListPage, error) {
 		scraper.UnmarshalOption{Loc: NarouLocation},
 	)
 	if err != nil {
-		return result, fmt.Errorf("unmarshal failed: %v", err)
+		return result, UnmarshalError{err}
 	}
 
 	result.NumItems = parsed.NumItems

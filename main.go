@@ -117,7 +117,7 @@ func GetIsNoticeListPage(watcher *narou.NarouWatcher, url string) (*narou.IsNoti
 
 	itemsPage, err := narou.ParseIsNoticeList(page)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%v from %v", err, url)
 	}
 	return itemsPage, nil
 }

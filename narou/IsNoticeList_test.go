@@ -2,7 +2,6 @@ package narou
 
 import (
 	"bytes"
-	"errors"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/google/go-cmp/cmp"
 	"github.com/koizuka/scraper"
@@ -178,7 +177,7 @@ func TestParseIsNoticeList(t *testing.T) {
 		},
 		{"タイトルエラー", args{"<html><head><title>invalid title</title></head></html>"},
 			nil,
-			errors.New("title mismatch: got:'invalid title', want:'更新通知チェック中一覧'"),
+			TitleMismatchError{"invalid title", "更新通知チェック中一覧"},
 		},
 	}
 	for _, tt := range tests {

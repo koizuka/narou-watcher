@@ -1,7 +1,6 @@
 package narou
 
 import (
-	"fmt"
 	"github.com/koizuka/scraper"
 )
 
@@ -22,13 +21,13 @@ func ParseUserTop(page *scraper.Page) (*UserTopInfo, error) {
 	const wantTitle = "ホーム｜ユーザページ"
 	title := page.Find("title").Text()
 	if title != wantTitle {
-		return nil, fmt.Errorf("title mismatch: got:'%v', want:'%v'", title, wantTitle)
+		return nil, TitleMismatchError{title, wantTitle}
 	}
 
 	var userTopInfo UserTopInfo
 	err := scraper.Unmarshal(&userTopInfo, page.Find("body"), scraper.UnmarshalOption{})
 	if err != nil {
-		return nil, fmt.Errorf("unmarshal failed: %v", err)
+		return nil, UnmarshalError{err}
 	}
 
 	return &userTopInfo, nil

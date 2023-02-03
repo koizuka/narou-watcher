@@ -1,7 +1,6 @@
 package narou
 
 import (
-	"fmt"
 	"github.com/koizuka/scraper"
 	"time"
 )
@@ -38,7 +37,7 @@ func ParseNovelInfo(page *scraper.Page) (*NovelInfo, error) {
 	var parsed NovelInfo
 	err := scraper.Unmarshal(&parsed, page.Selection, scraper.UnmarshalOption{Loc: NarouLocation})
 	if err != nil {
-		return nil, fmt.Errorf("unmarshal error: %v", err)
+		return nil, UnmarshalError{err}
 	}
 
 	return &parsed, nil
@@ -51,7 +50,7 @@ func IsAgeConfirmPage(page *scraper.Page) (bool, error) {
 	var parsed AgeConfirm
 	err := scraper.Unmarshal(&parsed, page.Selection, scraper.UnmarshalOption{})
 	if err != nil {
-		return false, fmt.Errorf("unmarshal error: %v", err)
+		return false, UnmarshalError{err}
 	}
 
 	return parsed.Confirm != nil && *parsed.Confirm == "年齢確認", nil
