@@ -17,6 +17,7 @@ import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
 import { NarouApi } from '../narouApi/NarouApi';
 import { clearCache, useIsNoticeList } from '../narouApi/useIsNoticeList';
 import { InitialItemsState, itemsStateReducer, SelectCommand } from '../reducer/ItemsState';
+import { AutoLinkText } from './AutoLinkText';
 import { BookmarkSelector } from './BookmarkSelector';
 import { NarouLoginForm } from './NarouLoginForm';
 import { NarouUpdateList } from './NarouUpdateList';
@@ -109,7 +110,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
       Server({JSON.stringify(server.baseUrl)}) is not working...?
       <button onClick={() => window.location.reload()}>reload</button>
       <p>status: {error.status}</p>
-      <code>{error.message}</code>
+      <code><AutoLinkText text={error.message} /></code>
     </div>;
   }
   if (!items) {
