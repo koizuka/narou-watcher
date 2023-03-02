@@ -9,8 +9,8 @@
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
-    "@mui/icons-material": "^5.11.9",
-    "@mui/material": "^5.11.10",
+    "@mui/icons-material": "^5.11.11",
+    "@mui/material": "^5.11.11",
     "@types/jest": "^27.5.0",
     "@types/luxon": "^3.2.0",
     "@types/react": "^18.0.27",
