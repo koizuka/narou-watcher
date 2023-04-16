@@ -119,7 +119,7 @@ func (narou *NarouWatcher) login(page *scraper.Page, credentials *Credentials) (
 }
 
 func (narou *NarouWatcher) Login(credentials *Credentials) error {
-	page, err := narou.session.GetPage("https://ssl.syosetu.com/login/input/")
+	page, err := narou.session.GetPage("https://syosetu.com/login/input/")
 	if err != nil {
 		return err
 	}
