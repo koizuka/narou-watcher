@@ -7,7 +7,8 @@ export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string>('');
 
-  const postLogin = useCallback(async () => {
+  const postLogin = useCallback(() => {
+    void (async () => {
     const res: Response = await props.api.login(userId, password);
     if (!res.ok) {
       const text = await res.text();
@@ -15,6 +16,7 @@ export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
     } else {
       props.onLogin();
     }
+  })();
   }, [userId, password, props]);
 
   const passwordRef = useRef<HTMLInputElement>();
@@ -25,13 +27,13 @@ export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
   }, []);
 
   return (<>
-    <Dialog open={error !== ''} onClose={() => closeError()}>
+    <Dialog open={error !== ''} onClose={() => { closeError(); }}>
       <DialogTitle>ログインできませんでした</DialogTitle>
       <DialogContent>
         <pre>{error}</pre>
       </DialogContent>
       <DialogActions>
-        <Button autoFocus onClick={() => closeError()}>OK</Button>
+        <Button autoFocus onClick={() => { closeError(); }}>OK</Button>
       </DialogActions>
     </Dialog>
     <Container maxWidth="sm">
@@ -41,14 +43,14 @@ export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
         <CardContent>
           <Box display="flex" flexDirection="column" justifyContent="center">
             <TextField id="id" name="id" label="ID or email" autoFocus
-              value={userId} onChange={e => setUserId(e.target.value)}
+              value={userId} onChange={e => { setUserId(e.target.value); }}
               onKeyPress={e => {
                 if (e.key === 'Enter') {
                   passwordRef.current?.focus();
                 }
               }} data-testid="id" />
             <TextField id="password" name="password" label="password" type="password"
-              value={password} onChange={e => setPassword(e.target.value)}
+              value={password} onChange={e => { setPassword(e.target.value); }}
               inputRef={passwordRef} onKeyPress={e => {
                 if (e.key === 'Enter') {
                   postLogin();

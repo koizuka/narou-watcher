@@ -4,4 +4,7 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
   }
+  toString(): string {
+    return `${this.name} ${this.status} ${this.message}`;
+  }
 }

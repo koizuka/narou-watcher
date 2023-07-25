@@ -20,13 +20,13 @@ function OpenConfirmDialogRaw({ api, item, onClose }: {
   onClose: () => void;
 }) {
   const { data: novelInfo } = useNovelInfo(api, item?.base_url);
-  const { data: bookmarkInfo } = useBookmarkInfo(novelInfo?.bookmark_no ? api : null, item?.isR18 || false);
+  const { data: bookmarkInfo } = useBookmarkInfo(novelInfo?.bookmark_no ? api : null, item?.isR18 ?? false);
 
   const bookmark = useMemo(() => {
     console.log('novelInfo:', novelInfo);
     console.log('bookmarkInfo:', bookmarkInfo);
     const bookmark_no = novelInfo?.bookmark_no
-    if (bookmarkInfo && bookmark_no && novelInfo?.bookmark_url) {
+    if (bookmarkInfo && bookmark_no && novelInfo.bookmark_url) {
       return {
         no: bookmark_no,
         name: bookmarkInfo[bookmark_no].name,
@@ -60,7 +60,7 @@ function OpenConfirmDialogRaw({ api, item, onClose }: {
             window.open(nextLink(item), '_blank');
           onClose();
         }}>最新{item?.latest}部分</Button>
-        <Button size="small" variant="contained" onClick={() => onClose()}>キャンセル</Button>
+        <Button size="small" variant="contained" onClick={() => { onClose(); }}>キャンセル</Button>
       </DialogActions>
     </Dialog>
   );

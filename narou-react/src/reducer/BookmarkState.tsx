@@ -1,6 +1,6 @@
 import { BookmarkInfo } from "../narouApi/useBookmarkInfo";
 
-export type BookmarkState = {
+export interface BookmarkState {
   bookmarks: BookmarkInfo | undefined;
   selected: number;
 }

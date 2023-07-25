@@ -3,8 +3,9 @@ import { useMemo } from 'react';
 import useSWR, { mutate } from 'swr';
 import { IsNoticeListItem } from './IsNoticeListItem';
 import { NarouApi } from './NarouApi';
+import { ApiError } from './ApiError';
 
-type IsNoticeListRecord = {
+interface IsNoticeListRecord {
   base_url: string;
   update_time: string;
   bookmark: number;
@@ -13,12 +14,12 @@ type IsNoticeListRecord = {
   author_name: string;
   completed?: boolean;
   is_notice?: boolean; // only in bookmark
-};
+}
 
 // login / logout したらキャッシュをすぐに消す
 export function clearCache() {
-  mutate('/narou/isnoticelist');
-  mutate('/r18/isnoticelist');
+  void mutate('/narou/isnoticelist');
+  void mutate('/r18/isnoticelist');
 }
 
 export function useIsNoticeList(
@@ -30,11 +31,11 @@ export function useIsNoticeList(
       bookmark: number,
     }
 ) {
-  const { data: raw_items, error } = useSWR<IsNoticeListRecord[]>(
+  const { data: raw_items, error } = useSWR<IsNoticeListRecord[], ApiError>(
     isR18 ?
       NarouApi.isnoticelistR18({ maxPage }) :
       NarouApi.isnoticelist({ maxPage }),
-    async path => api.call(path),
+    async (path: string) => api.call(path),
     {
       onErrorRetry: (error) => {
         console.log(`onErrorRetry: ${error.status}: ${error}`);
@@ -43,13 +44,13 @@ export function useIsNoticeList(
 
   // order: updated_at:ブクマ更新順, new:ブクマ追加順
   const order: 'updated_at' | 'new' = 'updated_at';
-  const { data: bookmark_items, error: bookmark_error } = useSWR<IsNoticeListRecord[]>((!error && bookmark) ?
+  const { data: bookmark_items, error: bookmark_error } = useSWR<IsNoticeListRecord[], ApiError>((!error && bookmark) ?
     (isR18 ?
       NarouApi.bookmarkR18(bookmark, { order }) :
       NarouApi.bookmark(bookmark, { order })
     )
     : null,
-    async path => api.call(path),
+    async (path: string) => api.call(path),
   );
 
   const raw_items2 = useMemo(() => {
@@ -75,5 +76,5 @@ export function useIsNoticeList(
     [raw_items2, isR18]
   );
 
-  return { data: error ? undefined : items, error: error || bookmark_error };
+  return { data: error ? undefined : items, error: error ?? bookmark_error };
 }

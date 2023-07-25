@@ -13,7 +13,7 @@ describe('NarouUpdateListItem', () => {
     Settings.now = () => Date.now();
   })
 
-  test('beware too new', async () => {
+  test('beware too new', () => {
     const update_time = Date.now();
 
     Settings.now = () => update_time; // fix current time

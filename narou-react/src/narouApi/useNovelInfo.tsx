@@ -1,8 +1,9 @@
 import { NarouApi } from './NarouApi';
 import useSWR from 'swr';
 import { useMemo } from 'react';
+import { ApiError } from './ApiError';
 
-type NovelInfo = {
+interface NovelInfo {
   base_url: string;
   title: string;
   abstract: string;
@@ -12,7 +13,7 @@ type NovelInfo = {
   bookmark_url?: string;
   bookmark_no?: number;
   bookmark_episode?: number;
-};
+}
 
 function extractInfoPath(base_url?: string): { host: string, ncode: string } | null {
   if (!base_url) {
@@ -48,7 +49,7 @@ export function useNovelInfo(
     }
   }, [info])
 
-  const { data, error } = useSWR<NovelInfo>(key, async path => api.call(path));
+  const { data, error } = useSWR<NovelInfo, ApiError>(key, async (path: string) => api.call(path));
 
   return { data, error };
 }

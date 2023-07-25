@@ -8,13 +8,13 @@ export function useBookmark(server: NarouApi, isR18: boolean): [number, (cur: nu
   const [{ bookmarks, selected }, dispatch] = useReducer(bookmarkStateReducer, InitialBookmarkState);
 
   const { data } = useBookmarkInfo(server, isR18);
-  useEffect(() => dispatch({ type: 'set', bookmarks: data }), [data]);
+  useEffect(() => { dispatch({ type: 'set', bookmarks: data }); }, [data]);
 
   useHotKeys(useMemo((): HotKeys => {
     if (bookmarks) {
       return {
-        'b': () => dispatch({ type: 'next' }),
-        'shift+B': () => dispatch({ type: 'prev' }),
+        'b': () => { dispatch({ type: 'next' }); },
+        'shift+B': () => { dispatch({ type: 'prev' }); },
       };
     } else {
       return {};
@@ -23,7 +23,7 @@ export function useBookmark(server: NarouApi, isR18: boolean): [number, (cur: nu
 
   return [
     selected,
-    useCallback((selected: number) => dispatch({ type: 'select', selected }), []),
+    useCallback((selected: number) => { dispatch({ type: 'select', selected }); }, []),
     bookmarks,
   ];
 }

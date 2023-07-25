@@ -1,27 +1,26 @@
 import { useMemo } from "react"
 import useSWR from "swr"
 import { NarouApi } from "./NarouApi"
+import { ApiError } from "./ApiError";
 
-export type BookmarkInfo = {
-    [no: number]: {
+export type BookmarkInfo = Record<number, {
         name: string;
         num_items: number;
-    }
-}
+    }>;
 
-type BookmarkInfoRecord = {
+interface BookmarkInfoRecord {
     no: number;
     name: string;
     num_items: number;
 }
 
 export function useBookmarkInfo(api: NarouApi | null, r18: boolean) {
-    const { data, error } = useSWR<BookmarkInfoRecord[]>(
+    const { data, error } = useSWR<BookmarkInfoRecord[], ApiError>(
         api ?
             (r18 ? NarouApi.bookmarksR18() : NarouApi.bookmarks())
             :
             null,
-        async key => api ? api.call(key) : [],
+        async (key: string) => api ? api.call(key) : [],
     )
 
     const info: BookmarkInfo | undefined = useMemo(() => {

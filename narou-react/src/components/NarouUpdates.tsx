@@ -10,7 +10,8 @@ import {
   Toolbar
 } from '@mui/material';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { useAppBadge, useClientBadge } from '../hooks/useAppBadge';
+import { useAppBadge } from '../hooks/useAppBadge';
+import { useClientBadge } from "../hooks/useClientBadge";
 import { useBookmark } from '../hooks/useBookmark';
 import { useHotKeys } from '../hooks/useHotKeys';
 import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
@@ -42,7 +43,7 @@ function R18SwitchRaw({ enableR18, setEnableR18 }: {
       control={
         <Switch
           checked={enableR18}
-          onChange={event => setEnableR18(event.target.checked)}
+          onChange={event => { setEnableR18(event.target.checked); }}
         />}
     />
   );
@@ -61,9 +62,9 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   useEffect(() => {
     dispatch({ type: 'set', items: rawItems, bookmark: bookmark !== 0 })
   }, [bookmark, rawItems]);
-  const setSelectedIndex = useCallback((index: number) => dispatch({ type: 'select', index }), []);
-  const selectCommand = useCallback((command: SelectCommand) => dispatch({ type: 'select-command', command }), []);
-  const selectDefault = useCallback(() => selectCommand('default'), [selectCommand]);
+  const setSelectedIndex = useCallback((index: number) => { dispatch({ type: 'select', index }); }, []);
+  const selectCommand = useCallback((command: SelectCommand) => { dispatch({ type: 'select-command', command }); }, []);
+  const selectDefault = useCallback(() => { selectCommand('default'); }, [selectCommand]);
 
   const [confirm, setConfirm] = useState<IsNoticeListItem | undefined>(undefined);
 
@@ -76,11 +77,11 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
     if (numNewItems !== null) {
       document.title = `なろう 未読:${numNewItems}`;
       if (numNewItems) {
-        setAppBadge(numNewItems);
-        setClientBadge(numNewItems);
+        void setAppBadge(numNewItems);
+        void setClientBadge(numNewItems);
       } else {
-        clearAppBadge();
-        clearClientBadge();
+        void clearAppBadge();
+        void clearClientBadge();
       }
     }
   }, [clearAppBadge, clearClientBadge, numNewItems, setAppBadge, setClientBadge]);
@@ -94,21 +95,21 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   }, [selectedIndex]);
 
   useHotKeys(useMemo(() => ({
-    'r': () => setEnableR18(v => !v),
-    '1': () => setMaxPage(v => maxPageValue(v === maxPageValue(false))),
+    'r': () => { setEnableR18(v => !v); },
+    '1': () => { setMaxPage(v => maxPageValue(v === maxPageValue(false))); },
     'h': () => window.open(userTopURL, '_blank'),
   }), [userTopURL]));
 
-  const onClose = useCallback(() => setConfirm(undefined), []);
+  const onClose = useCallback(() => { setConfirm(undefined); }, []);
 
   if (error) {
-    console.log(`error = ${error}`);
+    console.log(`error = ${error.toString()}`);
     if (error.status === 401) {
       onUnauthorized();
     }
     return <div>
       Server({JSON.stringify(server.baseUrl)}) is not working...?
-      <button onClick={() => window.location.reload()}>reload</button>
+      <button onClick={() => { window.location.reload(); }}>reload</button>
       <p>status: {error.status}</p>
       <code><AutoLinkText text={error.message} /></code>
     </div>;
@@ -169,6 +170,13 @@ export function NarouUpdates({ api }: { api: NarouApi }) {
     }, 0);
   }, []);
 
+  const onLogout = useCallback(() => {
+    void (async () => {
+    await api.logout();
+    clearCache();
+    setLoginMode(true);
+  })(); }, [api]);
+
   if (loginMode) {
     return <NarouLoginForm api={api} onLogin={() => {
       console.log('logged in!');
@@ -181,11 +189,7 @@ export function NarouUpdates({ api }: { api: NarouApi }) {
     <>
       <NarouUpdateScreen server={api}
         onUnauthorized={onUnauthorized} />
-      <Button onClick={async () => {
-        await api.logout();
-        clearCache();
-        setLoginMode(true);
-      }}>logout</Button>
+      <Button onClick={onLogout}>logout</Button>
     </>
   );
 }

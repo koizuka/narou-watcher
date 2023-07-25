@@ -1,16 +1,14 @@
 import { useEffect } from 'react';
 
-export type HotKeys = {
-  [key: string]: (event: KeyboardEvent) => void;
-}
+export type HotKeys = Record<string, (event: KeyboardEvent) => void>;
 
-type KeyCombination = {
+interface KeyCombination {
   key: string;
   shiftKey: boolean;
   ctrlKey: boolean;
   altKey: boolean;
   metaKey: boolean;
-};
+}
 
 function toKeyString(event: KeyboardEvent | KeyCombination): string {
   return [
@@ -53,6 +51,7 @@ export function useHotKeys(hotkeys: HotKeys) {
         }
 
         const handler = table[toKeyString(event)];
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (handler) {
           handler(event);
         }

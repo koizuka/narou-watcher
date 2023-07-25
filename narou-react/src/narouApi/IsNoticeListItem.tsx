@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 
-export type IsNoticeListItem = {
+export interface IsNoticeListItem {
   base_url: string;
   update_time: DateTime;
   bookmark: number;
@@ -10,7 +10,7 @@ export type IsNoticeListItem = {
   completed?: boolean;
   memo?: string;
   isR18: boolean;
-};
+}
 
 export function hasUnread(item: Pick<IsNoticeListItem, 'latest' | 'bookmark'>): boolean {
   return item.latest > item.bookmark;

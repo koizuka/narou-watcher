@@ -17,7 +17,7 @@ const NarouApiMock = NarouApi as unknown as jest.Mock;
 function setup() {
 	const mockCall = jest.fn<Promise<unknown>, [string]>();
 	const mockLogin = jest.fn(async (): Promise<Response> => {
-		return new Response();
+		return Promise.resolve(new Response());
 	});
 
 	NarouApiMock.mockImplementation(() => {
@@ -43,6 +43,7 @@ test('login page when not logged in', async () => {
 				</SWRConfig>
 			</ThemeProvider>
 		);
+		return Promise.resolve();
 	});
 
 	expect(mockCall).toHaveBeenCalled();
@@ -80,6 +81,7 @@ test('empty', async () => {
 				</SWRConfig>
 			</ThemeProvider>
 		);
+		return Promise.resolve();
 	});
 
 	expect(mockCall).toHaveBeenCalled();

@@ -1,11 +1,11 @@
 import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
 
-export type ItemsState = {
+export interface ItemsState {
   items?: IsNoticeListItem[];
   numNewItems: number | null;
   selectedIndex: number;
   defaultIndex: number;
-};
+}
 
 export const InitialItemsState: ItemsState = {
   numNewItems: null,
@@ -40,7 +40,7 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
           .slice(0, 30);
 
         const head = items[0];
-        const index = head && head.bookmark < head.latest ? 0 : -1;
+        const index = items[0] && head.bookmark < head.latest ? 0 : -1;
         return {
           ...state,
           items,
@@ -95,7 +95,7 @@ function ascend<T>(a: T, b: T, f: (v: T) => (number | string)): -1 | 0 | 1 {
   return 0;
 }
 
-type Reverse<T> = {
+interface Reverse<T> {
   f: (v: T) => number | string
 }
 function reverse<T>(f: (v: T) => (number | string)): Reverse<T> {
@@ -106,7 +106,7 @@ function compare<T>(a: T, b: T, ...comparators: (((v: T) => (number | string)) |
   for (const f of comparators) {
     let c;
     if (typeof f === 'object') {
-      c = ascend(b, a, (f as Reverse<T>).f);
+      c = ascend(b, a, (f ).f);
     } else {
       c = ascend(a, b, f);
     }

@@ -11,7 +11,13 @@
     "newlist",
     "preval",
     "syosetu",
+    "testid",
+    "TTFB",
     "vite",
     "vitejs"
-  ]
+  ],
+  "editor.defaultFormatter": "GitHub.copilot",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  }
 }

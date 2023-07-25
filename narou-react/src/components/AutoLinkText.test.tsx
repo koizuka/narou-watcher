@@ -5,12 +5,13 @@ import { AutoLinkText } from './AutoLinkText';
 const text = "this is https://example.com https://example2.com";
 
 test('AutoLinkText', async () => {
-  await act(async () => {
+  await act(() => {
     render(
       <div data-testid="target">
         <AutoLinkText text={text} />
       </div>
     );
+    return Promise.resolve();
   });
 
   const target = screen.getByTestId('target');

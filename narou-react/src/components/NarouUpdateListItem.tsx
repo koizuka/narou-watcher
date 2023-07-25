@@ -41,7 +41,7 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
       return {
         component: 'a',
         href: nextLink(item),
-        onClick: () => selectDefault(),
+        onClick: () => { selectDefault(); },
         target: '_blank',
         tabIndex: 0,
         ref: ref,
@@ -60,8 +60,8 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
     return { color: 'primary', badgeContent: numNewEpisodes };
   }, [item.bookmark, item.latest]);
 
-  const onFocusVisible = useCallback(() => setSelectedIndex(index), [index, setSelectedIndex]);
-  const onClick = useCallback(() => onSecondaryAction(item), [item, onSecondaryAction]);
+  const onFocusVisible = useCallback(() => { setSelectedIndex(index); }, [index, setSelectedIndex]);
+  const onClick = useCallback(() => { onSecondaryAction(item); }, [item, onSecondaryAction]);
 
   const [bewareTooNew, setBewareTooNew] = useState(false);
   useEffect(() => {
