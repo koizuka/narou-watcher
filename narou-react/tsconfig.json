@@ -8,8 +8,8 @@
     ],
     "types": [
       "vite/client",
-      "react/next",
-      "react-dom/next"
+      "react",
+      "react-dom"
     ],
     "allowJs": true,
     "skipLibCheck": true,
