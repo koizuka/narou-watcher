@@ -397,29 +397,29 @@ func favNovelListHandler(baseUrl, title string, category uint, order string, pag
 }
 
 /*
- _ga=GA1.2.480990279.1606738764;
- __td_signed=true;
- ses=BS61zXxUXZZ4uCAEaApV13;
- autologin=870350<>9d6c6ccc27380d5bf6fbbf8da3a0741eb0489e521a39b727e84dff9c0dea6461;
- ks2=p9dsy5affbf;
- sasieno=0;
- lineheight=0;
- fontsize=0;
- fix_menu_bar=1;
- novellayout=2;
- OX_plg=pm;
- adr_id=Cjag6FpghKfJeNu8fgwu4uoAx3h1stntiCq4GyJqWcHtd6I2;
- over18=yes;
- __gads=ID=2531297594aec20f:T=1608919401:S=ALNI_MZFxrvRPPqrgzrjvehQRZl09NKqrQ;
- _im_vid=01F4EF0APZ5D0QQ9VEBGJANCGP;
- smplineheight=0;
- smpfontsize=0;
- smpnovellayout=0;
- _gid=GA1.2.1578484011.1621610916;
- nlist3=11w31.v-wrk1.k-ukjd.q-jsbu.1c-u9la.1a-rt12.2j-10jqn.y-11dl1.7;
- nlist1=pijl.46-cagn.j-11dxw.19-k0av.t7-axgr.23-ithk.rn-xkje.1-y62b.1-i6d3.40-ov8q.6o-w5gw.2d-tdut.2e-10c4q.1g-12nco.t-12unt.0-12s5n.2-xahs.53-11bkv.1y-qvkr.48-10xw4.1c-12opl.b-vgsp.5b-12new.p-vc92.33-10dnk.3g-10s97.2v-zijf.2v-10ski.19-xm6a.2y-10rbj.1p;
- _td=45948fd9-4fc6-4adf-a6bc-4e5540c04d5a;
- _gat=1
+_ga=GA1.2.480990279.1606738764;
+__td_signed=true;
+ses=BS61zXxUXZZ4uCAEaApV13;
+autologin=870350<>9d6c6ccc27380d5bf6fbbf8da3a0741eb0489e521a39b727e84dff9c0dea6461;
+ks2=p9dsy5affbf;
+sasieno=0;
+lineheight=0;
+fontsize=0;
+fix_menu_bar=1;
+novellayout=2;
+OX_plg=pm;
+adr_id=Cjag6FpghKfJeNu8fgwu4uoAx3h1stntiCq4GyJqWcHtd6I2;
+over18=yes;
+__gads=ID=2531297594aec20f:T=1608919401:S=ALNI_MZFxrvRPPqrgzrjvehQRZl09NKqrQ;
+_im_vid=01F4EF0APZ5D0QQ9VEBGJANCGP;
+smplineheight=0;
+smpfontsize=0;
+smpnovellayout=0;
+_gid=GA1.2.1578484011.1621610916;
+nlist3=11w31.v-wrk1.k-ukjd.q-jsbu.1c-u9la.1a-rt12.2j-10jqn.y-11dl1.7;
+nlist1=pijl.46-cagn.j-11dxw.19-k0av.t7-axgr.23-ithk.rn-xkje.1-y62b.1-i6d3.40-ov8q.6o-w5gw.2d-tdut.2e-10c4q.1g-12nco.t-12unt.0-12s5n.2-xahs.53-11bkv.1y-qvkr.48-10xw4.1c-12opl.b-vgsp.5b-12new.p-vc92.33-10dnk.3g-10s97.2v-zijf.2v-10ski.19-xm6a.2y-10rbj.1p;
+_td=45948fd9-4fc6-4adf-a6bc-4e5540c04d5a;
+_gat=1
 */
 func novelInfoHandler(ncode, baseUrl string, r18 bool) NarouApiHandlerType {
 	domain := strings.TrimSuffix(baseUrl, "/") + "/"
