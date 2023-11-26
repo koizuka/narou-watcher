@@ -28,6 +28,7 @@ jobs:
       with:
         node-version: '18.x'
         cache: 'yarn'
+        cache-dependency-path: 'narou-react/yarn.lock'
 
     - name: Install
       run: yarn install --frozen-lockfile
