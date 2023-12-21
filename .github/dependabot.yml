@@ -17,7 +17,8 @@ updates:
       - "eslint-*"
       - "eslint"
     mui:
-      patterns: "@mui/*"
+      patterns:
+      - "@mui/*"
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
