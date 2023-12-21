@@ -10,13 +10,16 @@ updates:
   schedule:
     interval: daily
   open-pull-requests-limit: 10
+  groups:
+    eslint:
+      patterns:
+      - "@typescript-eslint/*"
+      - "eslint-*"
+      - "eslint"
+    mui:
+      patterns: "@mui/*"
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
     # Check for updates to GitHub Actions every week
     interval: "weekly"
-groups:
-  typescript-eslint:
-    patterns: "@typescript-eslint/*"
-  mui:
-    patterns: "@mui/*"
