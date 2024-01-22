@@ -4,9 +4,9 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { IsNoticeListItem } from '../narouApi/IsNoticeListItem';
 import { BEWARE_TIME, NarouUpdateListItem } from './NarouUpdateListItem';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
-
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('NarouUpdateListItem', () => {
   afterEach(() => {
@@ -53,13 +53,13 @@ describe('NarouUpdateListItem', () => {
 
     Settings.now = () => update_time + BEWARE_TIME - 1; // 1 ms before disappear
     act(() => {
-      jest.advanceTimersByTime(BEWARE_TIME - 1);
+      vi.advanceTimersByTime(BEWARE_TIME - 1);
     });
     expect(elem.querySelector('.MuiListItemText-secondary')?.textContent).toEqual(withAlert);
 
     Settings.now = () => update_time + BEWARE_TIME; // 3 minutes after updated time
     act(() => {
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
     });
     expect(elem.querySelector('.MuiListItemText-secondary')?.textContent).toEqual(withoutAlert);
 

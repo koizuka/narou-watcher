@@ -1,5 +1,6 @@
 import { BookmarkInfo } from "../narouApi/useBookmarkInfo";
 import { BookmarkState, bookmarkStateReducer, InitialBookmarkState } from "./BookmarkState";
+import { describe, expect, test } from 'vitest';
 
 describe('bookmarkStateReducer', () => {
   const bookmarks: BookmarkInfo = {

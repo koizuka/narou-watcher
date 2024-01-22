@@ -5,18 +5,19 @@ import { SWRConfig } from 'swr';
 import { ApiError } from "../narouApi/ApiError";
 import { NarouApi } from '../narouApi/NarouApi';
 import { NarouUpdates } from './NarouUpdates';
+import { expect, test, vi } from 'vitest';
 
 const theme = createTheme({});
 function sleep(period: number) {
 	return new Promise(resolve => setTimeout(resolve, period));
 }
 
-jest.mock('../narouApi/NarouApi');
-const NarouApiMock = NarouApi as unknown as jest.Mock;
+vi.mock('../narouApi/NarouApi');
+const NarouApiMock = vi.mocked(NarouApi);
 
 function setup() {
-	const mockCall = jest.fn<Promise<unknown>, [string]>();
-	const mockLogin = jest.fn(async (): Promise<Response> => {
+	const mockCall = vi.fn<[string], Promise<unknown>>();
+	const mockLogin = vi.fn(async (): Promise<Response> => {
 		return Promise.resolve(new Response());
 	});
 
@@ -24,9 +25,9 @@ function setup() {
 		return {
 			call: mockCall,
 			login: mockLogin,
-		};
+		} as unknown as NarouApi;
 	})
-	NarouApi.isnoticelist = jest.fn(() => 'isnoticelist');
+	NarouApi.isnoticelist = vi.fn(() => 'isnoticelist');
 
 	return { mockCall, mockLogin, api: new NarouApi('') };
 }

@@ -1,4 +1,5 @@
 import { checkKeyString } from "./useHotKeys";
+import { expect, test } from 'vitest';
 
 test('checkKeyString', () => {
   expect(() => checkKeyString('a')).not.toThrow();
