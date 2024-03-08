@@ -19,6 +19,12 @@ updates:
     mui:
       patterns:
       - "@mui/*"
+    react:
+      patterns:
+      - "@types/react-*"
+      - "@types/react"
+      - "react-*"
+      - "react"
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
