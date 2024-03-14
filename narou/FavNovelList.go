@@ -8,9 +8,12 @@ import (
 
 const (
 	FavNovelListURL      = "https://syosetu.com/favnovelmain/list/"
-	FavNovelListTitle    = "ブックマーク"
+	FavNovelListTitle    = "ブックマーク | ユーザページ | 小説家になろう"
+	IsNoticeListTitle    = "更新チェック中のブックマーク | ユーザページ | 小説家になろう"
 	FavNovelListR18URL   = "https://syosetu.com/favnovelmain18/list/"
-	FavNovelListR18Title = "Xブックマーク"
+	IsNoticeListR18Title = "更新チェック中のXブックマーク | Xユーザページ | 小説家になろう"
+
+	FavNovelListR18Title = "Xブックマーク | Xユーザページ | 小説家になろう"
 )
 
 type FavNovelList struct {

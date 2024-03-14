@@ -104,7 +104,7 @@ func GetFavNovelList(watcher *narou.NarouWatcher, url, wantTitle string, maxPage
 	return result, nil
 }
 
-func GetIsNoticeListPage(watcher *narou.NarouWatcher, url string) (*narou.IsNoticeListPage, error) {
+func GetIsNoticeListPage(watcher *narou.NarouWatcher, url string, wantTitle string) (*narou.IsNoticeListPage, error) {
 	page, err := watcher.GetPage(url)
 	if err != nil {
 		switch err.(type) {
@@ -115,18 +115,18 @@ func GetIsNoticeListPage(watcher *narou.NarouWatcher, url string) (*narou.IsNoti
 		}
 	}
 
-	itemsPage, err := narou.ParseIsNoticeList(page)
+	itemsPage, err := narou.ParseIsNoticeList(page, wantTitle)
 	if err != nil {
 		return nil, fmt.Errorf("%v from %v", err, url)
 	}
 	return itemsPage, nil
 }
 
-func GetIsNoticeList(watcher *narou.NarouWatcher, url string, maxPage uint) ([]model.IsNoticeListRecord, error) {
+func GetIsNoticeList(watcher *narou.NarouWatcher, url string, wantTitle string, maxPage uint) ([]model.IsNoticeListRecord, error) {
 	var items []narou.IsNoticeList
 
 	for i := uint(0); i < maxPage; i++ {
-		page, err := GetIsNoticeListPage(watcher, url)
+		page, err := GetIsNoticeListPage(watcher, url, wantTitle)
 		if err != nil {
 			return nil, err
 		}
@@ -539,7 +539,7 @@ func novelInfoHandler(ncode, baseUrl string, r18 bool) NarouApiHandlerType {
 	}
 }
 
-func isNoticeListHandler(url string) NarouApiHandlerType {
+func isNoticeListHandler(url string, wantTitle string) NarouApiHandlerType {
 	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
 		query := r.URL.Query()
 		var maxPage uint = 1
@@ -551,7 +551,7 @@ func isNoticeListHandler(url string) NarouApiHandlerType {
 			maxPage = uint(p)
 		}
 
-		results, err := GetIsNoticeList(watcher, url, maxPage)
+		results, err := GetIsNoticeList(watcher, url, wantTitle, maxPage)
 		if err != nil {
 			return nil, err
 		}
@@ -702,8 +702,8 @@ func main() {
 	setNovelInfoHandler("/narou/novels/", "https://ncode.syosetu.com/", false)
 	setNovelInfoHandler("/r18/novels/", "https://novel18.syosetu.com/", true)
 
-	setHandler("/narou/isnoticelist", isNoticeListHandler(narou.IsNoticeListURL))
-	setHandler("/r18/isnoticelist", isNoticeListHandler(narou.IsNoticeListR18URL))
+	setHandler("/narou/isnoticelist", isNoticeListHandler(narou.IsNoticeListURL, narou.IsNoticeListTitle))
+	setHandler("/r18/isnoticelist", isNoticeListHandler(narou.IsNoticeListR18URL, narou.IsNoticeListR18Title))
 
 	setHandler("/narou/fav-user-updates", favUserUpdatesHandler(narou.UserTopApiURL))
 

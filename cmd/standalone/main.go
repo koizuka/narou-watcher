@@ -178,12 +178,13 @@ func main() {
 	}
 
 	type Site struct {
-		Name            string
-		IsNoticeListURL string
+		Name              string
+		IsNoticeListURL   string
+		IsNoticeListTitle string
 	}
 	sites := []Site{
-		{"小説家になろう", narou.IsNoticeListURL},
-		{"小説家になろう(R18)", narou.IsNoticeListR18URL},
+		{"小説家になろう", narou.IsNoticeListURL, narou.IsNoticeListR18URL},
+		{"小説家になろう(R18)", narou.IsNoticeListR18URL, narou.IsNoticeListR18Title},
 	}
 
 	openCount := 0
@@ -194,7 +195,7 @@ func main() {
 			log.Fatalf("GetPage(%v) failed: %v", site.IsNoticeListURL, err)
 		}
 
-		results, err := narou.ParseIsNoticeList(page)
+		results, err := narou.ParseIsNoticeList(page, site.IsNoticeListTitle)
 		if err != nil {
 			narouSession.Flush(&logger)
 			log.Fatal(err)
