@@ -8,9 +8,12 @@ import (
 
 const (
 	FavNovelListURL      = "https://syosetu.com/favnovelmain/list/"
-	FavNovelListTitle    = "ブックマーク"
+	FavNovelListTitle    = "ブックマーク | ユーザページ | 小説家になろう"
+	IsNoticeListTitle    = "更新チェック中のブックマーク | ユーザページ | 小説家になろう"
 	FavNovelListR18URL   = "https://syosetu.com/favnovelmain18/list/"
-	FavNovelListR18Title = "Xブックマーク"
+	IsNoticeListR18Title = "更新チェック中のXブックマーク | Xユーザページ | 小説家になろう"
+
+	FavNovelListR18Title = "Xブックマーク | Xユーザページ | 小説家になろう"
 )
 
 type FavNovelList struct {
@@ -34,34 +37,40 @@ func (i *FavNovelList) NextEpisode() EpisodeURL {
 	}
 }
 
-type FavNovelListTitleInfo struct {
-	Title      string     `find:"a.title"`
-	NovelURL   EpisodeURL `find:"a.title" attr:"href"`
-	AuthorName string     `find:"span.fn_name" re:"[^（]*（(.*)）[^）]*"`
-}
-type FavNovelListUpdateInfo struct {
-	IsNotice   *string      `find:"span.isnotice"`
-	UpdateTime time.Time    `find:"p:nth-of-type(1)" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
-	ItemURL    []EpisodeURL `find:"span.no a" attr:"href"`
-	Completed  *string      `find:"span.no a:last-of-type" re:"(最終)"`
-}
 type ParsedFavNovelList struct {
-	TitleInfo  FavNovelListTitleInfo  `find:"tr:nth-of-type(1)"`
-	Memo       *string                `find:"td.bkm_memo" re:"メモ(.*)"`
-	UpdateInfo FavNovelListUpdateInfo `find:"td.info"`
+	// <li class="c-up-dropdown__item c-up-dropdown__item--delete js-delete_bookmark_confirm" data-remodal-target="delete-bookmark" data-useridfavncode="870350_2244062" data-title="title1"><a href="JavaScript:void(0);">登録解除</a></li>
+	Title string `find:"li.c-up-dropdown__item--delete" attr:"data-title"`
+	// <div class="p-up-bookmark-item__title">
+	// <a href="https://ncode.syosetu.com/novel1/"><span class="c-up-label c-up-label--novel-long">連載</span>&nbsp;title1
+	NovelURL EpisodeURL `find:"div.p-up-bookmark-item__title a" attr:"href"`
+	// <div class="p-up-bookmark-item__author"><a href="https://mypage.syosetu.com/author1id">author1</a></div>
+	AuthorName string `find:"div.p-up-bookmark-item__author a"`
+	// <span class="p-up-bookmark-item__notice" title="更新通知ON"></span>
+	IsNotice *string `find:"span.p-up-bookmark-item__notice"`
+	// <span class="p-up-bookmark-item__date">最新掲載日：2024年03月14日 12時00分</span>
+	UpdateTime time.Time `find:"span.p-up-bookmark-item__date" re:"([0-9]+年[0-9]+月[0-9]+日 [0-9]+時[0-9]+分)" time:"2006年01月02日 15時04分"`
+	// <div class="p-up-bookmark-item__button">
+	// <div class="c-button-combo c-button-combo--horizon c-button-combo--full">
+	// <a href="https://ncode.syosetu.com/novel1/52/" class="c-button c-button--outline c-button--sm">最新 ep.52</a>
+	// <a href="https://ncode.syosetu.com/novel1/52/" class="c-button c-button--primary c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true"></span>ep.52</a>
+	// </div><!-- /.c-button-combo -->
+	ItemURL   []EpisodeURL `find:"div.p-up-bookmark-item__button div.c-button-combo a" attr:"href"`
+	Completed *string      `find:"span.p-up-bookmark-item__complete"`
+	Memo      *string      `find:"div.c-up-memo" re:"^\\s*(\\S*(?:\\s+\\S+)*)"`
 }
 
 type ParsedFavNovelListPage struct {
-	NumItems     uint                 `find:"div#sub ul.category_box li.now a" re:".*\\(([0-9]+)\\)$"`
-	TotalItems1  *uint                `find:"div#main div.nowcategory" re:"\\(全([0-9]+)件\\)"`
-	TotalItems2  *uint                `find:"div#contents h2" re:"\\(全([0-9]+)件\\)"`
-	NextPageLink *string              `find:"div#main form div:nth-of-type(1) a[title='next page']" attr:"href"`
-	Items        []ParsedFavNovelList `find:"div#main table.favnovel"`
+	// <div class="c-up-hit-number"><span class="c-up-hit-number__item">
+	// 全187件中</span><span class="c-up-hit-number__item">1件目～50件目を表示</span>
+	NumItems uint `find:"span.c-up-hit-number__item" re:"全([0-9]+)件中"`
+	// <a href="index.php?p=2" class="c-pager__item" title="次のページ">次へ <span class='p-icon p-icon--angle-right' aria-hidden='true'></span></a>
+	NextPageLink *string `find:"a[title='次のページ']" attr:"href"`
+	// <li class="c-up-panel__list-item p-up-bookmark-item">
+	Items []ParsedFavNovelList `find:"li.p-up-bookmark-item"`
 }
 
 type FavNovelListPage struct {
 	NumItems     uint
-	TotalItems   uint
 	NextPageLink string
 	Items        []FavNovelList
 }
@@ -72,27 +81,6 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage,
 	if title != wantTitle {
 		return nil, TitleMismatchError{title, wantTitle}
 	}
-	//
-	// table.favnovel
-	//   tr
-	//     td.kyokyo1[@rowspan=2]
-	//     td.title
-	//       a.title[@href=<link>] タイトル
-	//       span.fn_name 著者名
-	//   tr
-	//     td.info
-	//       p
-	//         span.isnotice チェック中
-	//         更新日：2021/03/13 13:50
-	//         span.no
-	//           a[@href=リンク]
-	//             img[src=アイコン画像]
-	//             &nbsp;207部分
-	//           a[@href=リンク]
-	//             最新208部分
-	//       p.right
-	//         a[@href=リンク]
-	//           設定
 	result := &FavNovelListPage{}
 
 	var parsed ParsedFavNovelListPage
@@ -106,14 +94,6 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage,
 	}
 
 	result.NumItems = parsed.NumItems
-	if parsed.TotalItems1 == nil && parsed.TotalItems2 == nil {
-		return nil, fmt.Errorf("Total Items not found")
-	}
-	if parsed.TotalItems1 != nil {
-		result.TotalItems = *parsed.TotalItems1
-	} else {
-		result.TotalItems = *parsed.TotalItems2
-	}
 	if parsed.NextPageLink != nil {
 		result.NextPageLink, err = page.ResolveLink(*parsed.NextPageLink)
 		if err != nil {
@@ -122,32 +102,30 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage,
 	}
 
 	for _, item := range parsed.Items {
-		titleInfo := item.TitleInfo
-		updateInfo := item.UpdateInfo
 		var memo string
 		if item.Memo != nil {
 			memo = *item.Memo
 		}
 		var bookmarkEpisode uint
 		var latestEpisode uint
-		switch len(updateInfo.ItemURL) {
+		switch len(item.ItemURL) {
 		case 1:
-			latestEpisode = updateInfo.ItemURL[0].Episode
+			latestEpisode = item.ItemURL[0].Episode
 		case 2:
-			bookmarkEpisode = updateInfo.ItemURL[0].Episode
-			latestEpisode = updateInfo.ItemURL[1].Episode
+			bookmarkEpisode = item.ItemURL[0].Episode
+			latestEpisode = item.ItemURL[1].Episode
 		}
 
 		result.Items = append(result.Items, FavNovelList{
-			Title:           titleInfo.Title,
-			SiteID:          titleInfo.NovelURL.SiteID,
-			NovelID:         titleInfo.NovelURL.NovelID,
-			AuthorName:      titleInfo.AuthorName,
-			UpdateTime:      updateInfo.UpdateTime,
+			Title:           item.Title,
+			SiteID:          item.NovelURL.SiteID,
+			NovelID:         item.NovelURL.NovelID,
+			AuthorName:      item.AuthorName,
+			UpdateTime:      item.UpdateTime,
 			BookmarkEpisode: bookmarkEpisode,
 			LatestEpisode:   latestEpisode,
-			IsNotice:        updateInfo.IsNotice != nil,
-			Completed:       updateInfo.Completed != nil,
+			IsNotice:        item.IsNotice != nil,
+			Completed:       item.Completed != nil,
 			Memo:            memo,
 		})
 	}

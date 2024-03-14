@@ -30,25 +30,34 @@ func (i *IsNoticeList) NextEpisode() EpisodeURL {
 	}
 }
 
-type IsNoticelistTitleInfo struct {
-	Title      string     `find:"a.title"`
-	NovelURL   EpisodeURL `find:"a.title" attr:"href"`
-	AuthorName string     `find:"span.fn_name" re:"[^（]*（(.*)）[^）]*"`
-}
-type IsNoticelistUpdateInfo struct {
-	UpdateTime time.Time    `find:"td.info2 p:nth-of-type(1)" re:"([0-9]{4}/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
-	ItemURL    []EpisodeURL `find:"span.no a" attr:"href"`
-	Completed  *string      `find:"span.no a:last-of-type" re:"(最終)"`
-}
 type ParsedIsNoticeList struct {
-	TitleInfo  IsNoticelistTitleInfo  `find:"tr:nth-of-type(1)"`
-	UpdateInfo IsNoticelistUpdateInfo `find:"tr:nth-of-type(2)"`
+	// <div class="p-up-bookmark-item__title">
+	// <a href="https://ncode.syosetu.com/作品1/"><span class="c-up-label c-up-label--novel-long">連載</span>&nbsp;タイトル1
+	// Title    string     `find:"div.p-up-bookmark-item__title a"`
+
+	// <li class="c-up-dropdown__item c-up-dropdown__item--delete js-delete_bookmark_confirm" data-remodal-target="delete-bookmark" data-useridfavncode="870350_1913052" data-title="タイトル1"><a href="JavaScript:void(0);">登録解除</a></li>
+	Title string `find:"li.c-up-dropdown__item--delete" attr:"data-title"`
+
+	NovelURL EpisodeURL `find:"div.p-up-bookmark-item__title a" attr:"href"`
+	// <div class="p-up-bookmark-item__author"><a href="https://mypage.syosetu.com/作者1ID">作者1</a></div>
+	AuthorName string `find:"div.p-up-bookmark-item__author a"`
+
+	// <span class="p-up-bookmark-item__date">最新掲載日：2000年01月02日 03時04分</span>
+	UpdateTime time.Time `find:"span.p-up-bookmark-item__date" re:"([0-9]{4}年[0-9]+月[0-9]+日 [0-9]+時[0-9]+分)" time:"2006年01月02日 15時04分"`
+	// <div class="p-up-bookmark-item__button">
+	// <div class="c-button-combo c-button-combo--horizon c-button-combo--full">
+	// <a href="https://ncode.syosetu.com/作品1/2/" class="c-button c-button--outline c-button--sm">最新 ep.2</a>
+	// <a href="https://ncode.syosetu.com/作品1/1/" class="c-button c-button--primary c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true"></span>ep.1<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
+	// </div>
+	ItemURL []EpisodeURL `find:"div.p-up-bookmark-item__button div a" attr:"href"`
+	// <span class="p-up-bookmark-item__complete">完結済</span>
+	Completed *string `find:"span.p-up-bookmark-item__complete"`
 }
 
 type ParsedIsNoticeListPage struct {
-	NumItems     uint                 `find:"h3.isnoticelist" re:"更新通知チェック中一覧 ([0-9]+)/[0-9]+"`
-	NextPageLink *string              `find:"form div:nth-of-type(1) a[title='next page']" attr:"href"`
-	Items        []ParsedIsNoticeList `find:"table.favnovel"`
+	NumItems     uint                 `find:"span.c-up-hit-number__item" re:"全([0-9]+)件中"`
+	NextPageLink *string              `find:"a[title='次のページ']" attr:"href"`
+	Items        []ParsedIsNoticeList `find:"li.c-up-panel__list-item"`
 }
 
 type IsNoticeListPage struct {
@@ -60,8 +69,7 @@ type IsNoticeListPage struct {
 /** 更新通知チェック中一覧の先頭ページの内容を解読して返す
  * @param page 更新チェック中小説一覧ページ(IsNoticeListURL)を取得した結果を与えること
  */
-func ParseIsNoticeList(page *scraper.Page) (*IsNoticeListPage, error) {
-	const wantTitle = "更新通知チェック中一覧"
+func ParseIsNoticeList(page *scraper.Page, wantTitle string) (*IsNoticeListPage, error) {
 	const maintenanceTitle = "メンテナンス中 | 小説家になろうグループ"
 	title := page.Find("title").Text()
 	if title == maintenanceTitle {
@@ -96,7 +104,7 @@ func ParseIsNoticeList(page *scraper.Page) (*IsNoticeListPage, error) {
 	var parsed ParsedIsNoticeListPage
 	err := scraper.Unmarshal(
 		&parsed,
-		page.Find("div#main"),
+		page.Find("div.l-main"),
 		scraper.UnmarshalOption{Loc: NarouLocation},
 	)
 	if err != nil {
@@ -112,27 +120,25 @@ func ParseIsNoticeList(page *scraper.Page) (*IsNoticeListPage, error) {
 	}
 
 	for _, item := range parsed.Items {
-		titleInfo := item.TitleInfo
-		updateInfo := item.UpdateInfo
 		var bookmarkEpisode uint
 		var latestEpisode uint
-		switch len(updateInfo.ItemURL) {
+		switch len(item.ItemURL) {
 		case 1:
-			latestEpisode = updateInfo.ItemURL[0].Episode
+			latestEpisode = item.ItemURL[0].Episode
 		case 2:
-			bookmarkEpisode = updateInfo.ItemURL[0].Episode
-			latestEpisode = updateInfo.ItemURL[1].Episode
+			bookmarkEpisode = item.ItemURL[0].Episode
+			latestEpisode = item.ItemURL[1].Episode
 		}
 
 		result.Items = append(result.Items, IsNoticeList{
-			Title:           titleInfo.Title,
-			SiteID:          titleInfo.NovelURL.SiteID,
-			NovelID:         titleInfo.NovelURL.NovelID,
-			AuthorName:      titleInfo.AuthorName,
-			UpdateTime:      updateInfo.UpdateTime,
+			Title:           item.Title,
+			SiteID:          item.NovelURL.SiteID,
+			NovelID:         item.NovelURL.NovelID,
+			AuthorName:      item.AuthorName,
+			UpdateTime:      item.UpdateTime,
 			BookmarkEpisode: bookmarkEpisode,
 			LatestEpisode:   latestEpisode,
-			Completed:       updateInfo.Completed != nil,
+			Completed:       item.Completed != nil,
 		})
 	}
 
