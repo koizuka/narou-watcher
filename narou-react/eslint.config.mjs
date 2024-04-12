@@ -21,7 +21,6 @@ export default tsEslint.config(
   ...tsEslint.configs.stylisticTypeChecked,
   reactRecommended,
   {
-    // @ts-expect-error but it works
     plugins: {
       'react-hooks': pluginReactHooks,
     },
