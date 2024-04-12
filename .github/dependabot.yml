@@ -11,11 +11,10 @@ updates:
     interval: daily
   open-pull-requests-limit: 10
   groups:
-    eslint:
+    eslint-plugins:
       patterns:
-      - "@typescript-eslint/*"
+      - "typescript-eslint"
       - "eslint-*"
-      - "eslint"
     mui:
       patterns:
       - "@mui/*"
