@@ -10,7 +10,7 @@ export function AutoLinkText({ text }: { text: string; }) {
         text: text.substring(i, m.index),
         href: m[1],
       });
-      i = (m.index ?? 0) + m[0].length;
+      i = m.index + m[0].length;
     }
     return items;
   }, [text]);
