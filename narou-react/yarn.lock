@@ -2251,10 +2251,10 @@ eslint-plugin-testing-library@^6.2.1:
   dependencies:
     "@typescript-eslint/utils" "^5.58.0"
 
-eslint-plugin-vitest@^0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-vitest/-/eslint-plugin-vitest-0.5.1.tgz#97d55c810304c913f4ea8e1a6aba1319276ff757"
-  integrity sha512-g137wC+LCq2N+tfqK39Nl6Rs2N9u+zu6lWxaVgpN3wX+Kq6zSyxjPSI/ZBXUjP+qandT3z1DM5wK5IjD4XrAIw==
+eslint-plugin-vitest@^0.5.3:
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-vitest/-/eslint-plugin-vitest-0.5.3.tgz#9723db969014751b231a0e2c44305af66c8dd3b4"
+  integrity sha512-D0iu6ppP6FmNSZP4cdhEXqyI+fuW6JwwWdECRrNymd1jiVgUmDgSvtryytonNxHQQWhGNmZM3V/qvpXttH1rRQ==
   dependencies:
     "@typescript-eslint/utils" "^7.6.0"
 
