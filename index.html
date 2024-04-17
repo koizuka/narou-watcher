@@ -14,7 +14,7 @@
     -->
   <link rel="manifest" href="/narou/manifest.json" />
   <title>narou-watcher</title>
-  <script type="module" crossorigin src="/narou/assets/index-BSXc-n-u.js"></script>
+  <script type="module" crossorigin src="/narou/assets/index-5q3FNYVu.js"></script>
   <link rel="stylesheet" crossorigin href="/narou/assets/index-jqkGs4ZY.css">
 </head>
 
@@ -24,16 +24,19 @@
     <span>Maybe URL of the script has changed?</span>
     <button onclick="location.reload()">reload</button>
   </div>
-  <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+  <script>
+    function handleSuccess() {
+      sessionStorage.removeItem('reloaded');
+    }
+    function handleError() {
+      if (sessionStorage.getItem('reloaded')) {
+        console.error('Failed to load script');
+        return;
+      }
+      sessionStorage.setItem('reloaded', 'true');
+      window.location.reload();
+    }
+  </script>
 </body>
 
 </html>
