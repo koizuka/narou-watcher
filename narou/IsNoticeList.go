@@ -55,7 +55,7 @@ type ParsedIsNoticeList struct {
 }
 
 type ParsedIsNoticeListPage struct {
-	NumItems     uint                 `find:"span.c-up-hit-number__item" re:"全([0-9]+)件中"`
+	NumItems     uint                 `find:"div.c-up-tab + div span.c-up-hit-number__item:first-of-type" re:"全([0-9]+)件中"`
 	NextPageLink *string              `find:"a[title='次のページ']" attr:"href"`
 	Items        []ParsedIsNoticeList `find:"li.c-up-panel__list-item"`
 }
