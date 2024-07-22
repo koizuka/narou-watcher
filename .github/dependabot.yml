@@ -18,6 +18,9 @@ updates:
     mui:
       patterns:
       - "@mui/*"
+    emotion:
+      patterns:
+      - "@emotion/*"
     react:
       patterns:
       - "@types/react-*"
