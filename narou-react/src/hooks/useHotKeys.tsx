@@ -21,7 +21,7 @@ function toKeyString(event: KeyboardEvent | KeyCombination): string {
 }
 
 export function checkKeyString(keyString: string): string {
-  const match = keyString.toLowerCase().match(/^((?:(?:shift|ctrl|alt|meta)\+)*)(\+|\w+)$/);
+  const match = /^((?:(?:shift|ctrl|alt|meta)\+)*)(\+|\w+)$/.exec(keyString.toLowerCase());
   if (match === null) {
     throw new Error(`Invalid key string: ${keyString}`);
   }

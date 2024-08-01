@@ -20,7 +20,7 @@ function extractInfoPath(base_url?: string): { host: string, ncode: string } | n
     return null;
   }
 
-  const m = base_url.match(/https:\/\/([0-9a-zA-Z.]+)\/([0-9a-z]+)\/?/);
+  const m = /https:\/\/([0-9a-zA-Z.]+)\/([0-9a-z]+)\/?/.exec(base_url);
   if (!m) {
     console.warn(`base_url is invalid: ${base_url}`);
     return null;
