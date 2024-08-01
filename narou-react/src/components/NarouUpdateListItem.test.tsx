@@ -1,10 +1,9 @@
 import { render } from '@testing-library/react';
 import { DateTime, Settings } from 'luxon';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import React, { act } from 'react';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { IsNoticeListItem } from '../narouApi/IsNoticeListItem';
 import { BEWARE_TIME, NarouUpdateListItem } from './NarouUpdateListItem';
-import { afterEach, describe, expect, test, vi } from 'vitest';
 
 vi.useFakeTimers();
 

@@ -1,7 +1,7 @@
 import React, { render, screen } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
-import { AutoLinkText } from './AutoLinkText';
+import { act } from 'react';
 import { expect, test } from 'vitest';
+import { AutoLinkText } from './AutoLinkText';
 
 const text = "this is https://example.com https://example2.com";
 

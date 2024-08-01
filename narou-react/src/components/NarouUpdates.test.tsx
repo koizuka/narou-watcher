@@ -1,11 +1,11 @@
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import React, { fireEvent, render, screen } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { SWRConfig } from 'swr';
+import { expect, test, vi } from 'vitest';
 import { ApiError } from "../narouApi/ApiError";
 import { NarouApi } from '../narouApi/NarouApi';
 import { NarouUpdates } from './NarouUpdates';
-import { expect, test, vi } from 'vitest';
 
 const theme = createTheme({});
 function sleep(period: number) {
