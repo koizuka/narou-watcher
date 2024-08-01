@@ -16,7 +16,7 @@ vi.mock('../narouApi/NarouApi');
 const NarouApiMock = vi.mocked(NarouApi);
 
 function setup() {
-	const mockCall = vi.fn<[string], Promise<unknown>>();
+	const mockCall = vi.fn<(s: string) => Promise<unknown>>();
 	const mockLogin = vi.fn(async (): Promise<Response> => {
 		return Promise.resolve(new Response());
 	});
