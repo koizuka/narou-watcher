@@ -20,7 +20,7 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
-  "eslint.experimental.useFlatConfig": true,
+  "eslint.useFlatConfig": true,
   "eslint.options": {
     "overrideConfigFile": "./eslint.config.mjs"
   }
