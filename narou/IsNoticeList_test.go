@@ -230,27 +230,29 @@ koizuka [ID:(MyUserID)]
 <div class="p-up-bookmark-item__menu c-up-dropdown c-up-dropdown--hover">
 <span class="p-icon p-icon--ellipsis-v" aria-hidden="true"></span>設定
 <ul class="c-up-dropdown__list c-up-dropdown__list--delimit">
-<li class="c-up-dropdown__item"><a href="/favnovelmain/updateinput/useridfavncode/(MyUserID)_(作品1の何か)?isnotice=true">設定変更</a></li>
-<li class="c-up-dropdown__item c-up-dropdown__item--delete js-delete_bookmark_confirm" data-remodal-target="delete-bookmark" data-useridfavncode="(MyUserID)(作品1の何か)" data-title="タイトル1"><a href="JavaScript:void(0);">登録解除</a></li>
+<li class="c-up-dropdown__item"><a href="/favnovelmain/updateinput/useridfavncode/xxxx_xxxx?isnotice=true">設定変更</a></li>
+<li class="c-up-dropdown__item c-up-dropdown__item--delete js-delete_bookmark_confirm" data-remodal-target="delete-bookmark" data-useridfavncode="xxxx_xxxx" data-title="タイトル1"><a href="JavaScript:void(0);">登録解除</a></li>
 </ul><!-- /.c-up-dropdown__list -->
 </div><!-- /.p-up-bookmark-item__menu -->
 </div><!-- /.p-up-bookmark-item__header -->
 
 <div class="p-up-bookmark-item__info-button">
 <div class="p-up-bookmark-item__info">
-<div class="p-up-bookmark-item__author"><a href="https://mypage.syosetu.com/作者1ID">作者1</a></div>
+
+<div class="p-up-bookmark-item__data"><a href="https://mypage.syosetu.com/author1" class="p-up-bookmark-item__data-item">作者1</a><span class="p-up-bookmark-item__data-item">全2エピソード</span><span class="p-up-bookmark-item__data-item p-up-bookmark-item__complete">完結済</span></div>
+
 <div class="p-up-bookmark-item__status">
-<span class="p-up-bookmark-item__date">最新掲載日：2000年01月02日 03時04分</span>
-<span class="p-up-bookmark-item__complete">完結済</span>
+<span class="p-up-bookmark-item__date">2000年01月02日 03時04分&nbsp;更新</span>
 <span class="p-up-bookmark-item__setting">
 <span class="p-up-bookmark-item__notice" title="更新通知ON"></span>
+<span class="p-up-bookmark-item__private" title="非公開ブックマーク"></span>
 </span><!-- /.p-up-bookmark-item__setting -->
 </div><!-- /.p-up-bookmark-item__status -->
 </div><!-- /.p-up-bookmark-item__info -->
 <div class="p-up-bookmark-item__button">
 <div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-<a href="https://ncode.syosetu.com/作品1/1/" class="c-button c-button--primary c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true"></span>ep.1<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
-<a href="https://ncode.syosetu.com/作品1/2/" class="c-button c-button--outline c-button--sm">最新 ep.2</a>
+<a href="https://ncode.syosetu.com/作品1/1/" class="c-button c-button--outline c-button__text-sm c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true" class="p-up-bookmark-item__siori-icon"></span>ep.1</a>
+<a href="https://ncode.syosetu.com/作品1/2/" class="c-button c-button--primary c-button__text-sm c-button--sm">ep.2<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
 </div>
 </div><!-- /.p-up-bookmark-item__button -->
 </div><!-- /.p-up-bookmark-item__info-button -->
@@ -267,17 +269,19 @@ koizuka [ID:(MyUserID)]
 <div class="p-up-bookmark-item__menu c-up-dropdown c-up-dropdown--hover">
 <span class="p-icon p-icon--ellipsis-v" aria-hidden="true"></span>設定
 <ul class="c-up-dropdown__list c-up-dropdown__list--delimit">
-<li class="c-up-dropdown__item"><a href="/favnovelmain/updateinput/useridfavncode/(MyUserID)_(作品2の何か)?isnotice=true">設定変更</a></li>
-<li class="c-up-dropdown__item c-up-dropdown__item--delete js-delete_bookmark_confirm" data-remodal-target="delete-bookmark" data-useridfavncode="(MyUserID)_(作品2の何か)" data-title="タイトル2"><a href="JavaScript:void(0);">登録解除</a></li>
+<li class="c-up-dropdown__item"><a href="/favnovelmain/updateinput/useridfavncode/xxxx_xxxx?isnotice=true">設定変更</a></li>
+<li class="c-up-dropdown__item c-up-dropdown__item--delete js-delete_bookmark_confirm" data-remodal-target="delete-bookmark" data-useridfavncode="xxxx_xxxx" data-title="タイトル2"><a href="JavaScript:void(0);">登録解除</a></li>
 </ul><!-- /.c-up-dropdown__list -->
 </div><!-- /.p-up-bookmark-item__menu -->
 </div><!-- /.p-up-bookmark-item__header -->
 
 <div class="p-up-bookmark-item__info-button">
 <div class="p-up-bookmark-item__info">
-<div class="p-up-bookmark-item__author"><a href="https://mypage.syosetu.com/作者ID2">作者2</a></div>
+
+<div class="p-up-bookmark-item__data"><a href="https://mypage.syosetu.com/author2" class="p-up-bookmark-item__data-item">作者2</a><span class="p-up-bookmark-item__data-item">全4エピソード</span></div>
+
 <div class="p-up-bookmark-item__status">
-<span class="p-up-bookmark-item__date">最新掲載日：2001年02月03日 04時05分</span>
+<span class="p-up-bookmark-item__date">2001年02月03日 04時05分&nbsp;更新</span>
 <span class="p-up-bookmark-item__setting">
 <span class="p-up-bookmark-item__notice" title="更新通知ON"></span>
 <span class="p-up-bookmark-item__private" title="非公開ブックマーク"></span>
@@ -286,8 +290,8 @@ koizuka [ID:(MyUserID)]
 </div><!-- /.p-up-bookmark-item__info -->
 <div class="p-up-bookmark-item__button">
 <div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-<a href="https://ncode.syosetu.com/作品2/3/" class="c-button c-button--primary c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true"></span>ep.3</a>
-<a href="https://ncode.syosetu.com/作品2/4/" class="c-button c-button--outline c-button--sm">最新 ep.4</a>
+<a href="https://ncode.syosetu.com/作品2/3/" class="c-button c-button--outline c-button__text-sm c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true" class="p-up-bookmark-item__siori-icon"></span>ep.3</a>
+<a href="https://ncode.syosetu.com/作品2/4/" class="c-button c-button--primary c-button__text-sm c-button--sm">ep.2<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
 </div>
 </div><!-- /.p-up-bookmark-item__button -->
 </div><!-- /.p-up-bookmark-item__info-button -->
@@ -304,15 +308,15 @@ koizuka [ID:(MyUserID)]
 <div class="p-up-bookmark-item__menu c-up-dropdown c-up-dropdown--hover">
 <span class="p-icon p-icon--ellipsis-v" aria-hidden="true"></span>設定
 <ul class="c-up-dropdown__list c-up-dropdown__list--delimit">
-<li class="c-up-dropdown__item"><a href="/favnovelmain/updateinput/useridfavncode/(MyUserID)_(作品3の何か)?isnotice=true">設定変更</a></li>
-<li class="c-up-dropdown__item c-up-dropdown__item--delete js-delete_bookmark_confirm" data-remodal-target="delete-bookmark" data-useridfavncode="(MyUserID)_(作品3の何か)" data-title="タイトル3"><a href="JavaScript:void(0);">登録解除</a></li>
+<li class="c-up-dropdown__item"><a href="/favnovelmain/updateinput/useridfavncode/xxxx_xxxx?isnotice=true">設定変更</a></li>
+<li class="c-up-dropdown__item c-up-dropdown__item--delete js-delete_bookmark_confirm" data-remodal-target="delete-bookmark" data-useridfavncode="xxxx_xxxx" data-title="タイトル3"><a href="JavaScript:void(0);">登録解除</a></li>
 </ul><!-- /.c-up-dropdown__list -->
 </div><!-- /.p-up-bookmark-item__menu -->
 </div><!-- /.p-up-bookmark-item__header -->
 
 <div class="p-up-bookmark-item__info-button">
 <div class="p-up-bookmark-item__info">
-<div class="p-up-bookmark-item__author"><a href="https://mypage.syosetu.com/331996">作者3</a></div>
+<div class="p-up-bookmark-item__data"><a href="https://mypage.syosetu.com/author3" class="p-up-bookmark-item__data-item">作者3</a><span class="p-up-bookmark-item__data-item">全3エピソード</span></div>
 <div class="p-up-bookmark-item__status">
 <span class="p-up-bookmark-item__date">最新掲載日：2002年03月04日 05時06分</span>
 <span class="p-up-bookmark-item__setting">
@@ -323,7 +327,8 @@ koizuka [ID:(MyUserID)]
 </div><!-- /.p-up-bookmark-item__info -->
 <div class="p-up-bookmark-item__button">
 <div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-<a href="https://ncode.syosetu.com/作品3/3/" class="c-button c-button--outline c-button--sm">最新 ep.3</a>
+<a class="c-button c-button--outline c-button__text-sm c-button--sm" href="https://ncode.syosetu.com/作品3/1/">最初から読む</a>
+<a href="https://ncode.syosetu.com/作品3/3/" class="c-button c-button--outline c-button__text-sm c-button--sm">最新 ep.3</a>
 </div>
 </div><!-- /.p-up-bookmark-item__button -->
 </div><!-- /.p-up-bookmark-item__info-button -->

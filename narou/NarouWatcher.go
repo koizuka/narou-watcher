@@ -72,6 +72,11 @@ func NewNarouWatcher(opt Options) (*NarouWatcher, error) {
 	session.ShowRequestHeader = opt.ShowRequestHeader
 	session.ShowResponseHeader = opt.ShowResponseHeader
 	session.UserAgent = opt.UserAgent
+	session.BodyFilter = func(resp *scraper.Response, body []byte) ([]byte, error) {
+		// HTML構文エラーがあるのを置換でつぶす
+		body = regexp.MustCompile(`<span><span></a>`).ReplaceAll(body, []byte("</span></span></a>"))
+		return body, nil
+	}
 
 	if !opt.NotSaveCookieToFile {
 		err := session.LoadCookie()

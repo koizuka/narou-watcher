@@ -359,7 +359,7 @@ nickname [ID:xxxx]
 
 <div class="p-up-bookmark-item__info-button">
 <div class="p-up-bookmark-item__info">
-<div class="p-up-bookmark-item__author"><a href="https://mypage.syosetu.com/author1id">author1</a></div>
+<div class="p-up-bookmark-item__data"><a href="https://mypage.syosetu.com/author1id" class="p-up-bookmark-item__data-item">author1</a><span class="p-up-bookmark-item__data-item">全2エピソード</span></div>
 <div class="p-up-bookmark-item__status">
 <span class="p-up-bookmark-item__date">最新掲載日：2000年01月02日 03時04分</span>
 <span class="p-up-bookmark-item__setting">
@@ -370,8 +370,8 @@ nickname [ID:xxxx]
 
 <div class="p-up-bookmark-item__button">
 <div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-<a href="https://ncode.syosetu.com/novel1/1/" class="c-button c-button--primary c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true"></span>ep.1</a>
-<a href="https://ncode.syosetu.com/novel1/2/" class="c-button c-button--outline c-button--sm">最新 ep.2</a>
+<a href="https://ncode.syosetu.com/novel1/1/" class="c-button c-button--outline c-button__text-sm c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true" class="p-up-bookmark-item__siori-icon"></span>ep.1</a>
+<a href="https://ncode.syosetu.com/novel1/2/" class="c-button c-button--primary c-button__text-sm c-button--sm">ep.2<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
 </div><!-- /.c-button-combo -->
 </div><!-- /.p-up-bookmark-item__button -->
 </div><!-- /.p-up-bookmark-item__info-button -->
@@ -403,10 +403,9 @@ nickname [ID:xxxx]
 
 <div class="p-up-bookmark-item__info-button">
 <div class="p-up-bookmark-item__info">
-<div class="p-up-bookmark-item__author"><a href="https://mypage.syosetu.com/xxxx">author2（test）</a></div>
+<div class="p-up-bookmark-item__data"><a href="https://mypage.syosetu.com/xxxx" class="p-up-bookmark-item__data-item">author2（test）</a><span class="p-up-bookmark-item__data-item">全4エピソード</span><span class="p-up-bookmark-item__data-item p-up-bookmark-item__complete">完結済</span></div>
 <div class="p-up-bookmark-item__status">
 <span class="p-up-bookmark-item__date">最新掲載日：2001年02月03日 04時05分</span>
-<span class="p-up-bookmark-item__complete">完結済</span>
 <span class="p-up-bookmark-item__setting">
 <span class="p-up-bookmark-item__notice" title="更新通知ON"></span>
 <span class="p-up-bookmark-item__private" title="非公開ブックマーク"></span>
@@ -416,8 +415,8 @@ nickname [ID:xxxx]
 
 <div class="p-up-bookmark-item__button">
 <div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-<a href="https://ncode.syosetu.com/n6178io/3/" class="c-button c-button--primary c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true"></span>ep.3</a>
-<a href="https://ncode.syosetu.com/n6178io/4/" class="c-button c-button--outline c-button--sm">最新 ep.4</a>
+<a href="https://ncode.syosetu.com/novel2/3/" class="c-button c-button--outline c-button__text-sm c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true" class="p-up-bookmark-item__siori-icon"></span>ep.3</a>
+<a href="https://ncode.syosetu.com/novel2/4/" class="c-button c-button--primary c-button__text-sm c-button--sm">ep.2<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
 </div><!-- /.c-button-combo -->
 </div><!-- /.p-up-bookmark-item__button -->
 </div><!-- /.p-up-bookmark-item__info-button -->
@@ -448,7 +447,7 @@ nickname [ID:xxxx]
 
 <div class="p-up-bookmark-item__info-button">
 <div class="p-up-bookmark-item__info">
-<div class="p-up-bookmark-item__author"><a href="https://mypage.syosetu.com/xxxx">author3</a></div>
+<div class="p-up-bookmark-item__data"><a href="https://mypage.syosetu.com/xxxx" class="p-up-bookmark-item__data-item">author3</a><span class="p-up-bookmark-item__data-item">全5エピソード</span></div>
 <div class="p-up-bookmark-item__status">
 <span class="p-up-bookmark-item__date">最新掲載日：2001年02月03日 04時06分</span>
 <span class="p-up-bookmark-item__setting">
@@ -459,7 +458,8 @@ nickname [ID:xxxx]
 
 <div class="p-up-bookmark-item__button">
 <div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-<a href="https://ncode.syosetu.com/n9460fv/5/" class="c-button c-button--outline c-button--sm">最新 ep.5</a>
+<a class="c-button c-button--outline c-button__text-sm c-button--sm" href="https://ncode.syosetu.com/作品3/1/">最初から読む</a>
+<a href="https://ncode.syosetu.com/作品3/3/" class="c-button c-button--outline c-button__text-sm c-button--sm">最新 ep.5</a>
 </div><!-- /.c-button-combo -->
 </div><!-- /.p-up-bookmark-item__button -->
 </div><!-- /.p-up-bookmark-item__info-button -->
@@ -490,7 +490,7 @@ nickname [ID:xxxx]
 
 <div class="p-up-bookmark-item__info-button">
 <div class="p-up-bookmark-item__info">
-<div class="p-up-bookmark-item__author"><a href="https://mypage.syosetu.com/xxxx">author_short</a></div>
+<div class="p-up-bookmark-item__data"><a href="https://mypage.syosetu.com/xxxx">author_short</a></div>
 <div class="p-up-bookmark-item__status">
 <span class="p-up-bookmark-item__date">最新掲載日：2002年03月04日 05時06分</span>
 <span class="p-up-bookmark-item__setting">

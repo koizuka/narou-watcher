@@ -40,18 +40,13 @@ type ParsedIsNoticeList struct {
 
 	NovelURL EpisodeURL `find:"div.p-up-bookmark-item__title a" attr:"href"`
 	// <div class="p-up-bookmark-item__author"><a href="https://mypage.syosetu.com/作者1ID">作者1</a></div>
-	AuthorName string `find:"div.p-up-bookmark-item__author a"`
+	AuthorName string `find:"div.p-up-bookmark-item__data a"`
 
 	// <span class="p-up-bookmark-item__date">最新掲載日：2000年01月02日 03時04分</span>
-	UpdateTime time.Time `find:"span.p-up-bookmark-item__date" re:"([0-9]{4}年[0-9]+月[0-9]+日 [0-9]+時[0-9]+分)" time:"2006年01月02日 15時04分"`
-	// <div class="p-up-bookmark-item__button">
-	// <div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-	// <a href="https://ncode.syosetu.com/作品1/2/" class="c-button c-button--outline c-button--sm">最新 ep.2</a>
-	// <a href="https://ncode.syosetu.com/作品1/1/" class="c-button c-button--primary c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true"></span>ep.1<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
-	// </div>
-	ItemURL []EpisodeURL `find:"div.p-up-bookmark-item__button div a" attr:"href"`
-	// <span class="p-up-bookmark-item__complete">完結済</span>
-	Completed *string `find:"span.p-up-bookmark-item__complete"`
+	UpdateTime      time.Time `find:"span.p-up-bookmark-item__date" re:"([0-9]{4}年[0-9]+月[0-9]+日 [0-9]+時[0-9]+分)" time:"2006年01月02日 15時04分"`
+	BookmarkEpisode *uint     `find:"div.p-up-bookmark-item__button div a:first-of-type" re:"ep.([0-9]+)"`
+	LastEpisode     *uint     `find:"span.p-up-bookmark-item__data-item" re:"全([0-9]+)エピソード"`
+	Completed       *string   `find:"span.p-up-bookmark-item__complete"` // <span class="p-up-bookmark-item__complete">完結済</span>
 }
 
 type ParsedIsNoticeListPage struct {
@@ -122,12 +117,11 @@ func ParseIsNoticeList(page *scraper.Page, wantTitle string) (*IsNoticeListPage,
 	for _, item := range parsed.Items {
 		var bookmarkEpisode uint
 		var latestEpisode uint
-		switch len(item.ItemURL) {
-		case 1:
-			latestEpisode = item.ItemURL[0].Episode
-		case 2:
-			bookmarkEpisode = item.ItemURL[0].Episode
-			latestEpisode = item.ItemURL[1].Episode
+		if item.BookmarkEpisode != nil {
+			bookmarkEpisode = *item.BookmarkEpisode
+		}
+		if item.LastEpisode != nil {
+			latestEpisode = *item.LastEpisode
 		}
 
 		result.Items = append(result.Items, IsNoticeList{

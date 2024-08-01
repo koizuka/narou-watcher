@@ -44,19 +44,15 @@ type ParsedFavNovelList struct {
 	// <a href="https://ncode.syosetu.com/novel1/"><span class="c-up-label c-up-label--novel-long">連載</span>&nbsp;title1
 	NovelURL EpisodeURL `find:"div.p-up-bookmark-item__title a" attr:"href"`
 	// <div class="p-up-bookmark-item__author"><a href="https://mypage.syosetu.com/author1id">author1</a></div>
-	AuthorName string `find:"div.p-up-bookmark-item__author a"`
+	AuthorName string `find:"div.p-up-bookmark-item__data a"`
 	// <span class="p-up-bookmark-item__notice" title="更新通知ON"></span>
 	IsNotice *string `find:"span.p-up-bookmark-item__notice"`
 	// <span class="p-up-bookmark-item__date">最新掲載日：2024年03月14日 12時00分</span>
-	UpdateTime time.Time `find:"span.p-up-bookmark-item__date" re:"([0-9]+年[0-9]+月[0-9]+日 [0-9]+時[0-9]+分)" time:"2006年01月02日 15時04分"`
-	// <div class="p-up-bookmark-item__button">
-	// <div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-	// <a href="https://ncode.syosetu.com/novel1/52/" class="c-button c-button--outline c-button--sm">最新 ep.52</a>
-	// <a href="https://ncode.syosetu.com/novel1/52/" class="c-button c-button--primary c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true"></span>ep.52</a>
-	// </div><!-- /.c-button-combo -->
-	ItemURL   []EpisodeURL `find:"div.p-up-bookmark-item__button div.c-button-combo a" attr:"href"`
-	Completed *string      `find:"span.p-up-bookmark-item__complete"`
-	Memo      *string      `find:"div.c-up-memo" re:"^\\s*(\\S*(?:\\s+\\S+)*)"`
+	UpdateTime      time.Time `find:"span.p-up-bookmark-item__date" re:"([0-9]+年[0-9]+月[0-9]+日 [0-9]+時[0-9]+分)" time:"2006年01月02日 15時04分"`
+	BookmarkEpisode *uint     `find:"div.p-up-bookmark-item__button div a:first-of-type" re:"ep.([0-9]+)"`
+	LastEpisode     *uint     `find:"span.p-up-bookmark-item__data-item" re:"全([0-9]+)エピソード"`
+	Completed       *string   `find:"span.p-up-bookmark-item__complete"`
+	Memo            *string   `find:"div.c-up-memo" re:"^\\s*(\\S*(?:\\s+\\S+)*)"`
 }
 
 type ParsedFavNovelListPage struct {
@@ -108,12 +104,11 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage,
 		}
 		var bookmarkEpisode uint
 		var latestEpisode uint
-		switch len(item.ItemURL) {
-		case 1:
-			latestEpisode = item.ItemURL[0].Episode
-		case 2:
-			bookmarkEpisode = item.ItemURL[0].Episode
-			latestEpisode = item.ItemURL[1].Episode
+		if item.BookmarkEpisode != nil {
+			bookmarkEpisode = *item.BookmarkEpisode
+		}
+		if item.LastEpisode != nil {
+			latestEpisode = *item.LastEpisode
 		}
 
 		result.Items = append(result.Items, FavNovelList{
