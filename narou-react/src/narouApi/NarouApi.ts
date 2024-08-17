@@ -45,12 +45,12 @@ export class NarouApi {
         await this.fetch('/narou/logout');
     }
 
-    async call(key: NarouApiCallKey) {
+    async call<T>(key: NarouApiCallKey) {
         const res = await this.fetch(key);
         if (!res.ok) {
             throw new ApiError(res.status, await res.text());
         }
-        return res.json();
+        return res.json() as T;
     }
 
     static isnoticelist({ maxPage = 1 }: { maxPage: number }): NarouApiCallKey {

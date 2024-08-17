@@ -49,7 +49,7 @@ export function useNovelInfo(
     }
   }, [info])
 
-  const { data, error } = useSWR<NovelInfo, ApiError>(key, async (path: string) => api.call(path));
+  const { data, error } = useSWR<NovelInfo, ApiError>(key, async (path: string) => api.call<NovelInfo>(path));
 
   return { data, error };
 }
