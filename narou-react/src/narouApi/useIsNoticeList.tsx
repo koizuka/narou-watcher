@@ -35,7 +35,7 @@ export function useIsNoticeList(
     isR18 ?
       NarouApi.isnoticelistR18({ maxPage }) :
       NarouApi.isnoticelist({ maxPage }),
-    async (path: string) => api.call(path),
+    async (path: string) => api.call<IsNoticeListRecord[]>(path),
     {
       onErrorRetry: (error) => {
         console.log(`onErrorRetry: ${error.status}: ${error.toString()}`);
@@ -50,7 +50,7 @@ export function useIsNoticeList(
       NarouApi.bookmark(bookmark, { order })
     )
     : null,
-    async (path: string) => api.call(path),
+    async (path: string) => api.call<IsNoticeListRecord[]>(path),
   );
 
   const raw_items2 = useMemo(() => {
