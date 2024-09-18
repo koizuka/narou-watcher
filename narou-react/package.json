@@ -13,7 +13,7 @@
     "@mui/icons-material": "^6.1.0",
     "@mui/material": "^6.1.0",
     "@types/luxon": "^3.4.2",
-    "@types/react": "^18.3.6",
+    "@types/react": "^18.3.7",
     "@types/react-dom": "^18.3.0",
     "luxon": "^3.5.0",
     "react": "^18.3.1",
