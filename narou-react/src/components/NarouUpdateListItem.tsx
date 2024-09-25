@@ -2,7 +2,7 @@ import { Book, Info } from '@mui/icons-material';
 import {
   Avatar, Badge, BadgeTypeMap, ButtonTypeMap, IconButton, ListItem,
   ListItemAvatar,
-  ListItemButton, ListItemSecondaryAction, ListItemText
+  ListItemButton, ListItemText
 } from '@mui/material';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
@@ -86,6 +86,16 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
 
   return (
     <ListItem data-testid={testId}
+      secondaryAction={
+        <IconButton
+          edge="end"
+          onClick={onClick}
+          disableRipple={true}
+          size="large"
+          tabIndex={-1}>
+          <Info />
+        </IconButton>
+      }
       {...(isSelected ? { selected: true, ref: scrollIn } : {})}
     >
       <ListItemButton
@@ -103,16 +113,6 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
         </ListItemAvatar>
         <ListItemText primary={firstLine} secondary={secondLine} />
       </ListItemButton>
-      <ListItemSecondaryAction>
-        <IconButton
-          edge="end"
-          onClick={onClick}
-          disableRipple={true}
-          size="large"
-          tabIndex={-1}>
-          <Info />
-        </IconButton>
-      </ListItemSecondaryAction>
     </ListItem>
   );
 }
