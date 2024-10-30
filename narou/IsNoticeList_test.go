@@ -249,12 +249,10 @@ koizuka [ID:(MyUserID)]
 </span><!-- /.p-up-bookmark-item__setting -->
 </div><!-- /.p-up-bookmark-item__status -->
 </div><!-- /.p-up-bookmark-item__info -->
-<div class="p-up-bookmark-item__button">
-<div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-<a href="https://ncode.syosetu.com/作品1/1/" class="c-button c-button--outline c-button__text-sm c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true" class="p-up-bookmark-item__siori-icon"></span>ep.1</a>
-<a href="https://ncode.syosetu.com/作品1/2/" class="c-button c-button--primary c-button__text-sm c-button--sm">ep.2<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
-</div>
-</div><!-- /.p-up-bookmark-item__button -->
+<div class="p-up-bookmark-item__button-group">
+<a href="https://ncode.syosetu.com/作品1/1/" class="p-up-bookmark-item__button c-button c-button--outline c-button__text-sm c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true" class="p-up-bookmark-item__siori-icon"></span>ep.1</a>
+<a href="https://ncode.syosetu.com/作品1/2/" class="p-up-bookmark-item__button c-button c-button--primary c-button__text-sm c-button--sm">ep.2<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
+</div><!-- /.p-up-bookmark-item__button-group -->
 </div><!-- /.p-up-bookmark-item__info-button -->
 
 
@@ -288,12 +286,10 @@ koizuka [ID:(MyUserID)]
 </span><!-- /.p-up-bookmark-item__setting -->
 </div><!-- /.p-up-bookmark-item__status -->
 </div><!-- /.p-up-bookmark-item__info -->
-<div class="p-up-bookmark-item__button">
-<div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-<a href="https://ncode.syosetu.com/作品2/3/" class="c-button c-button--outline c-button__text-sm c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true" class="p-up-bookmark-item__siori-icon"></span>ep.3</a>
-<a href="https://ncode.syosetu.com/作品2/4/" class="c-button c-button--primary c-button__text-sm c-button--sm">ep.2<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
-</div>
-</div><!-- /.p-up-bookmark-item__button -->
+<div class="p-up-bookmark-item__button-group">
+<a href="https://ncode.syosetu.com/作品2/3/" class="p-up-bookmark-item__button c-button c-button--outline c-button__text-sm c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true" class="p-up-bookmark-item__siori-icon"></span>ep.3</a>
+<a href="https://ncode.syosetu.com/作品2/4/" class="p-up-bookmark-item__button c-button c-button--primary c-button__text-sm c-button--sm">ep.2<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
+</div><!-- /.p-up-bookmark-item__button-group -->
 </div><!-- /.p-up-bookmark-item__info-button -->
 
 
@@ -325,12 +321,10 @@ koizuka [ID:(MyUserID)]
 </span><!-- /.p-up-bookmark-item__setting -->
 </div><!-- /.p-up-bookmark-item__status -->
 </div><!-- /.p-up-bookmark-item__info -->
-<div class="p-up-bookmark-item__button">
-<div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-<a class="c-button c-button--outline c-button__text-sm c-button--sm" href="https://ncode.syosetu.com/作品3/1/">最初から読む</a>
-<a href="https://ncode.syosetu.com/作品3/3/" class="c-button c-button--outline c-button__text-sm c-button--sm">最新 ep.3</a>
-</div>
-</div><!-- /.p-up-bookmark-item__button -->
+<div class="p-up-bookmark-item__button-group">
+<a class="p-up-bookmark-item__button c-button c-button--outline c-button__text-sm c-button--sm" href="https://ncode.syosetu.com/作品3/1/">最初から読む</a>
+<a href="https://ncode.syosetu.com/作品3/3/" class="p-up-bookmark-item__button c-button c-button--outline c-button__text-sm c-button--sm">最新 ep.3</a>
+</div><!-- /.p-up-bookmark-item__button-group -->
 </div><!-- /.p-up-bookmark-item__info-button -->
 
 

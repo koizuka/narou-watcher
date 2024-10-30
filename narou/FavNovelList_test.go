@@ -368,12 +368,10 @@ nickname [ID:xxxx]
 </div><!-- /.p-up-bookmark-item__status -->
 </div><!-- /.p-up-bookmark-item__info -->
 
-<div class="p-up-bookmark-item__button">
-<div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-<a href="https://ncode.syosetu.com/novel1/1/" class="c-button c-button--outline c-button__text-sm c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true" class="p-up-bookmark-item__siori-icon"></span>ep.1</a>
-<a href="https://ncode.syosetu.com/novel1/2/" class="c-button c-button--primary c-button__text-sm c-button--sm">ep.2<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
-</div><!-- /.c-button-combo -->
-</div><!-- /.p-up-bookmark-item__button -->
+<div class="p-up-bookmark-item__button-group">
+<a href="https://ncode.syosetu.com/novel1/1/" class="p-up-bookmark-item__button c-button c-button--outline c-button__text-sm c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true" class="p-up-bookmark-item__siori-icon"></span>ep.1</a>
+<a href="https://ncode.syosetu.com/novel1/2/" class="p-up-bookmark-item__button c-button c-button--primary c-button__text-sm c-button--sm">ep.2<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
+</div><!-- /.p-up-bookmark-item__button-group -->
 </div><!-- /.p-up-bookmark-item__info-button -->
 <div class="c-up-memo"> 楽しい </div>
 </div><!-- /.c-up-chk-item__content -->
@@ -413,12 +411,10 @@ nickname [ID:xxxx]
 </div><!-- /.p-up-bookmark-item__status -->
 </div><!-- /.p-up-bookmark-item__info -->
 
-<div class="p-up-bookmark-item__button">
-<div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-<a href="https://ncode.syosetu.com/novel2/3/" class="c-button c-button--outline c-button__text-sm c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true" class="p-up-bookmark-item__siori-icon"></span>ep.3</a>
-<a href="https://ncode.syosetu.com/novel2/4/" class="c-button c-button--primary c-button__text-sm c-button--sm">ep.2<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
-</div><!-- /.c-button-combo -->
-</div><!-- /.p-up-bookmark-item__button -->
+<div class="p-up-bookmark-item__button-group">
+<a href="https://ncode.syosetu.com/novel2/3/" class="p-up-bookmark-item__button c-button c-button--outline c-button__text-sm c-button--sm"><span class="p-icon p-icon--siori" aria-hidden="true" class="p-up-bookmark-item__siori-icon"></span>ep.3</a>
+<a href="https://ncode.syosetu.com/novel2/4/" class="p-up-bookmark-item__button c-button c-button--primary c-button__text-sm c-button--sm">ep.2<span class="p-up-bookmark-item__unread">未読<span class="p-up-bookmark-item__unread-num">1<span><span></a>
+</div><!-- /.p-up-bookmark-item__button-group -->
 </div><!-- /.p-up-bookmark-item__info-button -->
 </div><!-- /.c-up-chk-item__content -->
 </div><!-- /.c-up-chk-item c-up-chk-item--upper -->
@@ -456,12 +452,10 @@ nickname [ID:xxxx]
 </div><!-- /.p-up-bookmark-item__status -->
 </div><!-- /.p-up-bookmark-item__info -->
 
-<div class="p-up-bookmark-item__button">
-<div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-<a class="c-button c-button--outline c-button__text-sm c-button--sm" href="https://ncode.syosetu.com/作品3/1/">最初から読む</a>
-<a href="https://ncode.syosetu.com/作品3/3/" class="c-button c-button--outline c-button__text-sm c-button--sm">最新 ep.5</a>
-</div><!-- /.c-button-combo -->
-</div><!-- /.p-up-bookmark-item__button -->
+<div class="p-up-bookmark-item__button-group">
+<a class="p-up-bookmark-item__button c-button c-button--outline c-button__text-sm c-button--sm" href="https://ncode.syosetu.com/作品3/1/">最初から読む</a>
+<a href="https://ncode.syosetu.com/作品3/3/" class="p-up-bookmark-item__button c-button c-button--outline c-button__text-sm c-button--sm">最新 ep.5</a>
+</div><!-- /.p-up-bookmark-item__button-group -->
 </div><!-- /.p-up-bookmark-item__info-button -->
 </div><!-- /.c-up-chk-item__content -->
 </div><!-- /.c-up-chk-item c-up-chk-item--upper -->
@@ -498,10 +492,8 @@ nickname [ID:xxxx]
 </div><!-- /.p-up-bookmark-item__status -->
 </div><!-- /.p-up-bookmark-item__info -->
 
-<div class="p-up-bookmark-item__button">
-<div class="c-button-combo c-button-combo--horizon c-button-combo--full">
-</div><!-- /.c-button-combo -->
-</div><!-- /.p-up-bookmark-item__button -->
+<div class="p-up-bookmark-item__button-group">
+</div><!-- /.p-up-bookmark-item__button-group -->
 </div><!-- /.p-up-bookmark-item__info-button -->
 </div><!-- /.c-up-chk-item__content -->
 </div><!-- /.c-up-chk-item c-up-chk-item--upper -->

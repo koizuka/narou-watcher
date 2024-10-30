@@ -49,7 +49,7 @@ type ParsedFavNovelList struct {
 	IsNotice *string `find:"span.p-up-bookmark-item__notice"`
 	// <span class="p-up-bookmark-item__date">最新掲載日：2024年03月14日 12時00分</span>
 	UpdateTime      time.Time `find:"span.p-up-bookmark-item__date" re:"([0-9]+年[0-9]+月[0-9]+日 [0-9]+時[0-9]+分)" time:"2006年01月02日 15時04分"`
-	BookmarkEpisode *uint     `find:"div.p-up-bookmark-item__button div a:first-of-type" re:"ep.([0-9]+)"`
+	BookmarkEpisode *uint     `find:"div.p-up-bookmark-item__button-group a:first-of-type" re:"ep.([0-9]+)"`
 	LastEpisode     *uint     `find:"span.p-up-bookmark-item__data-item" re:"全([0-9]+)エピソード"`
 	Completed       *string   `find:"span.p-up-bookmark-item__complete"`
 	Memo            *string   `find:"div.c-up-memo" re:"^\\s*(\\S*(?:\\s+\\S+)*)"`
