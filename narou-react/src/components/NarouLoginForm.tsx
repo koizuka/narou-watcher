@@ -19,7 +19,7 @@ export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
   })();
   }, [userId, password, props]);
 
-  const passwordRef = useRef<HTMLInputElement>();
+  const passwordRef = useRef<HTMLInputElement>(undefined);
 
   const closeError = useCallback(() => {
     setError('');
