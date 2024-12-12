@@ -44,14 +44,16 @@ export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
           <Box display="flex" flexDirection="column" justifyContent="center">
             <TextField id="id" name="id" label="ID or email" autoFocus
               value={userId} onChange={e => { setUserId(e.target.value); }}
-              onKeyPress={e => {
+              onKeyDown={e => {
+                if (e.defaultPrevented) return;
                 if (e.key === 'Enter') {
                   passwordRef.current?.focus();
                 }
               }} data-testid="id" />
             <TextField id="password" name="password" label="password" type="password"
               value={password} onChange={e => { setPassword(e.target.value); }}
-              inputRef={passwordRef} onKeyPress={e => {
+              inputRef={passwordRef} onKeyDown={e => {
+                if (e.defaultPrevented) return;
                 if (e.key === 'Enter') {
                   postLogin();
                 }
