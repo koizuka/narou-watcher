@@ -27,6 +27,9 @@ updates:
       - "@types/react"
       - "react-*"
       - "react"
+    testing-library:
+      patterns:
+      - "@testing-library/*"
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
