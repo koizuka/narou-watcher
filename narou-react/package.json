@@ -57,7 +57,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "typescript-eslint": "^8.20.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.1",
+    "vitest": "^3.0.2",
     "whatwg-fetch": "^3.6.20"
   },
   "packageManager": "yarn@1.22.19+sha256.732620bac8b1690d507274f025f3c6cfdc3627a84d9642e38a07452cc00e0f2e"
