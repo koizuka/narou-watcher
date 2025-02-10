@@ -20,6 +20,7 @@ type FavNovelList struct {
 	SiteID          string
 	NovelID         string
 	Title           string
+	IsShort         bool
 	AuthorName      string
 	UpdateTime      time.Time
 	BookmarkEpisode uint
@@ -39,7 +40,8 @@ func (i *FavNovelList) NextEpisode() EpisodeURL {
 
 type ParsedFavNovelList struct {
 	// <li class="c-up-dropdown__item c-up-dropdown__item--delete js-delete_bookmark_confirm" data-remodal-target="delete-bookmark" data-useridfavncode="870350_2244062" data-title="title1"><a href="JavaScript:void(0);">登録解除</a></li>
-	Title string `find:"li.c-up-dropdown__item--delete" attr:"data-title"`
+	Title      string  `find:"li.c-up-dropdown__item--delete" attr:"data-title"`
+	ShortLabel *string `find:"span.c-up-label--novel-short"`
 	// <div class="p-up-bookmark-item__title">
 	// <a href="https://ncode.syosetu.com/novel1/"><span class="c-up-label c-up-label--novel-long">連載</span>&nbsp;title1
 	NovelURL EpisodeURL `find:"div.p-up-bookmark-item__title a" attr:"href"`
@@ -102,17 +104,19 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage,
 		if item.Memo != nil {
 			memo = *item.Memo
 		}
+		isShort := item.ShortLabel != nil
 		var bookmarkEpisode uint
 		var latestEpisode uint
 		if item.BookmarkEpisode != nil {
 			bookmarkEpisode = *item.BookmarkEpisode
 		}
-		if item.LastEpisode != nil {
+		if item.LastEpisode != nil && !isShort {
 			latestEpisode = *item.LastEpisode
 		}
 
 		result.Items = append(result.Items, FavNovelList{
 			Title:           item.Title,
+			IsShort:         isShort,
 			SiteID:          item.NovelURL.SiteID,
 			NovelID:         item.NovelURL.NovelID,
 			AuthorName:      item.AuthorName,

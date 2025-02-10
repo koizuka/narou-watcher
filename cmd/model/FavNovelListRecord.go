@@ -11,5 +11,6 @@ type FavNovelListRecord struct {
 	AuthorName      string    `json:"author_name"`
 	IsNotice        bool      `json:"is_notice,omitempty"`
 	Completed       bool      `json:"completed,omitempty"`
+	IsShort         bool      `json:"is_short,omitempty"`
 	Memo            string    `json:"memo,omitempty"`
 }

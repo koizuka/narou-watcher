@@ -484,7 +484,10 @@ nickname [ID:xxxx]
 
 <div class="p-up-bookmark-item__info-button">
 <div class="p-up-bookmark-item__info">
-<div class="p-up-bookmark-item__data"><a href="https://mypage.syosetu.com/xxxx">author_short</a></div>
+<div class="p-up-bookmark-item__data">
+<a class="p-up-bookmark-item__data-item" href="https://mypage.syosetu.com/xxxx">author_short</a>
+<span class="p-up-bookmark-item__data-item">全1エピソード</span>
+</div> // p-up-bookmark-item__data
 <div class="p-up-bookmark-item__status">
 <span class="p-up-bookmark-item__date">最新掲載日：2002年03月04日 05時06分</span>
 <span class="p-up-bookmark-item__setting">
@@ -672,10 +675,10 @@ func TestParseFavNovelList(t *testing.T) {
 			NumItems:     187,
 			NextPageLink: "http://localhost/index.php?p=2",
 			Items: []FavNovelList{
-				{"ncode", "novel1", "title1", "author1", datetime("2000/01/02 03:04"), 1, 2, false, false, "楽しい"},
-				{"ncode", "novel2", "title2", "author2（test）", datetime("2001/02/03 04:05"), 3, 4, true, true, ""},
-				{"ncode", "novel3", "title3", "author3", datetime("2001/02/03 04:06"), 0, 5, true, false, ""},
-				{"ncode", "short", "短篇", "author_short", datetime("2002/03/04 05:06"), 0, 0, false, false, ""},
+				{"ncode", "novel1", "title1", false, "author1", datetime("2000/01/02 03:04"), 1, 2, false, false, "楽しい"},
+				{"ncode", "novel2", "title2", false, "author2（test）", datetime("2001/02/03 04:05"), 3, 4, true, true, ""},
+				{"ncode", "novel3", "title3", false, "author3", datetime("2001/02/03 04:06"), 0, 5, true, false, ""},
+				{"ncode", "short", "短篇", true, "author_short", datetime("2002/03/04 05:06"), 0, 0, false, false, ""},
 			},
 		}, false},
 	}

@@ -98,6 +98,7 @@ func GetFavNovelList(watcher *narou.NarouWatcher, url, wantTitle string, maxPage
 			AuthorName:      item.AuthorName,
 			IsNotice:        item.IsNotice,
 			Completed:       item.Completed,
+			IsShort:         item.IsShort,
 			Memo:            item.Memo,
 		})
 	}
