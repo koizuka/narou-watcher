@@ -55,7 +55,7 @@
     "eslint-plugin-testing-library": "^7.1.1",
     "eslint-plugin-vitest": "^0.5.4",
     "jest-environment-jsdom": "^29.7.0",
-    "typescript-eslint": "^8.24.0",
+    "typescript-eslint": "^8.24.1",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.5",
     "whatwg-fetch": "^3.6.20"
