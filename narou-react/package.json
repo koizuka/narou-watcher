@@ -15,7 +15,7 @@
     "@types/luxon": "^3.4.2",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
-    "luxon": "^3.5.0",
+    "luxon": "^3.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
