@@ -9,7 +9,6 @@ export default defineConfig({
   },
   plugins: [tsconfigPaths(), react()],
   define: {
-    'process.env': process.env,
     'import.meta.env.BUILD_DATE': JSON.stringify(DateTime.now().toISO()),
   },
   server: {
