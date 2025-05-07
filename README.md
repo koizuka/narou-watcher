@@ -1,9 +1,11 @@
 # narou-watcher
+
 小説家になろうの新着小説をチェックしたい
 
 ## 構成
 
 ### サーバー (narou-watcher)
+
 場所: `./`
 
 「小説家になろう」の新着チェック中小説ページ(isnoticelist)をパースしてJSONにして返すAPIおよび、login/logout、ログインセッションクッキーを中継する仕組みを提供します。
@@ -12,26 +14,28 @@
 実行中に SIGINT (キーであれば CTRL+C ) を送ると正常にシャットダウンします。
 
 #### コマンドライン引数
+
 |option|default|説明|
 |---|---|---|
 |-port 数値|7676|HTTPリッスンポート|
-|-reverse-proxy 文字列|https://koizuka.github.io/narou-watcher/|フロントエンドを読み込むアドレス|
+|-reverse-proxy 文字列|<https://koizuka.github.io/narou-watcher/>|フロントエンドを読み込むアドレス|
 |-log-dir 文字列|githubの作業ディレクトリのトップ/log/narou|開発ログの保存先|
 |-public-url 文字列|""|公開サーバーからreverse proxyするときの外に見えるアドレス(httpsにするときは必須)。パスは `/` より下も可能。|
 |-open|bool|サーバーが起動したら公開アドレスをブラウザで開く(ローカル起動用)|
 |-debug|bool|-log-dir のディレクトリに通信ログを記録する(ローカル起動用)|
 
 #### API
+
 * `POST /login`
-    * form post形式で、 `id` にIDまたはメールアドレス、`password` にパスワードを入れて POSTすると、「小説家になろう」にログインを試みます。
-        * 成功したら HTTP status=200, レスポンスボディは true を返すとともに、セッションキーをクッキーで返します(後述)。このため、ログイン情報はサーバーに保持せず、ユーザーのブラウザに覚えさせます。
-        * 失敗したら HTTP status=401 を返します。
+  * form post形式で、 `id` にIDまたはメールアドレス、`password` にパスワードを入れて POSTすると、「小説家になろう」にログインを試みます。
+    * 成功したら HTTP status=200, レスポンスボディは true を返すとともに、セッションキーをクッキーで返します(後述)。このため、ログイン情報はサーバーに保持せず、ユーザーのブラウザに覚えさせます。
+    * 失敗したら HTTP status=401 を返します。
 * `GET /logout`
-    * 「小説家になろう」からログアウトし、こちらのセッションクッキーも削除します。
+  * 「小説家になろう」からログアウトし、こちらのセッションクッキーも削除します。
 * `GET /narou/isnoticelist` `GET /r18/isnoticelist`
-    * ログイン状態でなければ HTTP status=401 を返します。
-    * ログイン状態で、新着更新チェック中小説一覧の1ページ目を取得して以下のオブジェクトを配列にしてJSONにして返します。
-    * クエリパラメータ `max_page` は指定分、次ページを合成する。1(初期値)なら指定ページのみ。
+  * ログイン状態でなければ HTTP status=401 を返します。
+  * ログイン状態で、新着更新チェック中小説一覧の1ページ目を取得して以下のオブジェクトを配列にしてJSONにして返します。
+  * クエリパラメータ `max_page` は指定分、次ページを合成する。1(初期値)なら指定ページのみ。
 
 |key|type|説明|
 |---|---|---|
@@ -43,23 +47,23 @@
 |author_name|string|著者の名前|
 
 * `GET /narou/bookmarks` `GET /r18/bookmarks`
-    * ブックマーク名一覧。以下のオブジェクトが登録分並ぶ。
-      
+  * ブックマーク名一覧。以下のオブジェクトが登録分並ぶ。
+
 |key|type|説明|
 |---|---|---|
 |no|number|1〜10|
 |name|string|ブックマーク名|
 |num_items|number|登録アイテム数|
-    
-* `GET /narou/bookmarks/:no` `GET /r18/bookmarsk/:no`
-    * ブックマークの内容の1ページ
-    * `:no` は1〜10
-    * クエリパラメータ `page` をつけるとページング。1が先頭
-    * クエリパラメータ `order` はソートオーダー。そのまま中継される。
-      * `updated_at` がブックマーク更新順
-      * `new` はブックマーク追加順
-    * クエリパラメータ `max_page` は指定分、次ページを合成する。1(初期値)なら指定ページのみ。
-      
+
+* `GET /narou/bookmarks/:no` `GET /r18/bookmarks/:no`
+  * ブックマークの内容の1ページ
+  * `:no` は1〜10
+  * クエリパラメータ `page` をつけるとページング。1が先頭
+  * クエリパラメータ `order` はソートオーダー。そのまま中継される。
+    * `updated_at` がブックマーク更新順
+    * `new` はブックマーク追加順
+  * クエリパラメータ `max_page` は指定分、次ページを合成する。1(初期値)なら指定ページのみ。
+
 | key         | type         | 説明               |
 |-------------|--------------|------------------|
 | base_url    | string       | 小説自体のURL         |
@@ -71,10 +75,10 @@
 | is_notice   | boolean      | 更新チェック中ならtrue    |
 | completed   | boolean      | 完結ならtrue         |
 | memo        | string       | メモ(存在する場合のみ)     |
-    
+
 * `GET /narou/novels/:ncode` `GET /r18/novels/:ncode`
-    * 小説のncodeから概要ページの内容の抜粋を得る
-      
+  * 小説のncodeから概要ページの内容の抜粋を得る
+
 |key|type| 説明                               |
 |---|---|----------------------------------|
 |base_url|string| 小説のURL                           |
@@ -88,14 +92,14 @@
 |bookmark_episode|uint| しおり部分(登録されていなければフィールドなし)         |
 |contents|[]chapter| 章一覧                              |
 
-  * chapter
+* chapter
 
 | key      | type      | 説明                             |
 |----------|-----------|--------------------------------|
 | chapter  | string    | 章のタイトル。章設定をしていない作品にはこのキーは付かない。 |
 | episodes | []episode | エピソード一覧                        |
 
-  * episode
+* episode
 
 | key      | type    | 説明                  |
 |----------|---------|---------------------|
@@ -104,8 +108,8 @@
 | date     | ISO8601 | 投稿日時                |
 | update   | ISO8601 | 改稿日時(改稿されていない場合は省略) |
 
-  * `GET /narou/fav-user-updates`
-    * お気に入りユーザーの更新情報
+* `GET /narou/fav-user-updates`
+  * お気に入りユーザーの更新情報
 
 | key              | type   | 説明           |
 |------------------|--------|--------------|
@@ -115,14 +119,17 @@
 | passive_count    | int    | 不明           |
 
 #### ログインセッションクッキー
+
 小説家になろうのサイトが Set-Cookieしてきたものの名前の前に `narou-` をつけてこちらのクッキーとして Set-Cookie にして返し、ブラウザに覚えさせます。
 
 ブラウザからのリクエストについているクッキーに `narou-` で始まるものがあれば、この後の名前にして「小説家になろう」に送信します。
 
 ### フロントエンド (narou-react)
+
 場所: `./narou-react/`
 
 開くとまずサーバーのアドレスを以下のルールで決定します。
+
 1. クエリパラメータに `server` があれば、その値をサーバーURLとする
 2. 自分のURLをみて、URLスキームが `http:` であれば、 `localhost:7676` をサーバーURLとする
 3. ドメインをみて、 `github.io` でなければ、自分のアドレスをサーバーURLとする
@@ -144,6 +151,7 @@
 ## 開発
 
 ### サーバーの開発
+
 Go言語がビルドできる環境で
 `go build`
 
@@ -154,7 +162,9 @@ Go言語がビルドできる環境で
 `./narou-watcher -open` で起動すると、上記に加えてブラウザで `localhost:7676` を開きますが、フロントエンドは `https://koizuka.github.io/narou-watcher/` にデプロイされているものを reverse-proxyして読み込みます。
 
 ### フロントエンドの開発
+
 `./narou-react` ディレクトリで、 node + npm を入れた状態で
+
 ```bash
 npm install # (初回)
 npm start
@@ -163,8 +173,9 @@ npm start
 でビルドしたフロントエンドを読み込む localhost:3000 が開き、localhost:7676 のサーバーに接続する動作をします。
 
 ### サーバーの公開
+
 サーバー上でGitHubから git clone, go buildした `narou-watcher` に `-public-url` を設定して起動し、 nginxなどで `localhost:7676` (デフォルト) にリバースプロキシすることでhttpsな自分のサーバーで公開することができます。フロントエンドのコードも自作にする場合は `-reverse-proxy` 引数に置き場所のURLを与えます。
 
 ## メモ
 
-https://github.com/koizuka/scraper を使ってます。
+<https://github.com/koizuka/scraper> を使ってます。
