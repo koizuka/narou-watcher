@@ -154,10 +154,10 @@ Go言語がビルドできる環境で
 `./narou-watcher -open` で起動すると、上記に加えてブラウザで `localhost:7676` を開きますが、フロントエンドは `https://koizuka.github.io/narou-watcher/` にデプロイされているものを reverse-proxyして読み込みます。
 
 ### フロントエンドの開発
-`./narou-react` ディレクトリで、 node + yarn を入れた状態で
+`./narou-react` ディレクトリで、 node + npm を入れた状態で
 ```bash
-yarn install # (初回)
-yarn start
+npm install # (初回)
+npm start
 ```
 
 でビルドしたフロントエンドを読み込む localhost:3000 が開き、localhost:7676 のサーバーに接続する動作をします。
