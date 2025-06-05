@@ -14,7 +14,7 @@
     "@mui/material": "^7.1.0",
     "@types/luxon": "^3.6.2",
     "@types/react": "^19.1.6",
-    "@types/react-dom": "^19.1.5",
+    "@types/react-dom": "^19.1.6",
     "globals": "^16.2.0",
     "luxon": "^3.6.1",
     "react": "^19.1.0",
