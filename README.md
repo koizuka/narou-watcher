@@ -167,10 +167,25 @@ Go言語がビルドできる環境で
 
 ```bash
 npm install # (初回)
-npm start
+npm run start
 ```
 
-でビルドしたフロントエンドを読み込む localhost:3000 が開き、localhost:7676 のサーバーに接続する動作をします。
+でViteによるビルドしたフロントエンドを読み込む localhost:5173 が開き、localhost:7676 のサーバーに接続する動作をします。
+
+#### 技術スタック
+
+* React 19.1.0
+* TypeScript 5.8.3
+* Vite 6.3.5 (ビルドツール)
+* Material-UI 7.1.0
+* Vitest 3.2.2 (テスト)
+
+#### その他のコマンド
+
+```bash
+npm run build   # プロダクション用ビルド
+npm run test    # テスト実行
+```
 
 ### サーバーの公開
 
