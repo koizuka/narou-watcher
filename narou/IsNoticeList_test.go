@@ -212,9 +212,27 @@ koizuka [ID:(MyUserID)]
 </div><!-- /.c-up-tab -->
 
 
+<div class="c-up-list-tools">
 <div class="c-up-hit-number"><span class="c-up-hit-number__item">
-全218件中</span><span class="c-up-hit-number__item">1件目～30件目を表示</span>
+全306件中</span><span class="c-up-hit-number__item">1件目～30件目を表示</span>
 </div><!-- /.c-up-hit-number -->
+<div class="c-up-list-tools__pager">
+<div class="c-up-pager c-up-pager--sm">
+<span class="c-up-pager__item is-disabled" title="最初のページ"><span class="p-icon p-icon--angle-double-left" aria-hidden="true"></span></span>
+
+<span class="c-up-pager__item is-disabled" title="前のページ"><span class="p-icon p-icon--angle-left" aria-hidden="true"></span> 前</span>
+
+<div class="c-up-pager__num">
+<span class="c-up-pager__item is-current">1</span><a href="?p=2" class="c-up-pager__item" title="2ページ">2</a><a href="?p=3" class="c-up-pager__item" title="3ページ">3</a><a href="?p=4" class="c-up-pager__item" title="4ページ">4</a><a href="?p=5" class="c-up-pager__item" title="5ページ">5</a>
+</div><!-- /.c-up-pager__num -->
+
+<a href="?p=2" class="c-up-pager__item" title="次のページ">次 <span class='p-icon p-icon--angle-right' aria-hidden='true'></span></a>
+
+<a href="?p=11" class="c-up-pager__item" title="最後のページ"><span class='p-icon p-icon--angle-double-right' aria-hidden='true'></span></a>
+
+</div><!-- /.c-up-pager -->
+</div><!-- /.c-up-list-tools__pager -->
+</div><!-- /.c-up-list-tools -->
 
 <div class="c-up-panel">
 <form method="post" action="/favnovelmain/update/?token=xxxx">
@@ -334,20 +352,27 @@ koizuka [ID:(MyUserID)]
 </form>
 </div><!--/.c-up-panel-->
 
-<div class="c-pager-box">
-<div class="c-pager">
+<div class="c-up-list-tools">
+<div class="c-up-hit-number"><span class="c-up-hit-number__item">
+全306件中</span><span class="c-up-hit-number__item">1件目～30件目を表示</span>
+</div><!-- /.c-up-hit-number -->
+<div class="c-up-list-tools__pager">
+<div class="c-up-pager c-up-pager--sm">
+<span class="c-up-pager__item is-disabled" title="最初のページ"><span class="p-icon p-icon--angle-double-left" aria-hidden="true"></span></span>
 
-<span class="c-pager__item is-disabled" title="最初のページ">最初へ</span>
+<span class="c-up-pager__item is-disabled" title="前のページ"><span class="p-icon p-icon--angle-left" aria-hidden="true"></span> 前</span>
 
-<span class="c-pager__item is-disabled" title="前のページ"><span class="p-icon p-icon--angle-left" aria-hidden="true"></span> 前へ</span>
+<div class="c-up-pager__num">
+<span class="c-up-pager__item is-current">1</span><a href="?p=2" class="c-up-pager__item" title="2ページ">2</a><a href="?p=3" class="c-up-pager__item" title="3ページ">3</a><a href="?p=4" class="c-up-pager__item" title="4ページ">4</a><a href="?p=5" class="c-up-pager__item" title="5ページ">5</a>
+</div><!-- /.c-up-pager__num -->
 
-<span class="c-pager__item is-current">1</span><a href="index.php?p=2" class="c-pager__item" title="2ページ">2</a><a href="index.php?p=3" class="c-pager__item" title="3ページ">3</a><a href="index.php?p=4" class="c-pager__item" title="4ページ">4</a><a href="index.php?p=5" class="c-pager__item" title="5ページ">5</a><a href="index.php?p=6" class="c-pager__item" title="6ページ">6</a><a href="index.php?p=7" class="c-pager__item" title="7ページ">7</a><a href="index.php?p=8" class="c-pager__item" title="8ページ">8</a><a href="index.php?p=9" class="c-pager__item" title="9ページ">9</a>
+<a href="?p=2" class="c-up-pager__item" title="次のページ">次 <span class='p-icon p-icon--angle-right' aria-hidden='true'></span></a>
 
-<a href="index.php?p=2" class="c-pager__item" title="次のページ">次へ <span class='p-icon p-icon--angle-right' aria-hidden='true'></span></a>
+<a href="?p=11" class="c-up-pager__item" title="最後のページ"><span class='p-icon p-icon--angle-double-right' aria-hidden='true'></span></a>
 
-<a href="index.php?p=11" class="c-pager__item" title="last page">最後へ</a>
-
-</div><!-- /.c-pager --></div>
+</div><!-- /.c-up-pager -->
+</div><!-- /.c-up-list-tools__pager -->
+</div><!-- /.c-up-list-tools -->
 
 <div class="c-ad">
 <div id="80f3793d724f656f3c8d5d34b530240b">
@@ -457,8 +482,8 @@ func TestParseIsNoticeList(t *testing.T) {
 	}{
 		{"更新チェック中一覧テスト", args{TestHtml},
 			&IsNoticeListPage{
-				NumItems:     218,
-				NextPageLink: "http://localhost/index.php?p=2",
+				NumItems:     306,
+				NextPageLink: "http://localhost/?p=2",
 				Items: []IsNoticeList{
 					{"ncode", "作品1", "タイトル1", "作者1", datetime("2000/01/02 03:04"), 1, 2, true},
 					{"ncode", "作品2", "タイトル2", "作者2", datetime("2001/02/03 04:05"), 3, 4, false},

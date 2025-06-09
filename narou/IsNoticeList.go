@@ -51,7 +51,7 @@ type ParsedIsNoticeList struct {
 
 type ParsedIsNoticeListPage struct {
 	NumItems     uint                 `find:"div.c-up-tab + div span.c-up-hit-number__item:first-of-type" re:"全([0-9]+)件中"`
-	NextPageLink *string              `find:"a[title='次のページ']" attr:"href"`
+	NextPageLink []string             `find:"a[title='次のページ']" attr:"href"`
 	Items        []ParsedIsNoticeList `find:"li.c-up-panel__list-item"`
 }
 
@@ -107,8 +107,8 @@ func ParseIsNoticeList(page *scraper.Page, wantTitle string) (*IsNoticeListPage,
 	}
 
 	result.NumItems = parsed.NumItems
-	if parsed.NextPageLink != nil {
-		result.NextPageLink, err = page.ResolveLink(*parsed.NextPageLink)
+	if len(parsed.NextPageLink) >= 1 {
+		result.NextPageLink, err = page.ResolveLink(parsed.NextPageLink[0])
 		if err != nil {
 			return nil, fmt.Errorf("ResolvedLink error: %v", parsed.NextPageLink)
 		}
