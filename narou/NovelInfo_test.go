@@ -57,90 +57,70 @@ const html = `<html>
 <div id="container">
 
 
-  <div class="contents1">
-<span class="attention">＜R15＞</span>
-</div><!--contents1-->
-<div id="novel_contents">
-<div id="novel_color">
+<article class="p-novel">
 
+<p class="p-novel__series">
+<a href="/SERIESID/" class="p-novel__series-link">SERIES</a>
+</p>
 
-<p class="novel_title">TITLE</p>
+<h1 class="novel_title">TITLE</h1>
 
+<div class="p-novel__author">作者：<a href="https://mypage.syosetu.com/AUTHORID/">AUTHOR</a>
+</div>
 
-<div class="novel_writername">
-作者：AUTHOR
-</div><!--novel_writername-->
-
-
-<div id="novel_ex">ABSTRACT<br />ABSTRACT
+<div id="novel_ex" class="p-novel__summary">ABSTRACT<br />ABSTRACT
 </div>
 
 <div class="novellingindex_bookmarker_no"><a href="/NCODE/3/">3部分</a></div>
 
+<div class="p-novel__bookmarker-no">
+<a href="/NCODE/3/">3部分</a>
+</div>
 
-<div class="index_box">
- <div class="chapter_title">CHAPTER1</div>
+<div class="p-eplist">
+<div class="p-eplist__chapter-title">CHAPTER1</div>
  
-<dl class="novel_sublist2">
-<dd class="subtitle">
-<a href="/NCODE/1/">第1-1話</a>
-</dd>
-<dt class="long_update">
+<div class="p-eplist__sublist">
+<a href="/NCODE/1/" class="p-eplist__subtitle">第1-1話</a>
+<div class="p-eplist__update">
 2021/05/03 23:44<span title="2021/05/07 15:54 改稿">（<u>改</u>）</span></dt>
-</dl>
+</div>
+</div>
  
-<dl class="novel_sublist2">
-<dd class="subtitle">
-<a href="/NCODE/2/">第1-2話</a>
-</dd>
-<dt class="long_update">
+<div class="p-eplist__sublist">
+<a href="/NCODE/2/" class="p-eplist__subtitle">第1-2話</a>
+<div class="p-eplist__update">
 2021/05/03 23:58<span title="2021/05/07 15:55 改稿">（<u>改</u>）</span></dt>
-</dl>
- <div class="chapter_title">CHAPTER2</div>
+</div>
+</div>
+
+<div class="p-eplist__chapter-title">CHAPTER2</div>
  
-<dl class="novel_sublist2">
-<dd class="subtitle">
-<a href="/NCODE/3/">第2-1話</a>
-<span class="bookmarker_now">　</span></dd>
-<dt class="long_update">
-2021/05/06 19:00</dt>
-</dl>
-</div><!--index_box-->
+<div class="p-eplist__sublist">
+<a href="/NCODE/3/" class="p-eplist__subtitle">第2-1話</a>
+<span class="bookmarker_now">　</span>
+<div class="p-eplist__update">
+2021/05/06 19:00
+</div>
+</div>
+
+</div><!--./p-eplist-->
+
+</article><!-- /.p-novel -->
+
 
 </div><!--novel_color-->
 
-<div class="wrap_menu_novelview_after">
-<div class="box_menu_novelview_after clearfix">
-<ul class="menu_novelview_after">
+<div class="p-bookmark-bar__right">
+<div class="p-bookmark-bar__item">
+<a class="p-bookmark-bar__bkm-link" href="https://syosetu.com/favnovelmain/list/?nowcategory=2">ブックマーク</a>
+</div><!-- /.p-bookmark-bar__item -->
+</div><!-- /.p-bookmark-bar__right -->
 
-<li class="list_menu_novelview_after"><a href="https://syosetu.com/favnovelmain/list/?nowcategory=2">ブックマーク</a></li>
-
-</ul>
-
-<ul class="footerbookmark"><li class="booklist_now">
-<a href="javascript:void(0)" class="bookmark_delete_url">ブックマーク解除</a>
-<input type="hidden" name="bookmark_deleteconf_url" value="https://syosetu.com/favnovelmain/deleteconfirmajax/favncode/NOVELID2/">
-</li>
-
-</ul>
-</div><!-- footer_bookmark -->
-</div><!-- wrap -->
-
-<div id="novel_attention">
-+注意+<br />
-</div><!--novel_attention-->
-
-<div id="novel_footer">
-<ul class="undernavi">
-<li><a href="https://mypage.syosetu.com/AUTHORID/">作者マイページ</a></li>
-<li><a href="https://ncode.syosetu.com/novelview/infotop/ncode/NCODE/#trackback">トラックバック</a></li>
-
-<li><a href="https://ncode.syosetu.com/txtdownload/top/ncode/NOVELID2/" onclick="javascript:window.open('https://ncode.syosetu.com/txtdownload/top/ncode/NOVELID2/','a','width=600,height=450'); return false;">TXTダウンロード</a></li>
-
-
-<li><a href="https://syosetu.com/ihantsuhou/input/ncode/NOVELID2/">情報提供</a></li>
-</ul>
-</div><!--novel_footer-->
+<div class="c-under-nav">
+<a class="c-under-nav__item" href="https://mypage.syosetu.com/AUTHORID/">作者マイページ</a></li>
+<a class="c-under-nav__item" href="https://syosetu.com/ihantsuhou/input/ncode/NOVELID2/">情報提供</a></li>
+</div><!--./c-under-nav-->
 
 </div><!--novel_contents-->
 

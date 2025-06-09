@@ -62,7 +62,7 @@ type ParsedFavNovelListPage struct {
 	// 全187件中</span><span class="c-up-hit-number__item">1件目～50件目を表示</span>
 	NumItems uint `find:"span.c-up-hit-number__item" re:"全([0-9]+)件中"`
 	// <a href="index.php?p=2" class="c-pager__item" title="次のページ">次へ <span class='p-icon p-icon--angle-right' aria-hidden='true'></span></a>
-	NextPageLink *string `find:"a[title='次のページ']" attr:"href"`
+	NextPageLink []string `find:"a[title='次のページ']" attr:"href"`
 	// <li class="c-up-panel__list-item p-up-bookmark-item">
 	Items []ParsedFavNovelList `find:"li.p-up-bookmark-item"`
 }
@@ -92,8 +92,8 @@ func ParseFavNovelList(page *scraper.Page, wantTitle string) (*FavNovelListPage,
 	}
 
 	result.NumItems = parsed.NumItems
-	if parsed.NextPageLink != nil {
-		result.NextPageLink, err = page.ResolveLink(*parsed.NextPageLink)
+	if len(parsed.NextPageLink) >= 1 {
+		result.NextPageLink, err = page.ResolveLink(parsed.NextPageLink[0])
 		if err != nil {
 			return nil, fmt.Errorf("ResolvedLink error: %v", parsed.NextPageLink)
 		}

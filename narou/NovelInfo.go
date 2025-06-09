@@ -6,18 +6,18 @@ import (
 )
 
 type SubList2 struct {
-	SubTitle string `find:"dd.subtitle a"`
-	Link     string `find:"dd.subtitle a" attr:"href"`
-	No       uint   `find:"dd.subtitle a" attr:"href" re:"/.*/([0-9]+)/"`
+	SubTitle string `find:"a"`
+	Link     string `find:"a" attr:"href"`
+	No       uint   `find:"a" attr:"href" re:"/.*/([0-9]+)/"`
 
-	PublishTime time.Time  `find:"dt.long_update" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
-	UpdateTime  *time.Time `find:"dt.long_update span" attr:"title" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
+	PublishTime time.Time  `find:"div.p-eplist__update" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
+	UpdateTime  *time.Time `find:"div.p-eplist__update span" attr:"title" re:"([0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+)" time:"2006/01/02 15:04"`
 }
 
 type NovelIndex struct {
-	Chapters     []string   `find:"div.chapter_title"`
-	ChapterHeads []SubList2 `find:"div.chapter_title + dl.novel_sublist2"`
-	Episodes     []SubList2 `find:"dl.novel_sublist2"`
+	Chapters     []string   `find:"div.p-eplist__chapter-title"`
+	ChapterHeads []SubList2 `find:"div.p-eplist__chapter-title + div.p-eplist__sublist"`
+	Episodes     []SubList2 `find:"div.p-eplist__sublist"`
 }
 
 type NovelInfo struct {
@@ -26,11 +26,11 @@ type NovelInfo struct {
 	Keywords   string `find:"head meta[property='og:description']" attr:"content"`
 
 	Abstract        string      `find:"body div#novel_ex" html:""`
-	AuthorURL       string      `find:"body div#novel_footer ul.undernavi li:nth-of-type(1) a" attr:"href"`
-	BookmarkURL     *string     `find:"body li.list_menu_novelview_after a" attr:"href"`
-	BookmarkNo      *uint       `find:"body li.list_menu_novelview_after a" re:"nowcategory=([0-9]+)" attr:"href"`
+	AuthorURL       string      `find:"body div.p-novel__author a" attr:"href"`
+	BookmarkURL     *string     `find:"body a.p-bookmark-bar__bkm-link" attr:"href"`
+	BookmarkNo      *uint       `find:"body a.p-bookmark-bar__bkm-link" re:"nowcategory=([0-9]+)" attr:"href"`
 	BookmarkEpisode *uint       `find:"body div.novellingindex_bookmarker_no a" attr:"href" re:"\\/[a-zA-z0-9]*\\/([0-9]+)\\/$"`
-	Index           *NovelIndex `find:"body div.index_box"`
+	Index           *NovelIndex `find:"body div.p-eplist"`
 }
 
 func ParseNovelInfo(page *scraper.Page) (*NovelInfo, error) {
