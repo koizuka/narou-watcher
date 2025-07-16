@@ -62,6 +62,6 @@
     "whatwg-fetch": "^3.6.20"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.45.0"
+    "@rollup/rollup-linux-x64-gnu": "^4.45.1"
   }
 }
