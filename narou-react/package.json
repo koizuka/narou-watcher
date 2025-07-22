@@ -55,7 +55,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-testing-library": "^7.6.0",
     "eslint-plugin-vitest": "^0.5.4",
-    "jest-environment-jsdom": "^30.0.4",
+    "jest-environment-jsdom": "^30.0.5",
     "typescript-eslint": "^8.37.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4",
