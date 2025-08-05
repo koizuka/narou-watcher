@@ -22,7 +22,7 @@ function BookmarkSelectorRaw({ bookmarks, bookmark, onChangeBookmark: setBookmar
       disableUnderline={true}
       variant="standard"
       open={open} onOpen={() => { setOpen(true); }} onClose={() => { setOpen(false); }}
-      value={bookmark} onChange={event => { setBookmark(Number(event.target.value)); }}>
+      value={bookmark} onChange={event => { setBookmark(event.target.value); }}>
       <MenuItem key={0} value={0}>{open || large ? '更新チェック中' : 'BM-'}</MenuItem>
       {bookmarks && Object.keys(bookmarks).map(k => <MenuItem key={k} value={k}>{open || large ? bookmarks[Number(k)].name : `BM${bookmark}`}</MenuItem>)}
     </Select>
