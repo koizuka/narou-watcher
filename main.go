@@ -608,7 +608,19 @@ func checkNovelAccessHandler(baseUrl string, r18 bool) NarouApiHandlerType {
 		// Create a simple HTTP request for anonymous access
 		targetUrl := fmt.Sprintf("%s%s/%s/", baseUrl, ncode, episode)
 		
-		resp, err := http.Get(targetUrl)
+		// Use http client with timeout for anonymous access check
+		client := &http.Client{Timeout: 10 * time.Second}
+		req, err := http.NewRequest("GET", targetUrl, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create request: %v", err)
+		}
+		
+		// Add R18 age verification cookie if needed
+		if r18 {
+			req.AddCookie(&http.Cookie{Name: "over18", Value: "yes"})
+		}
+		
+		resp, err := client.Do(req)
 		if err != nil {
 			return nil, fmt.Errorf("failed to access novel: %v", err)
 		}
