@@ -80,4 +80,9 @@ export class NarouApi {
     static novelInfoR18(ncode: string): NarouApiCallKey {
         return `/r18/novels/${ncode}`;
     }
+
+    static checkNovelAccess(ncode: string, episode: number, r18 = false): NarouApiCallKey {
+        const prefix = r18 ? '/r18' : '/narou';
+        return `${prefix}/check-novel-access/${ncode}/${episode}`;
+    }
 }

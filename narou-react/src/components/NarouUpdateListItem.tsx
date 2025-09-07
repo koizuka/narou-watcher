@@ -11,13 +11,14 @@ import { IsNoticeListItem, itemSummary, nextLink, unread } from "../narouApi/IsN
 export const BEWARE_TIME = 3 * 60 * 1000;
 
 export const NarouUpdateListItem = React.memo(NarouUpdateListItemRaw);
-function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onSecondaryAction, selectDefault, 'data-testid': testId }: {
+function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onSecondaryAction, onWaitingAction, selectDefault, 'data-testid': testId }: {
   item: IsNoticeListItem;
   index: number;
   isSelected: boolean;
   setSelectedIndex: (index: number) => void;
   selectDefault: () => void;
   onSecondaryAction: (item: IsNoticeListItem) => void;
+  onWaitingAction?: (item: IsNoticeListItem) => void;
   'data-testid'?: string;
 }) {
   const scrollIn = useCallback((node: HTMLLIElement | null) => {
@@ -36,33 +37,6 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
     }
   }, [isSelected]);
 
-  const buttonProps = useMemo<ButtonTypeMap['props']>(() => {
-    if (unread(item) > 0) {
-      return {
-        component: 'a',
-        href: nextLink(item),
-        onClick: () => { selectDefault(); },
-        target: '_blank',
-        tabIndex: 0,
-        ref: ref,
-      };
-    } else {
-      return { disabled: true };
-    }
-  }, [item, selectDefault]);
-
-  const badgeProps = useMemo<BadgeTypeMap['props']>(() => {
-    const numNewEpisodes = item.latest - item.bookmark;
-
-    if (numNewEpisodes < 0) {
-      return { color: 'secondary', badgeContent: '!' };
-    }
-    return { color: 'primary', badgeContent: numNewEpisodes };
-  }, [item.bookmark, item.latest]);
-
-  const onFocusVisible = useCallback(() => { setSelectedIndex(index); }, [index, setSelectedIndex]);
-  const onClick = useCallback(() => { onSecondaryAction(item); }, [item, onSecondaryAction]);
-
   const [bewareTooNew, setBewareTooNew] = useState(false);
   useEffect(() => {
     const past = -item.update_time.diffNow('milliseconds').milliseconds;
@@ -77,7 +51,47 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
     } else {
       setBewareTooNew(false);
     }
-  }, [bewareTooNew, item.update_time]);
+  }, [item.update_time]);
+
+  const buttonProps = useMemo<ButtonTypeMap['props']>(() => {
+    if (unread(item) > 0) {
+      if (bewareTooNew && onWaitingAction) {
+        // For recent updates, use waiting action instead of direct link
+        return {
+          onClick: () => {
+            selectDefault();
+            onWaitingAction(item);
+          },
+          tabIndex: 0,
+          ref: ref,
+        };
+      } else {
+        // Normal behavior: direct link
+        return {
+          component: 'a',
+          href: nextLink(item),
+          onClick: () => { selectDefault(); },
+          target: '_blank',
+          tabIndex: 0,
+          ref: ref,
+        };
+      }
+    } else {
+      return { disabled: true };
+    }
+  }, [item, selectDefault, bewareTooNew, onWaitingAction]);
+
+  const badgeProps = useMemo<BadgeTypeMap['props']>(() => {
+    const numNewEpisodes = item.latest - item.bookmark;
+
+    if (numNewEpisodes < 0) {
+      return { color: 'secondary', badgeContent: '!' };
+    }
+    return { color: 'primary', badgeContent: numNewEpisodes };
+  }, [item.bookmark, item.latest]);
+
+  const onFocusVisible = useCallback(() => { setSelectedIndex(index); }, [index, setSelectedIndex]);
+  const onClick = useCallback(() => { onSecondaryAction(item); }, [item, onSecondaryAction]);
 
   const [firstLine, secondLine] = useMemo(() => [
     itemSummary(item),

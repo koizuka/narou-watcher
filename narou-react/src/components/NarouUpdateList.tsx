@@ -22,12 +22,14 @@ export function NarouUpdateList({
   selectedIndex, setSelectedIndex,
   selectCommand,
   onSecondaryAction,
+  onWaitingAction,
 }: {
   items: IsNoticeListItem[];
   selectedIndex: number;
   setSelectedIndex: (index: number) => void;
   selectCommand: (command: SelectCommand) => void;
   onSecondaryAction: (item: IsNoticeListItem) => void;
+  onWaitingAction: (item: IsNoticeListItem) => void;
 }) {
   useHotKeys(useMemo((): HotKeys => {
     return {
@@ -64,6 +66,7 @@ export function NarouUpdateList({
         setSelectedIndex={setSelectedIndex}
         selectDefault={selectDefault}
         onSecondaryAction={onSecondaryAction}
+        onWaitingAction={onWaitingAction}
       />)}
     </List>
   );

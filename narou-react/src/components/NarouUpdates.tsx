@@ -23,6 +23,7 @@ import { BookmarkSelector } from './BookmarkSelector';
 import { NarouLoginForm } from './NarouLoginForm';
 import { NarouUpdateList } from './NarouUpdateList';
 import { OpenConfirmDialog } from './OpenConfirmDialog';
+import { WaitingForNovelDialog } from './WaitingForNovelDialog';
 
 const UserTopURL = 'https://syosetu.com/user/top/';
 const UserTopName = 'ユーザーホーム';
@@ -67,6 +68,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   const selectDefault = useCallback(() => { selectCommand('default'); }, [selectCommand]);
 
   const [confirm, setConfirm] = useState<IsNoticeListItem | undefined>(undefined);
+  const [waiting, setWaiting] = useState<IsNoticeListItem | undefined>(undefined);
 
   const { setAppBadge, clearAppBadge } = useAppBadge();
   const { setClientBadge, clearClientBadge } = useClientBadge();
@@ -101,6 +103,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   }), [userTopURL]));
 
   const onClose = useCallback(() => { setConfirm(undefined); }, []);
+  const onWaitingClose = useCallback(() => { setWaiting(undefined); }, []);
 
   if (error) {
     console.log(`error = ${error.toString()}`);
@@ -122,6 +125,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
 
   return <>
     <OpenConfirmDialog api={server} item={confirm} onClose={onClose} />
+    <WaitingForNovelDialog api={server} item={waiting} onClose={onWaitingClose} />
     <AppBar position="sticky">
       <Toolbar>
         <Box>
@@ -145,6 +149,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
           selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex}
           selectCommand={selectCommand}
           onSecondaryAction={setConfirm}
+          onWaitingAction={setWaiting}
         />
       </Box>
       <Box position="fixed" right="20px" bottom="20px">
