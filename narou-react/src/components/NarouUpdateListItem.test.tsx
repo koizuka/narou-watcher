@@ -100,8 +100,9 @@ describe('NarouUpdateListItem', () => {
       />
     );
 
-    const button = rendered.getByRole('button');
-    await user.click(button);
+    const buttons = rendered.getAllByRole('button');
+    const mainButton = buttons.find(button => button.getAttribute('role') === 'button' && !button.getAttribute('tabindex')?.includes('-1'));
+    await user.click(mainButton || buttons[1]); // Use main button or fallback to second button
 
     expect(mockOnWaitingAction).toHaveBeenCalledWith(item);
     expect(mockSelectDefault).toHaveBeenCalled();

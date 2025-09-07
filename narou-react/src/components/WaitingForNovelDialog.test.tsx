@@ -91,7 +91,7 @@ describe('WaitingForNovelDialog', () => {
     );
 
     expect(screen.getAllByText('今すぐ確認')[0]).toBeInTheDocument();
-    expect(screen.getByText('そのまま開く')).toBeInTheDocument();
+    expect(screen.getAllByText('そのまま開く')[0]).toBeInTheDocument();
     expect(screen.getAllByText('キャンセル')[0]).toBeInTheDocument();
   });
 });
