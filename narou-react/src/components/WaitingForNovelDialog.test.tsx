@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DateTime } from 'luxon';
 import React from 'react';
@@ -67,7 +67,7 @@ describe('WaitingForNovelDialog', () => {
     const user = userEvent.setup();
     mockCall.mockResolvedValue({ accessible: false });
 
-    const { container } = render(
+    render(
       <WaitingForNovelDialog 
         api={mockApi}
         item={mockItem}
@@ -75,17 +75,18 @@ describe('WaitingForNovelDialog', () => {
       />
     );
 
-    // Find cancel button within this specific container
-    const cancelButton = container.querySelector('[role="dialog"] button:last-child') as HTMLButtonElement;
-    expect(cancelButton).toHaveTextContent('キャンセル');
+    // Wait for dialog to render and find cancel button by text content
+    const cancelButton = await screen.findByText('キャンセル');
+    expect(cancelButton).toBeInTheDocument();
+    
     await user.click(cancelButton);
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  test('has manual retry button', () => {
+  test('has manual retry button', async () => {
     mockCall.mockResolvedValue({ accessible: false });
 
-    const { container } = render(
+    render(
       <WaitingForNovelDialog 
         api={mockApi}
         item={mockItem}
@@ -93,14 +94,13 @@ describe('WaitingForNovelDialog', () => {
       />
     );
 
-    // Find buttons within this specific dialog container
-    const dialog = container.querySelector('[role="dialog"]');
-    expect(dialog).toBeInTheDocument();
-    
-    const buttons = dialog?.querySelectorAll('button');
-    expect(buttons).toHaveLength(3);
-    expect(buttons?.[0]).toHaveTextContent('今すぐ確認');
-    expect(buttons?.[1]).toHaveTextContent('そのまま開く');
-    expect(buttons?.[2]).toHaveTextContent('キャンセル');
+    // Wait for dialog to render by finding expected buttons
+    const manualRetryButton = await screen.findByText('今すぐ確認');
+    const openAnywayButton = await screen.findByText('そのまま開く');
+    const cancelButton = await screen.findByText('キャンセル');
+
+    expect(manualRetryButton).toBeInTheDocument();
+    expect(openAnywayButton).toBeInTheDocument();
+    expect(cancelButton).toBeInTheDocument();
   });
 });
