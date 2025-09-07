@@ -51,7 +51,7 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
     } else {
       setBewareTooNew(false);
     }
-  }, [bewareTooNew, item.update_time]);
+  }, [item.update_time]);
 
   const buttonProps = useMemo<ButtonTypeMap['props']>(() => {
     if (unread(item) > 0) {

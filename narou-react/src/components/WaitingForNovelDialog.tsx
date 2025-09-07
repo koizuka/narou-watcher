@@ -27,7 +27,7 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
 }) {
   const [retryCount, setRetryCount] = useState(0);
   const [isChecking, setIsChecking] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const extractNcodeAndEpisode = useCallback((item: IsNoticeListItem) => {
     // Extract ncode from base_url (e.g., "https://ncode.syosetu.com/n1234aa/" -> "n1234aa")
@@ -66,7 +66,11 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
       const accessible = await checkNovelAccess(item);
       
       if (accessible) {
-        // Novel is now accessible, open it
+        // Novel is now accessible, stop polling and open it
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
         openNovel(item);
         return;
       }
@@ -145,7 +149,7 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
         <DialogContentText>
           30秒ごとに確認し、公開され次第自動的に開きます。
         </DialogContentText>
-        <Typography variant="body2" color="textSecondary" sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
           {isChecking && <CircularProgress size={16} />}
           {isChecking
             ? '確認中...'
@@ -155,7 +159,7 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
           }
         </Typography>
         {retryCount > 0 && (
-          <Typography variant="body2" color="textSecondary">
+          <Typography variant="body2" color="text.secondary">
             確認回数: {retryCount}/{MAX_RETRY_COUNT}
           </Typography>
         )}
