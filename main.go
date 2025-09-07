@@ -276,20 +276,20 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 
 		body, err := handler(w.Header(), r, watcher)
 		if err != nil {
-			switch err.(type) {
+			switch err := err.(type) {
 			case narou.LoginError:
-				http.Error(w, "Unauthorized", 401)
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			case scraper.RequestError:
-				e := err.(scraper.RequestError)
-				http.Error(w, fmt.Sprintf("Request Failed: %#v: %v", e.RequestURL.String(), e.Err), 503)
+				e := err
+				http.Error(w, fmt.Sprintf("Request Failed: %#v: %v", e.RequestURL.String(), e.Err), http.StatusServiceUnavailable)
 			case scraper.ResponseError:
-				e := err.(scraper.ResponseError)
+				e := err
 				http.Error(w, fmt.Sprintf("%v: %#v", e.Response.Status, e.RequestURL.String()), e.Response.StatusCode)
 			case BadRequestError:
-				http.Error(w, fmt.Sprintf("Bad Request: %v", err), 400)
+				http.Error(w, fmt.Sprintf("Bad Request: %v", err), http.StatusBadRequest)
 			default:
-				log.Printf("%v %v: error %v: %v", r.Method, r.URL, 503, err)
-				http.Error(w, fmt.Sprintf("Internal Server Error: %v", err), 503)
+				log.Printf("%v %v: error %v: %v", r.Method, r.URL, http.StatusServiceUnavailable, err)
+				http.Error(w, fmt.Sprintf("Internal Server Error: %v", err), http.StatusServiceUnavailable)
 			}
 			return
 		}
@@ -320,9 +320,7 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 		for _, cookie := range watcher.Cookies(apiService.cookieDomain) {
 			name := apiService.cookiePrefix + cookie.Name
 			setCookie(name, cookie.Value, false)
-			if _, ok := deleteCookies[name]; ok {
-				delete(deleteCookies, name)
-			}
+			delete(deleteCookies, name)
 		}
 		for name, value := range deleteCookies {
 			setCookie(name, value, true)
@@ -601,37 +599,37 @@ func checkNovelAccessHandler(baseUrl string, r18 bool) NarouApiHandlerType {
 		if len(parts) != 2 {
 			return nil, fmt.Errorf("invalid path format, expected /check-novel-access/ncode/episode")
 		}
-		
+
 		ncode := parts[0]
 		episode := parts[1]
-		
+
 		// Create a simple HTTP request for anonymous access
 		targetUrl := fmt.Sprintf("%s%s/%s/", baseUrl, ncode, episode)
-		
+
 		// Use http client with timeout for anonymous access check
 		client := &http.Client{Timeout: 10 * time.Second}
 		req, err := http.NewRequest("GET", targetUrl, nil)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create request: %v", err)
 		}
-		
+
 		// Add R18 age verification cookie if needed
 		if r18 {
 			req.AddCookie(&http.Cookie{Name: "over18", Value: "yes"})
 		}
-		
+
 		resp, err := client.Do(req)
 		if err != nil {
 			return nil, fmt.Errorf("failed to access novel: %v", err)
 		}
 		defer resp.Body.Close()
-		
+
 		result := struct {
 			Accessible bool `json:"accessible"`
 		}{
 			Accessible: resp.StatusCode == 200,
 		}
-		
+
 		return ReturnJson(w, result)
 	}
 }
