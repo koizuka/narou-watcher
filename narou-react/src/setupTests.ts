@@ -7,3 +7,11 @@ import 'whatwg-fetch';
 
 // @ts-expect-error disable ts(7017) for globalThis
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
+// Mock window.open for tests
+Object.defineProperty(window, 'open', {
+  writable: true,
+  value: globalThis.vi?.fn() || function () {
+    console.log('window.open called in test environment');
+  },
+});

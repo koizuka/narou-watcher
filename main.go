@@ -591,6 +591,39 @@ func favUserUpdatesHandler(URL string) NarouApiHandlerType {
 	}
 }
 
+func checkNovelAccessHandler(baseUrl string, r18 bool) NarouApiHandlerType {
+	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+		path := strings.TrimPrefix(r.URL.Path, "/narou/check-novel-access/")
+		if r18 {
+			path = strings.TrimPrefix(r.URL.Path, "/r18/check-novel-access/")
+		}
+		parts := strings.Split(path, "/")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid path format, expected /check-novel-access/ncode/episode")
+		}
+		
+		ncode := parts[0]
+		episode := parts[1]
+		
+		// Create a simple HTTP request for anonymous access
+		targetUrl := fmt.Sprintf("%s%s/%s/", baseUrl, ncode, episode)
+		
+		resp, err := http.Get(targetUrl)
+		if err != nil {
+			return nil, fmt.Errorf("failed to access novel: %v", err)
+		}
+		defer resp.Body.Close()
+		
+		result := struct {
+			Accessible bool `json:"accessible"`
+		}{
+			Accessible: resp.StatusCode == 200,
+		}
+		
+		return ReturnJson(w, result)
+	}
+}
+
 func getProjectDirectory() (string, error) {
 	out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
 	if err != nil {
@@ -702,6 +735,15 @@ func main() {
 	}
 	setNovelInfoHandler("/narou/novels/", "https://ncode.syosetu.com/", false)
 	setNovelInfoHandler("/r18/novels/", "https://novel18.syosetu.com/", true)
+
+	// Check novel access endpoints
+	setCheckNovelAccessHandler := func(pattern, baseUrl string, r18 bool) {
+		mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+			narouApiService.HandlerFunc(checkNovelAccessHandler(baseUrl, r18))(w, r)
+		})
+	}
+	setCheckNovelAccessHandler("/narou/check-novel-access/", "https://ncode.syosetu.com/", false)
+	setCheckNovelAccessHandler("/r18/check-novel-access/", "https://novel18.syosetu.com/", true)
 
 	setHandler("/narou/isnoticelist", isNoticeListHandler(narou.IsNoticeListURL, narou.IsNoticeListTitle))
 	setHandler("/r18/isnoticelist", isNoticeListHandler(narou.IsNoticeListR18URL, narou.IsNoticeListR18Title))

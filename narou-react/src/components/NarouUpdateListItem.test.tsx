@@ -1,4 +1,5 @@
 import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DateTime, Settings } from 'luxon';
 import React, { act } from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
@@ -66,5 +67,115 @@ describe('NarouUpdateListItem', () => {
     Settings.now = () => update_time + BEWARE_TIME + 1; // 3 minutes after updated time
     rendered.rerender(toRender());
     expect(elem.querySelector('.MuiListItemText-secondary')?.textContent).toEqual(withoutAlert);
+  });
+
+  test('calls onWaitingAction when clicking on recent updates', async () => {
+    const update_time = Date.now();
+    Settings.now = () => update_time; // Current time is same as update time
+
+    const item: IsNoticeListItem = {
+      base_url: 'https://ncode.syosetu.com/n1234aa/',
+      update_time: DateTime.fromMillis(update_time),
+      bookmark: 0,
+      latest: 1,
+      title: 'Recent Novel',
+      author_name: 'author',
+      completed: false,
+      isR18: false,
+    };
+
+    const mockOnWaitingAction = vi.fn();
+    const mockSelectDefault = vi.fn();
+    const user = userEvent.setup();
+
+    const rendered = render(
+      <NarouUpdateListItem data-testid="item"
+        item={item}
+        index={0}
+        isSelected
+        setSelectedIndex={() => {/* nothing */ }}
+        selectDefault={mockSelectDefault}
+        onSecondaryAction={() => {/* nothing */ }}
+        onWaitingAction={mockOnWaitingAction}
+      />
+    );
+
+    const button = rendered.getByRole('button', { name: /Recent Novel/ });
+    await user.click(button);
+
+    expect(mockOnWaitingAction).toHaveBeenCalledWith(item);
+    expect(mockSelectDefault).toHaveBeenCalled();
+  });
+
+  test('opens direct link when clicking on older updates', () => {
+    const update_time = Date.now();
+    Settings.now = () => update_time + BEWARE_TIME + 1; // 3 minutes after update time
+
+    const item: IsNoticeListItem = {
+      base_url: 'https://ncode.syosetu.com/n1234aa/',
+      update_time: DateTime.fromMillis(update_time),
+      bookmark: 0,
+      latest: 1,
+      title: 'Older Novel',
+      author_name: 'author',
+      completed: false,
+      isR18: false,
+    };
+
+    const mockOnWaitingAction = vi.fn();
+    const mockSelectDefault = vi.fn();
+
+    const rendered = render(
+      <NarouUpdateListItem data-testid="item"
+        item={item}
+        index={0}
+        isSelected
+        setSelectedIndex={() => {/* nothing */ }}
+        selectDefault={mockSelectDefault}
+        onSecondaryAction={() => {/* nothing */ }}
+        onWaitingAction={mockOnWaitingAction}
+      />
+    );
+
+    const button = rendered.getByRole('button', { name: /Older Novel/ });
+    
+    // For older updates, it should be a direct link (no click handling needed for test)
+    expect(button).toHaveAttribute('href', 'https://ncode.syosetu.com/n1234aa/1/');
+    expect(mockOnWaitingAction).not.toHaveBeenCalled();
+  });
+
+  test('fallback to direct link when onWaitingAction is not provided', () => {
+    const update_time = Date.now();
+    Settings.now = () => update_time; // Current time is same as update time
+
+    const item: IsNoticeListItem = {
+      base_url: 'https://ncode.syosetu.com/n1234aa/',
+      update_time: DateTime.fromMillis(update_time),
+      bookmark: 0,
+      latest: 1,
+      title: 'Recent Novel',
+      author_name: 'author',
+      completed: false,
+      isR18: false,
+    };
+
+    const mockSelectDefault = vi.fn();
+
+    const rendered = render(
+      <NarouUpdateListItem data-testid="item"
+        item={item}
+        index={0}
+        isSelected
+        setSelectedIndex={() => {/* nothing */ }}
+        selectDefault={mockSelectDefault}
+        onSecondaryAction={() => {/* nothing */ }}
+        // onWaitingAction is not provided
+      />
+    );
+
+    const button = rendered.getByRole('button', { name: /Recent Novel/ });
+    
+    // Should fallback to direct link behavior
+    expect(button).toHaveAttribute('href', 'https://ncode.syosetu.com/n1234aa/1/');
   });
 });
