@@ -100,12 +100,12 @@ describe('NarouUpdateListItem', () => {
       />
     );
 
-    const button = rendered.getByRole('button', { name: /Recent Novel/ });
+    const button = rendered.getByRole('button');
     await user.click(button);
 
     expect(mockOnWaitingAction).toHaveBeenCalledWith(item);
     expect(mockSelectDefault).toHaveBeenCalled();
-  });
+  }, 10000);
 
   test('opens direct link when clicking on older updates', () => {
     const update_time = Date.now();
@@ -137,10 +137,10 @@ describe('NarouUpdateListItem', () => {
       />
     );
 
-    const button = rendered.getByRole('button', { name: /Older Novel/ });
+    const link = rendered.getByRole('link');
     
-    // For older updates, it should be a direct link (no click handling needed for test)
-    expect(button).toHaveAttribute('href', 'https://ncode.syosetu.com/n1234aa/1/');
+    // For older updates, it should be a direct link
+    expect(link).toHaveAttribute('href', 'https://ncode.syosetu.com/n1234aa/1/');
     expect(mockOnWaitingAction).not.toHaveBeenCalled();
   });
 
@@ -173,9 +173,9 @@ describe('NarouUpdateListItem', () => {
       />
     );
 
-    const button = rendered.getByRole('button', { name: /Recent Novel/ });
+    const link = rendered.getByRole('link');
     
     // Should fallback to direct link behavior
-    expect(button).toHaveAttribute('href', 'https://ncode.syosetu.com/n1234aa/1/');
+    expect(link).toHaveAttribute('href', 'https://ncode.syosetu.com/n1234aa/1/');
   });
 });

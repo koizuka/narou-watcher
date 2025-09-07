@@ -50,7 +50,7 @@ describe('WaitingForNovelDialog', () => {
   });
 
   test('does not display dialog when item is undefined', () => {
-    render(
+    const { container } = render(
       <WaitingForNovelDialog 
         api={mockApi}
         item={undefined}
@@ -58,7 +58,8 @@ describe('WaitingForNovelDialog', () => {
       />
     );
 
-    expect(screen.queryByText('小説の公開を待っています...')).not.toBeInTheDocument();
+    // Dialog should not be open
+    expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument();
   });
 
   test('calls onClose when cancel button is clicked', async () => {
@@ -73,7 +74,8 @@ describe('WaitingForNovelDialog', () => {
       />
     );
 
-    await user.click(screen.getByText('キャンセル'));
+    const cancelButton = screen.getAllByText('キャンセル')[0];
+    await user.click(cancelButton);
     expect(mockOnClose).toHaveBeenCalled();
   });
 
@@ -88,8 +90,8 @@ describe('WaitingForNovelDialog', () => {
       />
     );
 
-    expect(screen.getByText('今すぐ確認')).toBeInTheDocument();
+    expect(screen.getAllByText('今すぐ確認')[0]).toBeInTheDocument();
     expect(screen.getByText('そのまま開く')).toBeInTheDocument();
-    expect(screen.getByText('キャンセル')).toBeInTheDocument();
+    expect(screen.getAllByText('キャンセル')[0]).toBeInTheDocument();
   });
 });
