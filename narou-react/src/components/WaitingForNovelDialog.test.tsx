@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DateTime } from 'luxon';
 import React from 'react';
@@ -28,6 +28,7 @@ describe('WaitingForNovelDialog', () => {
   const mockOnClose = vi.fn();
 
   afterEach(() => {
+    cleanup(); // Ensure all components are unmounted
     vi.clearAllMocks();
     vi.clearAllTimers();
     vi.unstubAllGlobals();
@@ -66,7 +67,7 @@ describe('WaitingForNovelDialog', () => {
     const user = userEvent.setup();
     mockCall.mockResolvedValue({ accessible: false });
 
-    render(
+    const { container } = render(
       <WaitingForNovelDialog 
         api={mockApi}
         item={mockItem}
@@ -74,7 +75,9 @@ describe('WaitingForNovelDialog', () => {
       />
     );
 
-    const cancelButton = screen.getAllByText('キャンセル')[0];
+    // Find cancel button within this specific container
+    const cancelButton = container.querySelector('[role="dialog"] button:last-child') as HTMLButtonElement;
+    expect(cancelButton).toHaveTextContent('キャンセル');
     await user.click(cancelButton);
     expect(mockOnClose).toHaveBeenCalled();
   });
@@ -82,7 +85,7 @@ describe('WaitingForNovelDialog', () => {
   test('has manual retry button', () => {
     mockCall.mockResolvedValue({ accessible: false });
 
-    render(
+    const { container } = render(
       <WaitingForNovelDialog 
         api={mockApi}
         item={mockItem}
@@ -90,8 +93,14 @@ describe('WaitingForNovelDialog', () => {
       />
     );
 
-    expect(screen.getAllByText('今すぐ確認')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('そのまま開く')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('キャンセル')[0]).toBeInTheDocument();
+    // Find buttons within this specific dialog container
+    const dialog = container.querySelector('[role="dialog"]');
+    expect(dialog).toBeInTheDocument();
+    
+    const buttons = dialog?.querySelectorAll('button');
+    expect(buttons).toHaveLength(3);
+    expect(buttons?.[0]).toHaveTextContent('今すぐ確認');
+    expect(buttons?.[1]).toHaveTextContent('そのまま開く');
+    expect(buttons?.[2]).toHaveTextContent('キャンセル');
   });
 });
