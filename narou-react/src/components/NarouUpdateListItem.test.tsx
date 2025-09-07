@@ -1,5 +1,4 @@
 import { cleanup, render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { DateTime, Settings } from 'luxon';
 import React, { act } from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
