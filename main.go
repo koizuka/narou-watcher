@@ -637,8 +637,10 @@ func checkNovelAccessHandler(baseUrl string, r18 bool) NarouApiHandlerType {
 		defer resp.Body.Close()
 		result := struct {
 			Accessible bool `json:"accessible"`
+			StatusCode int  `json:"statusCode"`
 		}{
 			Accessible: resp.StatusCode == 200,
+			StatusCode: resp.StatusCode,
 		}
 
 		return ReturnJson(w, result)
