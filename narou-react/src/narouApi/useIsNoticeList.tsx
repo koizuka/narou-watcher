@@ -20,6 +20,8 @@ interface IsNoticeListRecord {
 export function clearCache() {
   void mutate('/narou/isnoticelist');
   void mutate('/r18/isnoticelist');
+  void mutate('/narou/bookmarks/');
+  void mutate('/r18/bookmarks/');
 }
 
 export function useIsNoticeList(

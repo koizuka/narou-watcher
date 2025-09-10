@@ -9,14 +9,20 @@ export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
 
   const postLogin = useCallback(() => {
     void (async () => {
-    const res: Response = await props.api.login(userId, password);
-    if (!res.ok) {
-      const text = await res.text();
-      setError(`${res.status} ${res.statusText}\n${text}`);
-    } else {
-      props.onLogin();
-    }
-  })();
+      const res: Response = await props.api.login(userId, password);
+      if (!res.ok) {
+        const text = await res.text();
+        setError(`${res.status} ${res.statusText}\n${text}`);
+      } else {
+        // ログイン直後に認証付きエンドポイントへアクセスしてセッションクッキー反映を確実にする
+        try {
+          await props.api.fetch(NarouApi.isnoticelist({ maxPage: 1 }));
+        } catch {
+          // 初回アクセスで401等が返っても以降の画面で再取得されるため握りつぶす
+        }
+        props.onLogin();
+      }
+    })();
   }, [userId, password, props]);
 
   const passwordRef = useRef<HTMLInputElement>(undefined);
