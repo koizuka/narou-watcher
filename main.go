@@ -25,6 +25,11 @@ import (
 	"time"
 )
 
+const (
+	// UserAgentString is the User-Agent header value used for HTTP requests
+	UserAgentString = "narou-watcher/1.0"
+)
+
 func GetFavNovelCategory(watcher *narou.NarouWatcher, url, wantTitle string) ([]model.FavNovelCategory, error) {
 	page, err := watcher.GetPage(url)
 	if err != nil {
@@ -251,6 +256,7 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 		watcher, err := narou.NewNarouWatcher(narou.Options{
 			SessionName: apiService.sessionName,
 			FilePrefix:  apiService.logDir + "/",
+			UserAgent:   UserAgentString,
 			GetCredentials: func() (*narou.Credentials, error) {
 				if id, password, ok := r.BasicAuth(); ok {
 					return &narou.Credentials{Id: id, Password: password}, nil
@@ -613,6 +619,12 @@ func checkNovelAccessHandler(baseUrl string, r18 bool) NarouApiHandlerType {
 			return nil, fmt.Errorf("failed to create request: %v", err)
 		}
 
+		// Set minimal headers for proper HTTP communication
+		// User-Agent is required by narou server to prevent 403 Forbidden
+		req.Header.Set("User-Agent", UserAgentString)
+		req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+		req.Header.Set("Accept-Language", "ja,en-US;q=0.7,en;q=0.3")
+
 		// Add R18 age verification cookie if needed
 		if r18 {
 			req.AddCookie(&http.Cookie{Name: "over18", Value: "yes"})
@@ -623,7 +635,6 @@ func checkNovelAccessHandler(baseUrl string, r18 bool) NarouApiHandlerType {
 			return nil, fmt.Errorf("failed to access novel: %v", err)
 		}
 		defer resp.Body.Close()
-
 		result := struct {
 			Accessible bool `json:"accessible"`
 		}{
