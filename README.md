@@ -118,6 +118,17 @@
 | novel_list_html  | string | WIP(現在はHTML) |
 | passive_count    | int    | 不明           |
 
+* `GET /narou/check-novel-access/:ncode/:episode` `GET /r18/check-novel-access/:ncode/:episode`
+  * 指定した小説の特定エピソードにアクセス可能かどうかを確認する（ログイン不要）
+  * `:ncode` は小説コード（例：n1234ab）
+  * `:episode` はエピソード番号（例：1、2、3...）
+  * 公開直後の小説が実際にアクセス可能かを判定するために使用
+
+| key        | type    | 説明                                      |
+|------------|---------|-------------------------------------------|
+| accessible | boolean | 小説にアクセス可能な場合true                      |
+| statusCode | int     | なろうサーバーからのHTTPステータスコード（200: 成功、404: 存在しない等） |
+
 #### ログインセッションクッキー
 
 小説家になろうのサイトが Set-Cookieしてきたものの名前の前に `narou-` をつけてこちらのクッキーとして Set-Cookie にして返し、ブラウザに覚えさせます。
