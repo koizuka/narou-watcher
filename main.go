@@ -614,7 +614,7 @@ func checkNovelAccessHandler(baseUrl string, r18 bool) NarouApiHandlerType {
 
 		// Use http client with timeout for anonymous access check
 		client := &http.Client{Timeout: 10 * time.Second}
-		req, err := http.NewRequest("GET", targetUrl, nil)
+		req, err := http.NewRequest("HEAD", targetUrl, nil)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create request: %v", err)
 		}
