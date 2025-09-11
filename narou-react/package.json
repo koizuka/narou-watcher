@@ -27,7 +27,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true  eslint -c eslint.config.mjs src/**/*.{ts,tsx}",
+    "lint": "eslint -c eslint.config.mjs src/**/*.{ts,tsx}",
     "test:ci": "vitest run",
     "test": "vitest"
   },

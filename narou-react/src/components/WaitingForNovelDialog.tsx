@@ -17,6 +17,7 @@ const MAX_RETRY_COUNT = 10; // Maximum 10 retries
 
 interface NovelAccessResponse {
   accessible: boolean;
+  statusCode: number;
 }
 
 export const WaitingForNovelDialog = React.memo(WaitingForNovelDialogRaw);
@@ -170,13 +171,24 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
           variant="outlined" 
           size="small"
           disabled={isChecking}
+          data-testid="manual-retry-button"
         >
           今すぐ確認
         </Button>
-        <Button onClick={handleOpenAnyway} variant="outlined" size="small">
+        <Button 
+          onClick={handleOpenAnyway} 
+          variant="outlined" 
+          size="small"
+          data-testid="open-anyway-button"
+        >
           そのまま開く
         </Button>
-        <Button onClick={handleCancel} variant="contained" size="small">
+        <Button 
+          onClick={handleCancel} 
+          variant="contained" 
+          size="small"
+          data-testid="cancel-button"
+        >
           キャンセル
         </Button>
       </DialogActions>

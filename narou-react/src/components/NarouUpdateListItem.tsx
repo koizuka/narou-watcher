@@ -4,7 +4,7 @@ import {
   ListItemAvatar,
   ListItemButton, ListItemText
 } from '@mui/material';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { IsNoticeListItem, itemSummary, nextLink, unread } from "../narouApi/IsNoticeListItem";
 
@@ -37,20 +37,10 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
     }
   }, [isSelected]);
 
-  const [bewareTooNew, setBewareTooNew] = useState(false);
-  useEffect(() => {
+  // Use useMemo to calculate bewareTooNew consistently
+  const bewareTooNew = useMemo(() => {
     const past = -item.update_time.diffNow('milliseconds').milliseconds;
-    if (past < BEWARE_TIME) {
-      setBewareTooNew(true);
-      const handle = setTimeout(() => {
-        setBewareTooNew(false);
-      }, BEWARE_TIME - past);
-      return () => {
-        clearTimeout(handle);
-      }
-    } else {
-      setBewareTooNew(false);
-    }
+    return past < BEWARE_TIME;
   }, [item.update_time]);
 
   const buttonProps = useMemo<ButtonTypeMap['props']>(() => {
