@@ -28,6 +28,7 @@ jobs:
       env:
         GOOS: "linux"
         GOARCH: "amd64"
+        CGO_ENABLED: "0"
 
     - name: Setup SSH
       uses: kielabokkie/ssh-key-and-known-hosts-action@242f53d26bbd43e843b08b0cbc8287ceb03fbe71 # v1.5.0
