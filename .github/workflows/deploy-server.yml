@@ -58,5 +58,15 @@ jobs:
         echo "restart"
         $SSH $REMOTE ${RESTART_COMMAND}
 
+        echo "verify service is running"
+        sleep 5
+        if ! $SSH $REMOTE "systemctl is-active --quiet narou-watcher.service"; then
+          echo "Service failed to start, checking logs..."
+          $SSH $REMOTE "systemctl status narou-watcher.service"
+          $SSH $REMOTE "journalctl -u narou-watcher.service --no-pager -n 20"
+          exit 1
+        fi
+
+        echo "service is running successfully"
         echo "delete old file"
         $SSH $REMOTE rm -f $TARGET_DIR$BINARY.old
