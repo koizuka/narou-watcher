@@ -1,10 +1,10 @@
-import { DateTime } from "luxon";
+import { addMinutes, parseISO } from "date-fns";
 import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
 import { ItemsState, itemsStateReducer, SelectCommand } from "./ItemsState";
 import { describe, expect, test } from 'vitest';
 
 describe('itemsStateReducer', () => {
-  const dummyDateTime = DateTime.fromISO('2021-10-03T16:59:00+0900');
+  const dummyDateTime = parseISO('2021-10-03T16:59:00+09:00');
   const dummyItem: Omit<IsNoticeListItem, 'bookmark' | 'latest'> = {
     update_time: dummyDateTime,
     base_url: 'base_url',
@@ -51,9 +51,9 @@ describe('itemsStateReducer', () => {
     })
 
     test('sort: 未読は古い順、未読数が多いのは後ろ、既読はその後ろに新しい順', () => {
-      const date1 = dummyDateTime.plus({ minutes: 1 });
-      const date2 = dummyDateTime.plus({ minutes: 2 });
-      const date3 = dummyDateTime.plus({ minutes: 3 });
+      const date1 = addMinutes(dummyDateTime, 1);
+      const date2 = addMinutes(dummyDateTime, 2);
+      const date3 = addMinutes(dummyDateTime, 3);
       const unread0 = { ...dummyItem, bookmark: 1, latest: 1 };
       const unread1 = { ...dummyItem, bookmark: 1, latest: 2 };
       const unread2 = { ...dummyItem, bookmark: 1, latest: 3, update_time: date1 };

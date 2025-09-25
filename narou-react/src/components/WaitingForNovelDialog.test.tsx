@@ -1,6 +1,5 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DateTime } from 'luxon';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { IsNoticeListItem } from '../narouApi/IsNoticeListItem';
@@ -23,7 +22,7 @@ describe('WaitingForNovelDialog', () => {
 
   const mockItem: IsNoticeListItem = {
     base_url: 'https://ncode.syosetu.com/n1234aa/',
-    update_time: DateTime.now(),
+    update_time: new Date(),
     bookmark: 5,
     latest: 6,
     title: 'Test Novel',

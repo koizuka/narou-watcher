@@ -33,8 +33,8 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
           return compare(a, b,
             i => score(i),
             a.bookmark < a.latest ?
-              i => i.update_time.toMillis() :
-              reverse(i => i.update_time.toMillis()),
+              i => i.update_time.getTime() :
+              reverse(i => i.update_time.getTime()),
             i => i.base_url);
         }))
           .slice(0, 30);

@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { DateTime, Settings } from 'luxon';
+import { format } from 'date-fns';
 import React from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { IsNoticeListItem } from '../narouApi/IsNoticeListItem';
@@ -10,17 +10,17 @@ vi.useFakeTimers();
 describe('NarouUpdateListItem', () => {
   afterEach(() => {
     cleanup(); // Ensure all components are unmounted
-    Settings.now = () => Date.now(); // reset
+    // Reset fake timer
     vi.clearAllTimers();
   });
 
   test('beware too new', () => {
     const update_time = Date.now();
 
-    Settings.now = () => update_time; // fix current time
+    vi.setSystemTime(new Date(update_time)); // fix current time
     const item: IsNoticeListItem = {
       base_url: '',
-      update_time: DateTime.fromMillis(update_time),
+      update_time: new Date(update_time),
       bookmark: 0,
       latest: 1,
       title: 'title',
@@ -39,25 +39,25 @@ describe('NarouUpdateListItem', () => {
         onSecondaryAction={() => {/* nothing */ }}
       />;
 
-    Settings.now = () => update_time;
+    vi.setSystemTime(new Date(update_time));
     const rendered = render(toRender());
     const elem = rendered.getByTestId('item');
     const primary = elem.querySelector('.MuiListItemText-primary')?.textContent;
     expect(primary).toEqual(`${item.title} (${item.bookmark}/${item.latest})`);
 
     const withoutAlert =
-      `${item.update_time.toFormat('yyyy/LL/dd HH:mm')} 更新  作者:${item.author_name}`;
+      `${format(item.update_time, 'yyyy/MM/dd HH:mm')} 更新  作者:${item.author_name}`;
     const withAlert =
-      `${item.update_time.toFormat('yyyy/LL/dd HH:mm')}(注意) 更新  作者:${item.author_name}`;
+      `${format(item.update_time, 'yyyy/MM/dd HH:mm')}(注意) 更新  作者:${item.author_name}`;
 
     expect(elem.querySelector('.MuiListItemText-secondary')?.textContent).toEqual(withAlert);
 
     // 時間経過後に再レンダリングすると (注意) マークが消える
     // Change the time and create a new item with different timestamp to force recalculation
-    Settings.now = () => update_time + BEWARE_TIME + 1000; // 3 minutes + 1 second after updated time
+    vi.setSystemTime(new Date(update_time + BEWARE_TIME + 1000)); // 3 minutes + 1 second after updated time
     const newItem = {
       ...item,
-      update_time: DateTime.fromMillis(update_time + BEWARE_TIME + 1000 - BEWARE_TIME - 1000) // Same original time
+      update_time: new Date(update_time + BEWARE_TIME + 1000 - BEWARE_TIME - 1000) // Same original time
     }; 
     const newRender = () =>
       <NarouUpdateListItem data-testid="item"
@@ -75,11 +75,11 @@ describe('NarouUpdateListItem', () => {
 
   test('renders with onWaitingAction prop', () => {
     const update_time = Date.now();
-    Settings.now = () => update_time; // Current time is same as update time
+    vi.setSystemTime(new Date(update_time)); // Current time is same as update time
 
     const item: IsNoticeListItem = {
       base_url: 'https://ncode.syosetu.com/n1234aa/',
-      update_time: DateTime.fromMillis(update_time),
+      update_time: new Date(update_time),
       bookmark: 0,
       latest: 1,
       title: 'Recent Novel',
@@ -109,11 +109,11 @@ describe('NarouUpdateListItem', () => {
 
   test('calls onWaitingAction for recent updates', () => {
     const update_time = Date.now();
-    Settings.now = () => update_time; // Current time is same as update time
+    vi.setSystemTime(new Date(update_time)); // Current time is same as update time
 
     const item: IsNoticeListItem = {
       base_url: 'https://ncode.syosetu.com/n1234aa/',
-      update_time: DateTime.fromMillis(update_time),
+      update_time: new Date(update_time),
       bookmark: 0,
       latest: 1,
       title: 'Recent Novel',
@@ -149,11 +149,11 @@ describe('NarouUpdateListItem', () => {
 
   test('uses normal link for old updates', () => {
     const update_time = Date.now() - BEWARE_TIME - 1000; // 3 minutes + 1 second ago
-    Settings.now = () => Date.now();
+    vi.setSystemTime(new Date(Date.now()));
 
     const item: IsNoticeListItem = {
       base_url: 'https://ncode.syosetu.com/n1234aa/',
-      update_time: DateTime.fromMillis(update_time),
+      update_time: new Date(update_time),
       bookmark: 0,
       latest: 1,
       title: 'Old Novel',
@@ -193,11 +193,11 @@ describe('NarouUpdateListItem', () => {
 
   test('disabled button when no unread episodes', () => {
     const update_time = Date.now();
-    Settings.now = () => update_time;
+    vi.setSystemTime(new Date(update_time));
 
     const item: IsNoticeListItem = {
       base_url: 'https://ncode.syosetu.com/n1234aa/',
-      update_time: DateTime.fromMillis(update_time),
+      update_time: new Date(update_time),
       bookmark: 1, // Same as latest
       latest: 1,
       title: 'No Unread Novel',

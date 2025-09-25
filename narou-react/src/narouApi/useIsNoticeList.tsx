@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon';
+import { parseISO } from 'date-fns';
 import { useMemo } from 'react';
 import useSWR, { mutate } from 'swr';
 import { IsNoticeListItem } from './IsNoticeListItem';
@@ -72,7 +72,7 @@ export function useIsNoticeList(
 
       const n = [
         ...raw_items2.map(i => ({ ...i, isR18: isR18 })),
-      ].map(i => ({ ...i, update_time: DateTime.fromISO(i.update_time) }));
+      ].map(i => ({ ...i, update_time: parseISO(i.update_time) }));
       return n;
     },
     [raw_items2, isR18]

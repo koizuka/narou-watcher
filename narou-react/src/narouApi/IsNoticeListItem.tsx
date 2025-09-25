@@ -1,8 +1,6 @@
-import { DateTime } from 'luxon';
-
 export interface IsNoticeListItem {
   base_url: string;
-  update_time: DateTime;
+  update_time: Date;
   bookmark: number;
   latest: number;
   title: string;

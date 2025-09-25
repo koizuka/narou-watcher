@@ -4,6 +4,7 @@ import {
   ListItemAvatar,
   ListItemButton, ListItemText
 } from '@mui/material';
+import { format } from 'date-fns';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { IsNoticeListItem, itemSummary, nextLink, unread } from "../narouApi/IsNoticeListItem";
@@ -39,7 +40,7 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
 
   // Use useMemo to calculate bewareTooNew consistently
   const bewareTooNew = useMemo(() => {
-    const past = -item.update_time.diffNow('milliseconds').milliseconds;
+    const past = Date.now() - item.update_time.getTime();
     return past < BEWARE_TIME;
   }, [item.update_time]);
 
@@ -85,7 +86,7 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
 
   const [firstLine, secondLine] = useMemo(() => [
     itemSummary(item),
-    `${item.update_time.toFormat('yyyy/LL/dd HH:mm')}${bewareTooNew ? '(注意)' : ''} 更新  作者:${item.author_name}${item.memo ? `  メモ:${item.memo}` : ''}`,
+    `${format(item.update_time, 'yyyy/MM/dd HH:mm')}${bewareTooNew ? '(注意)' : ''} 更新  作者:${item.author_name}${item.memo ? `  メモ:${item.memo}` : ''}`,
   ], [bewareTooNew, item]);
 
   return (
