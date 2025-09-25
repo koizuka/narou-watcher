@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import React from 'react';
 
 /**
@@ -11,7 +12,7 @@ import React from 'react';
  */
 export function BuildTimestamp(props: { name: string; }) {
   // Parse ISO string and display in local timezone
-  const buildDate = new Date(import.meta.env.BUILD_DATE as string).toISOString();
+  const buildDate = format(new Date(import.meta.env.BUILD_DATE as string), 'yyyy/MM/dd HH:mm');
   return (
     <div style={{
       display: "inline-block",
