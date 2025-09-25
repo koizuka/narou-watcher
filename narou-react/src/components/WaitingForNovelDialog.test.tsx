@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DateTime } from 'luxon';
 import React from 'react';
@@ -39,14 +39,27 @@ describe('WaitingForNovelDialog', () => {
   });
 
   afterEach(() => {
+    // Only run timer cleanup if fake timers are active
+    try {
+      vi.runOnlyPendingTimers();
+    } catch {
+      // Ignore error if timers are not mocked
+    }
+    vi.useRealTimers();
     cleanup();
   });
 
+  const flushAsync = async () => {
+    await act(async () => {
+      // Flush any pending promises
+    });
+  };
+
   test('displays waiting dialog when item is provided', () => {
     mockCall.mockResolvedValue({ accessible: false });
-    
+
     render(
-      <WaitingForNovelDialog 
+      <WaitingForNovelDialog
         api={mockApi}
         item={mockItem}
         onClose={mockOnClose}
@@ -55,7 +68,7 @@ describe('WaitingForNovelDialog', () => {
 
     expect(screen.getByText('小説の公開を待っています...')).toBeInTheDocument();
     expect(screen.getByText('「Test Novel」の次の話がまだ公開されていません。')).toBeInTheDocument();
-    expect(screen.getByText('30秒ごとに確認し、公開され次第自動的に開きます。')).toBeInTheDocument();
+    expect(screen.getByText('自動的に公開をチェックし、公開され次第開きます。')).toBeInTheDocument();
   });
 
   test('does not display dialog when item is undefined', () => {
@@ -256,7 +269,7 @@ describe('WaitingForNovelDialog', () => {
     mockCall.mockResolvedValue({ accessible: true, statusCode: 200 });
 
     render(
-      <WaitingForNovelDialog 
+      <WaitingForNovelDialog
         api={mockApi}
         item={r18Item}
         onClose={mockOnClose}
@@ -269,5 +282,146 @@ describe('WaitingForNovelDialog', () => {
       expect(window.open).toHaveBeenCalledWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
       expect(mockOnClose).toHaveBeenCalled();
     });
+  });
+
+  test('displays countdown timer starting from 30 seconds', async () => {
+    mockCall.mockResolvedValue({ accessible: false });
+
+    render(
+      <WaitingForNovelDialog
+        api={mockApi}
+        item={mockItem}
+        onClose={mockOnClose}
+      />
+    );
+
+    // Wait for initial call and countdown to be displayed
+    await waitFor(() => {
+      expect(mockCall).toHaveBeenCalledTimes(1);
+      expect(screen.getByText('次回確認まで: 30秒')).toBeInTheDocument();
+    });
+  });
+
+  test('countdown timer shows decreasing seconds over time', async () => {
+    vi.useFakeTimers();
+    mockCall.mockResolvedValue({ accessible: false });
+
+    render(
+      <WaitingForNovelDialog
+        api={mockApi}
+        item={mockItem}
+        onClose={mockOnClose}
+      />
+    );
+
+    await flushAsync();
+
+    expect(mockCall).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('次回確認まで: 30秒')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.getByText('次回確認まで: 29秒')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(screen.getByText('次回確認まで: 24秒')).toBeInTheDocument();
+  });
+
+  test('countdown resets after automatic polling check', async () => {
+    vi.useFakeTimers();
+    mockCall.mockResolvedValue({ accessible: false });
+
+    render(
+      <WaitingForNovelDialog
+        api={mockApi}
+        item={mockItem}
+        onClose={mockOnClose}
+      />
+    );
+
+    await flushAsync();
+
+    expect(mockCall).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('次回確認まで: 30秒')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(30000);
+    });
+
+    await flushAsync();
+
+    expect(mockCall).toHaveBeenCalledTimes(2);
+    expect(screen.getByText('次回確認まで: 30秒')).toBeInTheDocument();
+  });
+
+  test('shows checking state instead of countdown during API calls', async () => {
+    // Mock a slow API call
+    let resolveCall: ((value: { accessible: boolean; statusCode: number }) => void) | undefined;
+    const slowCall = new Promise<{ accessible: boolean; statusCode: number }>(resolve => {
+      resolveCall = resolve;
+    });
+    mockCall.mockReturnValue(slowCall);
+
+    render(
+      <WaitingForNovelDialog
+        api={mockApi}
+        item={mockItem}
+        onClose={mockOnClose}
+      />
+    );
+
+    // Should show checking state immediately
+    await waitFor(() => {
+      expect(screen.getByText('確認中...')).toBeInTheDocument();
+    });
+
+    // Should not show countdown while checking
+    expect(screen.queryByText(/次回確認まで:/)).not.toBeInTheDocument();
+
+    // Resolve the API call
+    resolveCall?.({ accessible: false, statusCode: 404 });
+
+    // Should show countdown after API call completes
+    await waitFor(() => {
+      expect(screen.queryByText('確認中...')).not.toBeInTheDocument();
+      expect(screen.getByText('次回確認まで: 30秒')).toBeInTheDocument();
+    });
+  });
+
+  test('manual retry button works and resets countdown', async () => {
+    vi.useFakeTimers(); // Set fake timers BEFORE rendering
+    mockCall.mockResolvedValue({ accessible: false });
+
+    render(
+      <WaitingForNovelDialog
+        api={mockApi}
+        item={mockItem}
+        onClose={mockOnClose}
+      />
+    );
+
+    await flushAsync();
+
+    expect(mockCall).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('次回確認まで: 30秒')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(screen.getByText('次回確認まで: 25秒')).toBeInTheDocument();
+
+    const retryButton = screen.getByTestId('manual-retry-button');
+    fireEvent.click(retryButton);
+
+    await flushAsync();
+
+    expect(mockCall).toHaveBeenCalledTimes(2);
+    expect(screen.getByText('次回確認まで: 30秒')).toBeInTheDocument();
   });
 });
