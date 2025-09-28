@@ -5,7 +5,7 @@ import {
   ListItemButton, ListItemText
 } from '@mui/material';
 import { format } from 'date-fns';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { IsNoticeListItem, itemSummary, nextLink, unread } from "../narouApi/IsNoticeListItem";
 
@@ -30,6 +30,8 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
   }, []);
 
   const ref = useRef<HTMLLIElement | null>(null);
+  const [, forceUpdate] = useState({});
+
   useEffect(() => {
     if (isSelected) {
       ref.current?.focus();
@@ -37,6 +39,21 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
       ref.current?.blur();
     }
   }, [isSelected]);
+
+  // Auto-update when BEWARE_TIME expires
+  useEffect(() => {
+    const past = Date.now() - item.update_time.getTime();
+    if (past < BEWARE_TIME) {
+      const remainingTime = BEWARE_TIME - past;
+      const timer = setTimeout(() => {
+        forceUpdate({});
+      }, remainingTime);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [item.update_time]);
 
   // Use useMemo to calculate bewareTooNew consistently
   const bewareTooNew = useMemo(() => {
