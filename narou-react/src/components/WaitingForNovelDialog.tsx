@@ -11,6 +11,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { IsNoticeListItem, nextLink } from '../narouApi/IsNoticeListItem';
 import { NarouApi } from '../narouApi/NarouApi';
+import { CountdownTimer } from './CountdownTimer';
 
 const POLLING_INTERVAL = 30 * 1000; // 30 seconds
 const MAX_RETRY_COUNT = 10; // Maximum 10 retries
@@ -28,9 +29,8 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
 }) {
   const [retryCount, setRetryCount] = useState(0);
   const [isChecking, setIsChecking] = useState(false);
-  const [countdown, setCountdown] = useState(POLLING_INTERVAL / 1000);
+  const [nextCheckTime, setNextCheckTime] = useState<Date | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const extractNcodeAndEpisode = useCallback((item: IsNoticeListItem) => {
     // Extract ncode from base_url (e.g., "https://ncode.syosetu.com/n1234aa/" -> "n1234aa")
@@ -64,31 +64,6 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
     onClose();
   }, [onClose]);
 
-  const resetCountdown = useCallback(() => {
-    setCountdown(POLLING_INTERVAL / 1000);
-  }, []);
-
-  const startCountdownTimer = useCallback(() => {
-    if (countdownRef.current) {
-      clearInterval(countdownRef.current);
-    }
-
-    countdownRef.current = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          return POLLING_INTERVAL / 1000;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
-
-  const stopCountdownTimer = useCallback(() => {
-    if (countdownRef.current) {
-      clearInterval(countdownRef.current);
-      countdownRef.current = null;
-    }
-  }, []);
 
   const startPolling = useCallback((item: IsNoticeListItem) => {
     const poll = async () => {
@@ -100,7 +75,7 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
           clearInterval(intervalRef.current);
           intervalRef.current = null;
         }
-        stopCountdownTimer();
+        setNextCheckTime(null); // カウントダウン停止
         openNovel(item);
         return;
       }
@@ -113,32 +88,29 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
           }
-          stopCountdownTimer();
+          setNextCheckTime(null); // カウントダウン停止
           return newCount;
         }
+        // 次回チェック時刻を設定
+        setNextCheckTime(new Date(Date.now() + POLLING_INTERVAL));
         return newCount;
       });
-
-      // Reset countdown after each check
-      resetCountdown();
     };
 
+    // 初回チェック
+    void poll();
+
+    // ポーリング設定
     intervalRef.current = setInterval(() => {
       void poll();
     }, POLLING_INTERVAL);
-
-    // Start countdown timer
-    startCountdownTimer();
-
-    // Also check immediately
-    void poll();
-  }, [checkNovelAccess, openNovel, resetCountdown, startCountdownTimer, stopCountdownTimer]);
+  }, [checkNovelAccess, openNovel]);
 
   useEffect(() => {
     if (item) {
       setRetryCount(0);
       setIsChecking(false);
-      resetCountdown();
+      setNextCheckTime(new Date(Date.now() + POLLING_INTERVAL)); // 初回の次回チェック時刻
       startPolling(item);
     }
 
@@ -147,18 +119,18 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-      stopCountdownTimer();
+      setNextCheckTime(null);
     };
-  }, [item, startPolling, resetCountdown, stopCountdownTimer]);
+  }, [item, startPolling]);
 
   const handleCancel = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    stopCountdownTimer();
+    setNextCheckTime(null);
     onClose();
-  }, [onClose, stopCountdownTimer]);
+  }, [onClose]);
 
   const handleOpenAnyway = useCallback(() => {
     if (item) {
@@ -174,11 +146,11 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
       if (accessible) {
         openNovel(item);
       } else {
-        // Reset countdown on manual retry
-        resetCountdown();
+        // 次回チェック時刻をリセット
+        setNextCheckTime(new Date(Date.now() + POLLING_INTERVAL));
       }
     })();
-  }, [item, checkNovelAccess, openNovel, resetCountdown]);
+  }, [item, checkNovelAccess, openNovel]);
 
   const isMaxRetriesReached = retryCount >= MAX_RETRY_COUNT;
 
@@ -194,18 +166,16 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
         </DialogContentText>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
           {isChecking && <CircularProgress size={16} />}
-          {!isChecking && !isMaxRetriesReached && (
-            <CircularProgress
-              size={16}
-              variant="determinate"
-              value={(1 - countdown / (POLLING_INTERVAL / 1000)) * 100}
-            />
-          )}
           {isChecking
             ? '確認中...'
             : isMaxRetriesReached
               ? '最大試行回数に達しました'
-              : `次回確認まで: ${countdown}秒`
+              : (
+                <CountdownTimer
+                  targetTime={nextCheckTime}
+                  intervalMs={POLLING_INTERVAL}
+                />
+              )
           }
         </Typography>
         {retryCount > 0 && (

@@ -1,14 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-// @ts-check
-// @ts-expect-error type definition is missing
 import eslint from '@eslint/js';
-// @ts-expect-error type definition is missing
 import pluginReactHooks from 'eslint-plugin-react-hooks';
-// @ts-expect-error type definition is missing
+// @ts-expect-error - eslint-plugin-react does not export types for this path
 import reactRecommended from 'eslint-plugin-react/configs/recommended.js';
-// @ts-expect-error type definition is missing
 import testingLibrary from 'eslint-plugin-testing-library';
 import vitest from 'eslint-plugin-vitest';
 import globals from 'globals';
