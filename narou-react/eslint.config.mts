@@ -3,15 +3,17 @@ import pluginReactHooks from 'eslint-plugin-react-hooks';
 // @ts-expect-error - eslint-plugin-react does not export types for this path
 import reactRecommended from 'eslint-plugin-react/configs/recommended.js';
 import testingLibrary from 'eslint-plugin-testing-library';
-import vitest from 'eslint-plugin-vitest';
+import vitest from '@vitest/eslint-plugin';
 import globals from 'globals';
 import tsEslint from 'typescript-eslint';
 
+// eslint-disable-next-line @typescript-eslint/no-deprecated
 export default tsEslint.config(
   eslint.configs.recommended,
   ...tsEslint.configs.recommendedTypeChecked,
   ...tsEslint.configs.strictTypeChecked,
   ...tsEslint.configs.stylisticTypeChecked,
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   reactRecommended,
   {
     plugins: {
