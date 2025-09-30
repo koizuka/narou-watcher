@@ -38,7 +38,7 @@ describe('CountdownTimer', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  test('shows decreasing seconds over time', async () => {
+  test('shows decreasing seconds over time', () => {
     const targetTime = new Date(Date.now() + 30 * 1000); // 30 seconds from now
 
     render(

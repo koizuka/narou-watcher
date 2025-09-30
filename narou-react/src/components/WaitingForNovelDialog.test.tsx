@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
@@ -48,11 +48,6 @@ describe('WaitingForNovelDialog', () => {
     cleanup();
   });
 
-  const flushAsync = async () => {
-    await act(async () => {
-      // Flush any pending promises
-    });
-  };
 
   test('displays waiting dialog when item is provided', () => {
     mockCall.mockResolvedValue({ accessible: false });
