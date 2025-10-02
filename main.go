@@ -346,6 +346,163 @@ func ReturnJson(w http.Header, body interface{}) ([]byte, error) {
 	return bin, nil
 }
 
+// TestDataHandlerWrapper wraps a handler to use test data when testDataProvider is set
+func TestDataHandlerWrapper(testDataProvider *narou.TestDataProvider, testHandler NarouApiHandlerType, normalHandler NarouApiHandlerType) NarouApiHandlerType {
+	if testDataProvider != nil {
+		return testHandler
+	}
+	return normalHandler
+}
+
+func testDataIsNoticeListHandler(provider *narou.TestDataProvider) NarouApiHandlerType {
+	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+		page, err := provider.GetIsNoticeListPage(1)
+		if err != nil {
+			return nil, err
+		}
+
+		var result []model.IsNoticeListRecord
+		for _, item := range page.Items {
+			result = append(result, model.IsNoticeListRecord{
+				BaseURL:         fmt.Sprintf("https://%v.syosetu.com/%v/", item.SiteID, item.NovelID),
+				UpdateTime:      item.UpdateTime,
+				BookmarkEpisode: item.BookmarkEpisode,
+				LatestEpisode:   item.LatestEpisode,
+				Title:           item.Title,
+				AuthorName:      item.AuthorName,
+				Completed:       item.Completed,
+			})
+		}
+		return ReturnJson(w, result)
+	}
+}
+
+func testDataFavNovelCategoryHandler(provider *narou.TestDataProvider, r18 bool) NarouApiHandlerType {
+	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+		categories := provider.GetFavNovelCategory(r18)
+		var result []model.FavNovelCategory
+		for _, cat := range categories {
+			result = append(result, model.FavNovelCategory{
+				No:       cat.No,
+				Name:     cat.Name,
+				NumItems: cat.NumItems,
+			})
+		}
+		return ReturnJson(w, result)
+	}
+}
+
+func testDataFavNovelListHandler(provider *narou.TestDataProvider, category uint) NarouApiHandlerType {
+	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+		page, err := provider.GetFavNovelListPage(category, 1)
+		if err != nil {
+			return nil, err
+		}
+
+		var result []model.FavNovelListRecord
+		for _, item := range page.Items {
+			result = append(result, model.FavNovelListRecord{
+				BaseURL:         fmt.Sprintf("https://%v.syosetu.com/%v/", item.SiteID, item.NovelID),
+				UpdateTime:      item.UpdateTime,
+				BookmarkEpisode: item.BookmarkEpisode,
+				LatestEpisode:   item.LatestEpisode,
+				Title:           item.Title,
+				AuthorName:      item.AuthorName,
+				IsNotice:        item.IsNotice,
+				Completed:       item.Completed,
+				IsShort:         item.IsShort,
+				Memo:            item.Memo,
+			})
+		}
+		return ReturnJson(w, result)
+	}
+}
+
+func testDataNovelInfoHandler(provider *narou.TestDataProvider, ncode string) NarouApiHandlerType {
+	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+		novelInfo, err := provider.GetNovelInfo(ncode)
+		if err != nil {
+			return nil, err
+		}
+
+		var contents []model.NovelInfoChapter
+		if novelInfo.Index != nil {
+			episodes := make([]model.NovelInfoEpisode, 0, len(novelInfo.Index.Episodes))
+			for _, ep := range novelInfo.Index.Episodes {
+				episodes = append(episodes, model.NovelInfoEpisode{
+					SubTitle: ep.SubTitle,
+					No:       ep.No,
+					Date:     ep.PublishTime,
+					Update:   ep.UpdateTime,
+				})
+			}
+			contents = append(contents, model.NovelInfoChapter{
+				Episodes: episodes,
+			})
+		}
+
+		return ReturnJson(w, model.NovelInfoRecord{
+			BaseURL:         fmt.Sprintf("https://ncode.syosetu.com/%s/", ncode),
+			Title:           novelInfo.Title,
+			AuthorName:      novelInfo.AuthorName,
+			Keywords:        strings.Split(novelInfo.Keywords, " "),
+			Abstract:        novelInfo.Abstract,
+			AuthorURL:       novelInfo.AuthorURL,
+			BookmarkURL:     novelInfo.BookmarkURL,
+			BookmarkNo:      novelInfo.BookmarkNo,
+			BookmarkEpisode: novelInfo.BookmarkEpisode,
+			Contents:        contents,
+		})
+	}
+}
+
+func testDataCheckNovelAccessHandler(provider *narou.TestDataProvider, ncode string) NarouApiHandlerType {
+	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+		path := strings.TrimPrefix(r.URL.Path, "/narou/check-novel-access/")
+		parts := strings.Split(path, "/")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid path format")
+		}
+
+		episode, err := strconv.ParseUint(parts[1], 10, 32)
+		if err != nil {
+			return nil, err
+		}
+
+		accessible := provider.IsEpisodeAccessible(ncode, uint(episode))
+		result := struct {
+			Accessible bool `json:"accessible"`
+			StatusCode int  `json:"statusCode"`
+		}{
+			Accessible: accessible,
+			StatusCode: 200,
+		}
+		if !accessible {
+			result.StatusCode = 404
+		}
+
+		return ReturnJson(w, result)
+	}
+}
+
+func testDataFavUserUpdatesHandler(provider *narou.TestDataProvider) NarouApiHandlerType {
+	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+		info, err := provider.GetFavUserUpdates()
+		if err != nil {
+			return nil, err
+		}
+
+		result := &model.FavUserUpdatesRecord{
+			R18PassiveCount: info.R18PassiveCount,
+			BlogListHTML:    info.BlogListHTML,
+			NovelListHTML:   info.NovelListHTML,
+			PassiveCount:    info.PassiveCount,
+		}
+
+		return ReturnJson(w, result)
+	}
+}
+
 func NarouLoginHandler(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
 	credentials := narou.Credentials{
 		Id:       r.PostFormValue("id"),
@@ -670,6 +827,7 @@ func main() {
 	logDirectory := flag.String("log-dir", path.Join(projectDir, "log"), "debug log directory(-debug 指定時)")
 	publicAddress := flag.String("public-url", "", "外から見えるアドレス(http://localhost:7676)の上書き")
 	debugFlag := flag.Bool("debug", false, "log directoryにデバッグ情報を記録する")
+	testDataFlag := flag.Bool("testdata", false, "テストデータモードで起動（なろうにアクセスせず、テストデータを返す）")
 	flag.Parse()
 
 	var host string
@@ -689,6 +847,12 @@ func main() {
 	sessionName := "narou"
 	log.Printf("session name: '%v'", sessionName)
 
+	var testDataProvider *narou.TestDataProvider
+	if *testDataFlag {
+		testDataProvider = narou.NewTestDataProvider(time.Now())
+		log.Printf("TEST DATA MODE: Using test data instead of actual narou.com")
+	}
+
 	narouApiService := NewNarouApiService(logDir, sessionName, openAddress, *debugFlag)
 
 	mux := http.NewServeMux()
@@ -697,13 +861,17 @@ func main() {
 		mux.HandleFunc(path, narouApiService.HandlerFunc(handler))
 	}
 
-	setBookmarksHandler := func(pattern, getURL, title string) {
+	setBookmarksHandler := func(pattern, getURL, title string, r18 bool) {
 		base := path.Clean(pattern)
 		mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 			subPath := path.Clean(path.Clean(r.URL.Path)[len(base):])
 			// log.Printf("bookmarks: subPath=%v", subPath)
 			if subPath == "." {
-				narouApiService.HandlerFunc(favNovelCategoryHandler(getURL, title))(w, r)
+				handler := favNovelCategoryHandler(getURL, title)
+				if testDataProvider != nil {
+					handler = testDataFavNovelCategoryHandler(testDataProvider, r18)
+				}
+				narouApiService.HandlerFunc(handler)(w, r)
 				return
 			} else {
 				category, err := strconv.ParseUint(subPath[1:], 10, 32)
@@ -734,13 +902,17 @@ func main() {
 					}
 					maxPage = uint(p)
 				}
-				narouApiService.HandlerFunc(favNovelListHandler(getURL, title, uint(category), order, page, maxPage))(w, r)
+				handler := favNovelListHandler(getURL, title, uint(category), order, page, maxPage)
+				if testDataProvider != nil {
+					handler = testDataFavNovelListHandler(testDataProvider, uint(category))
+				}
+				narouApiService.HandlerFunc(handler)(w, r)
 				return
 			}
 		})
 	}
-	setBookmarksHandler("/narou/bookmarks/", narou.FavNovelListURL, narou.FavNovelListTitle)
-	setBookmarksHandler("/r18/bookmarks/", narou.FavNovelListR18URL, narou.FavNovelListR18Title)
+	setBookmarksHandler("/narou/bookmarks/", narou.FavNovelListURL, narou.FavNovelListTitle, false)
+	setBookmarksHandler("/r18/bookmarks/", narou.FavNovelListR18URL, narou.FavNovelListR18Title, true)
 
 	setNovelInfoHandler := func(pattern, baseUrl string, r18 bool) {
 		base := path.Clean(pattern)
@@ -751,7 +923,11 @@ func main() {
 				return
 			} else {
 				ncode := subPath[1:]
-				narouApiService.HandlerFunc(novelInfoHandler(ncode, baseUrl, r18))(w, r)
+				handler := novelInfoHandler(ncode, baseUrl, r18)
+				if testDataProvider != nil {
+					handler = testDataNovelInfoHandler(testDataProvider, ncode)
+				}
+				narouApiService.HandlerFunc(handler)(w, r)
 				return
 			}
 		})
@@ -762,16 +938,31 @@ func main() {
 	// Check novel access endpoints
 	setCheckNovelAccessHandler := func(pattern, baseUrl string, r18 bool) {
 		mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+			if testDataProvider != nil {
+				// Extract ncode from path
+				path := strings.TrimPrefix(r.URL.Path, pattern)
+				parts := strings.Split(path, "/")
+				if len(parts) >= 1 {
+					ncode := parts[0]
+					narouApiService.HandlerFunc(testDataCheckNovelAccessHandler(testDataProvider, ncode))(w, r)
+					return
+				}
+			}
 			narouApiService.HandlerFunc(checkNovelAccessHandler(baseUrl, r18))(w, r)
 		})
 	}
 	setCheckNovelAccessHandler("/narou/check-novel-access/", "https://ncode.syosetu.com/", false)
 	setCheckNovelAccessHandler("/r18/check-novel-access/", "https://novel18.syosetu.com/", true)
 
-	setHandler("/narou/isnoticelist", isNoticeListHandler(narou.IsNoticeListURL, narou.IsNoticeListTitle))
-	setHandler("/r18/isnoticelist", isNoticeListHandler(narou.IsNoticeListR18URL, narou.IsNoticeListR18Title))
-
-	setHandler("/narou/fav-user-updates", favUserUpdatesHandler(narou.UserTopApiURL))
+	if testDataProvider != nil {
+		setHandler("/narou/isnoticelist", testDataIsNoticeListHandler(testDataProvider))
+		setHandler("/r18/isnoticelist", testDataIsNoticeListHandler(testDataProvider))
+		setHandler("/narou/fav-user-updates", testDataFavUserUpdatesHandler(testDataProvider))
+	} else {
+		setHandler("/narou/isnoticelist", isNoticeListHandler(narou.IsNoticeListURL, narou.IsNoticeListTitle))
+		setHandler("/r18/isnoticelist", isNoticeListHandler(narou.IsNoticeListR18URL, narou.IsNoticeListR18Title))
+		setHandler("/narou/fav-user-updates", favUserUpdatesHandler(narou.UserTopApiURL))
+	}
 
 	setHandler("/narou/login", NarouLoginHandler)
 	setHandler("/narou/logout", NarouLogoutHandler)
