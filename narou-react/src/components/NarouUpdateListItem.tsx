@@ -30,6 +30,7 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
   }, []);
 
   const ref = useRef<HTMLLIElement | null>(null);
+  // Store current time in state to trigger re-render when beware period expires
   const [currentTime, setCurrentTime] = useState(Date.now());
 
   useEffect(() => {
@@ -53,6 +54,7 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
         clearTimeout(timer);
       };
     }
+    // Only recreate timer when item.update_time changes (not when currentTime updates)
   }, [item.update_time]);
 
   // Calculate bewareTooNew based on current time (recalculated on every render)
