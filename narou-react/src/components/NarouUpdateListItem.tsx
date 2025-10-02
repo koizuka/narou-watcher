@@ -30,7 +30,8 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
   }, []);
 
   const ref = useRef<HTMLLIElement | null>(null);
-  const [, forceUpdate] = useState({});
+  // Store current time in state to trigger re-render when beware period expires
+  const [currentTime, setCurrentTime] = useState(Date.now());
 
   useEffect(() => {
     if (isSelected) {
@@ -46,20 +47,18 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
     if (past < BEWARE_TIME) {
       const remainingTime = BEWARE_TIME - past;
       const timer = setTimeout(() => {
-        forceUpdate({});
+        setCurrentTime(Date.now());
       }, remainingTime);
 
       return () => {
         clearTimeout(timer);
       };
     }
+    // Only recreate timer when item.update_time changes (not when currentTime updates)
   }, [item.update_time]);
 
-  // Use useMemo to calculate bewareTooNew consistently
-  const bewareTooNew = useMemo(() => {
-    const past = Date.now() - item.update_time.getTime();
-    return past < BEWARE_TIME;
-  }, [item.update_time]);
+  // Calculate bewareTooNew based on current time (recalculated on every render)
+  const bewareTooNew = currentTime - item.update_time.getTime() < BEWARE_TIME;
 
   const buttonProps = useMemo<ButtonTypeMap['props']>(() => {
     if (unread(item) > 0) {

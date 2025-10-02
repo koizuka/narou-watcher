@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { format } from 'date-fns';
 import React from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
@@ -52,23 +52,57 @@ describe('NarouUpdateListItem', () => {
 
     expect(elem.querySelector('.MuiListItemText-secondary')?.textContent).toEqual(withAlert);
 
-    // 時間経過後に再レンダリングすると (注意) マークが消える
-    // Change the time and create a new item with different timestamp to force recalculation
-    vi.setSystemTime(new Date(update_time + BEWARE_TIME + 1000)); // 3 minutes + 1 second after updated time
-    const newItem = {
-      ...item,
-      update_time: new Date(update_time + BEWARE_TIME + 1000 - BEWARE_TIME - 1000) // Same original time
-    }; 
-    const newRender = () =>
+    // 時間経過後に自動的に (注意) マークが消える
+    // Advance time to trigger the timer
+    act(() => {
+      vi.advanceTimersByTime(BEWARE_TIME + 1000); // 3 minutes + 1 second
+    });
+
+    const newElem = rendered.getByTestId('item');
+    expect(newElem.querySelector('.MuiListItemText-secondary')?.textContent).toEqual(withoutAlert);
+  });
+
+  test('beware mark disappears exactly at BEWARE_TIME boundary', () => {
+    const update_time = Date.now();
+    vi.setSystemTime(new Date(update_time));
+
+    const item: IsNoticeListItem = {
+      base_url: '',
+      update_time: new Date(update_time),
+      bookmark: 0,
+      latest: 1,
+      title: 'title',
+      author_name: 'author',
+      completed: false,
+      isR18: false,
+    };
+
+    const rendered = render(
       <NarouUpdateListItem data-testid="item"
-        item={newItem}
+        item={item}
         index={0}
         isSelected
         setSelectedIndex={() => {/* nothing */ }}
         selectDefault={() => {/* nothing */ }}
         onSecondaryAction={() => {/* nothing */ }}
-      />;
-    rendered.rerender(newRender());
+      />
+    );
+
+    const elem = rendered.getByTestId('item');
+    const withoutAlert =
+      `${format(item.update_time, 'yyyy/MM/dd HH:mm')} 更新  作者:${item.author_name}`;
+    const withAlert =
+      `${format(item.update_time, 'yyyy/MM/dd HH:mm')}(注意) 更新  作者:${item.author_name}`;
+
+    // Initially should have the alert
+    expect(elem.querySelector('.MuiListItemText-secondary')?.textContent).toEqual(withAlert);
+
+    // Advance time to exactly BEWARE_TIME (boundary condition)
+    act(() => {
+      vi.advanceTimersByTime(BEWARE_TIME);
+    });
+
+    // Should NOT have the mark at exactly BEWARE_TIME (since < BEWARE_TIME is now false)
     const newElem = rendered.getByTestId('item');
     expect(newElem.querySelector('.MuiListItemText-secondary')?.textContent).toEqual(withoutAlert);
   });
@@ -224,5 +258,41 @@ describe('NarouUpdateListItem', () => {
     const mainButton = container.querySelector('[role="button"]');
     expect(mainButton).toHaveAttribute('aria-disabled', 'true');
     expect(mainButton).toHaveAttribute('tabindex', '-1');
+  });
+
+  test('cleans up timer on unmount', () => {
+    const update_time = Date.now();
+    vi.setSystemTime(new Date(update_time));
+
+    const item: IsNoticeListItem = {
+      base_url: '',
+      update_time: new Date(update_time),
+      bookmark: 0,
+      latest: 1,
+      title: 'title',
+      author_name: 'author',
+      completed: false,
+      isR18: false,
+    };
+
+    const { unmount } = render(
+      <NarouUpdateListItem data-testid="item"
+        item={item}
+        index={0}
+        isSelected={false}
+        setSelectedIndex={() => {/* nothing */ }}
+        selectDefault={() => {/* nothing */ }}
+        onSecondaryAction={() => {/* nothing */ }}
+      />
+    );
+
+    // Verify timer is set for recent update
+    expect(vi.getTimerCount()).toBe(1);
+
+    // Unmount component
+    unmount();
+
+    // Timer should be cleaned up
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
