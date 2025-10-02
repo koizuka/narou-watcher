@@ -23,7 +23,11 @@ func NewPageFromText(html string) (*scraper.Page, error) {
 		return nil, err
 	}
 
-	page := &scraper.Page{doc, testUrl, logger}
+	page := &scraper.Page{
+		Document: doc,
+		BaseUrl:  testUrl,
+		Logger:   logger,
+	}
 
 	return page, nil
 }

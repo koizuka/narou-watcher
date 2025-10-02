@@ -87,11 +87,11 @@ func TestTestDataProvider_IsEpisodeAccessible(t *testing.T) {
 	provider := NewTestDataProvider(startTime)
 
 	tests := []struct {
-		name      string
-		ncode     string
-		episode   uint
-		wait      time.Duration
-		want      bool
+		name    string
+		ncode   string
+		episode uint
+		wait    time.Duration
+		want    bool
 	}{
 		{"regular episode immediately", "n0001aa", 1, 0, true},
 		{"n0002bb ep11 immediately", "n0002bb", 11, 0, false},
