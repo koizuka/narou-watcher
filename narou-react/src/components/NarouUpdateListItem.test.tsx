@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { format } from 'date-fns';
 import React from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
@@ -52,23 +52,12 @@ describe('NarouUpdateListItem', () => {
 
     expect(elem.querySelector('.MuiListItemText-secondary')?.textContent).toEqual(withAlert);
 
-    // 時間経過後に再レンダリングすると (注意) マークが消える
-    // Change the time and create a new item with different timestamp to force recalculation
-    vi.setSystemTime(new Date(update_time + BEWARE_TIME + 1000)); // 3 minutes + 1 second after updated time
-    const newItem = {
-      ...item,
-      update_time: new Date(update_time + BEWARE_TIME + 1000 - BEWARE_TIME - 1000) // Same original time
-    }; 
-    const newRender = () =>
-      <NarouUpdateListItem data-testid="item"
-        item={newItem}
-        index={0}
-        isSelected
-        setSelectedIndex={() => {/* nothing */ }}
-        selectDefault={() => {/* nothing */ }}
-        onSecondaryAction={() => {/* nothing */ }}
-      />;
-    rendered.rerender(newRender());
+    // 時間経過後に自動的に (注意) マークが消える
+    // Advance time to trigger the timer
+    act(() => {
+      vi.advanceTimersByTime(BEWARE_TIME + 1000); // 3 minutes + 1 second
+    });
+
     const newElem = rendered.getByTestId('item');
     expect(newElem.querySelector('.MuiListItemText-secondary')?.textContent).toEqual(withoutAlert);
   });
