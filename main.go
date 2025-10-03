@@ -336,6 +336,12 @@ func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func
 	}
 }
 
+func SetNoCacheHeaders(w http.Header) {
+	w.Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+	w.Set("Pragma", "no-cache")
+	w.Set("Expires", "0")
+}
+
 func ReturnJson(w http.Header, body interface{}) ([]byte, error) {
 	bin, err := json.Marshal(body)
 	if err != nil {
@@ -643,6 +649,7 @@ func checkNovelAccessHandler(baseUrl string, r18 bool) NarouApiHandlerType {
 			StatusCode: resp.StatusCode,
 		}
 
+		SetNoCacheHeaders(w)
 		return ReturnJson(w, result)
 	}
 }
