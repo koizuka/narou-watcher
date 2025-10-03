@@ -129,6 +129,7 @@ func testDataCheckNovelAccessHandler(provider *narou.TestDataProvider, ncode str
 			result.StatusCode = 404
 		}
 
+		SetNoCacheHeaders(w)
 		return ReturnJson(w, result)
 	}
 }
