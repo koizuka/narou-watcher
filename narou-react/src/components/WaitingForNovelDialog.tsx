@@ -155,7 +155,15 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
   const isMaxRetriesReached = retryCount >= MAX_RETRY_COUNT;
 
   return (
-    <Dialog open={!!item} onClose={handleCancel} disableEscapeKeyDown>
+    <Dialog
+      open={!!item}
+      onClose={(event, reason) => {
+        if (reason !== 'backdropClick') {
+          handleCancel();
+        }
+      }}
+      disableEscapeKeyDown
+    >
       <DialogTitle>小説の公開を待っています...</DialogTitle>
       <DialogContent>
         <DialogContentText>
