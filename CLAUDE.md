@@ -46,6 +46,16 @@ npm run build             # Build for production
 npm test                   # Run tests
 ```
 
+**Development Server Configuration:**
+- Vite listens on `0.0.0.0:3000` (accessible from network)
+- API requests (`/narou/*`, `/r18/*`) are proxied to `localhost:7676`
+- This allows mobile device testing without additional configuration
+
+**Mobile Access:**
+1. Start backend: `./narou-watcher`
+2. Start frontend: `cd narou-react && npm start`
+3. Access from mobile: `http://<PC_IP>:3000` (e.g., `http://192.168.0.60:3000`)
+
 ### Testing
 
 ```bash
@@ -100,6 +110,10 @@ npm test
 2. **Auto-refresh**: Frontend refreshes every 5 minutes and when tab becomes active
 3. **Unread Badge**: Shows unread count in browser tab and app badge
 4. **Keyboard Shortcuts**: Press Enter to open the oldest unread novel
+5. **API Server Detection**: Frontend automatically detects API server based on protocol:
+   - `http://` protocol: Uses current host (Vite proxy in development)
+   - `https://` protocol: Uses same origin (production deployment)
+   - Query parameter `?server=<URL>` overrides auto-detection
 
 ## Deployment
 
@@ -135,14 +149,18 @@ Then configure nginx/Apache to reverse proxy to localhost:7676
 
 ### Backend
 
-- `github.com/PuerkitoBio/goquery` - HTML parsing
-- `github.com/koizuka/scraper` - Web scraping framework
+- `github.com/PuerkitoBio/goquery` v1.10.3 - HTML parsing
+- `github.com/koizuka/scraper` v0.0.46 - Web scraping framework
+- `github.com/rs/cors` v1.11.1 - CORS middleware
 - Standard library for HTTP server
 
 ### Frontend
 
-- React 19.1.0
+- React 19.1.1
 - Material-UI 7.1.0
-- SWR for data fetching
-- Luxon for date handling
-- TypeScript for type safety
+- TypeScript 5.9.2
+- Vite 7.1.7 - Build tool and dev server
+- Vitest 3.2.4 - Testing framework
+- SWR 2.3.6 - Data fetching and caching
+- date-fns 4.1.0 - Date/time handling
+- Emotion 11.14.x - CSS-in-JS for Material-UI
