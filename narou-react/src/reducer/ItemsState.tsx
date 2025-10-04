@@ -109,15 +109,16 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
     case 'refresh-beware':
       if (state.items !== undefined) {
         const now = Date.now();
-        let hasChanged = false;
-        const items = state.items.map(item => {
+        const prevItems = state.items;
+        const items = prevItems.map(item => {
           const newBewareNew = now - item.update_time.getTime() < BEWARE_TIME;
           if (item.bewareNew !== newBewareNew) {
-            hasChanged = true;
             return { ...item, bewareNew: newBewareNew };
           }
           return item;
         });
+        // Check if any items were actually changed (by reference comparison)
+        const hasChanged = items.some((item, index) => item !== prevItems[index]);
         if (hasChanged) {
           return { ...state, items };
         }
