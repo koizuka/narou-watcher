@@ -120,20 +120,16 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
       ...bewareItems.map(item => item.update_time.getTime() + BEWARE_TIME)
     );
     const now = Date.now();
-    const delay = earliestEndTime - now;
+    const delay = Math.max(0, earliestEndTime - now);
 
-    if (delay > 0) {
-      const timer = setTimeout(() => {
-        dispatch({ type: 'refresh-beware' });
-      }, delay);
-
-      return () => {
-        clearTimeout(timer);
-      };
-    } else {
-      // Already expired, refresh immediately
+    // Schedule refresh for next tick or later
+    const timer = setTimeout(() => {
       dispatch({ type: 'refresh-beware' });
-    }
+    }, delay);
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, [items]);
 
   if (error) {

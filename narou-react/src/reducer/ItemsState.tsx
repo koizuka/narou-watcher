@@ -96,10 +96,11 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
 
     case 'clear-beware':
       if (state.items !== undefined) {
-        const items = state.items.map(item =>
-          item.base_url === action.baseUrl ? { ...item, bewareNew: false } : item
-        );
-        if (items !== state.items) {
+        const itemIndex = state.items.findIndex(item => item.base_url === action.baseUrl);
+        if (itemIndex !== -1 && state.items[itemIndex].bewareNew !== false) {
+          const items = state.items.map(item =>
+            item.base_url === action.baseUrl ? { ...item, bewareNew: false } : item
+          );
           return { ...state, items };
         }
       }
@@ -108,11 +109,18 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
     case 'refresh-beware':
       if (state.items !== undefined) {
         const now = Date.now();
-        const items = state.items.map(item => ({
-          ...item,
-          bewareNew: now - item.update_time.getTime() < BEWARE_TIME
-        }));
-        return { ...state, items };
+        let hasChanged = false;
+        const items = state.items.map(item => {
+          const newBewareNew = now - item.update_time.getTime() < BEWARE_TIME;
+          if (item.bewareNew !== newBewareNew) {
+            hasChanged = true;
+            return { ...item, bewareNew: newBewareNew };
+          }
+          return item;
+        });
+        if (hasChanged) {
+          return { ...state, items };
+        }
       }
       return state;
   }

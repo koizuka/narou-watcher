@@ -149,5 +149,120 @@ describe('itemsStateReducer', () => {
       ).toBe(expected);
     });
   })
+
+  describe('clear-beware', () => {
+    test('clears bewareNew flag for matching item', () => {
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, bewareNew: true },
+          { ...dummyItem, base_url: 'url2', bookmark: 0, latest: 1, bewareNew: true },
+          { ...dummyItem, base_url: 'url3', bookmark: 0, latest: 1, bewareNew: false },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'clear-beware', baseUrl: 'url1' });
+
+      expect(result.items?.[0].bewareNew).toBe(false);
+      expect(result.items?.[1].bewareNew).toBe(true);
+      expect(result.items?.[2].bewareNew).toBe(false);
+    });
+
+    test('does not update state when bewareNew is already false', () => {
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, bewareNew: false },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'clear-beware', baseUrl: 'url1' });
+
+      // Should return same state reference (no change)
+      expect(result).toBe(prevState);
+    });
+
+    test('does not update state when item not found', () => {
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, bewareNew: true },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'clear-beware', baseUrl: 'url2' });
+
+      // Should return same state reference (no change)
+      expect(result).toBe(prevState);
+    });
+  });
+
+  describe('refresh-beware', () => {
+    test('updates bewareNew based on current time', () => {
+      const now = Date.now();
+      const recentTime = new Date(now - 1000); // 1 second ago
+      const oldTime = new Date(now - 4 * 60 * 1000); // 4 minutes ago
+
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, update_time: recentTime, bewareNew: true },
+          { ...dummyItem, base_url: 'url2', bookmark: 0, latest: 1, update_time: oldTime, bewareNew: true },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'refresh-beware' });
+
+      expect(result.items?.[0].bewareNew).toBe(true);  // Still within BEWARE_TIME
+      expect(result.items?.[1].bewareNew).toBe(false); // Beyond BEWARE_TIME
+    });
+
+    test('does not update state when no changes', () => {
+      const now = Date.now();
+      const recentTime = new Date(now - 1000); // 1 second ago
+
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, update_time: recentTime, bewareNew: true },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'refresh-beware' });
+
+      // Should return same state reference (no change)
+      expect(result).toBe(prevState);
+    });
+
+    test('updates state when bewareNew changes', () => {
+      const now = Date.now();
+      const oldTime = new Date(now - 4 * 60 * 1000); // 4 minutes ago
+
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, update_time: oldTime, bewareNew: true },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'refresh-beware' });
+
+      // Should return new state reference (changed)
+      expect(result).not.toBe(prevState);
+      expect(result.items?.[0].bewareNew).toBe(false);
+    });
+  });
 });
 
