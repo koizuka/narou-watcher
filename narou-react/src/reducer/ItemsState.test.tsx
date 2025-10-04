@@ -18,6 +18,7 @@ describe('itemsStateReducer', () => {
       numNewItems: null,
       selectedIndex: -1,
       defaultIndex: -1,
+      clearedBewareItems: new Map(),
     };
 
     test('empty', () => {
@@ -27,26 +28,31 @@ describe('itemsStateReducer', () => {
         numNewItems: 0,
         selectedIndex: -1,
         defaultIndex: -1,
+        clearedBewareItems: new Map(),
       });
     })
 
     test('one read item', () => {
       const items: IsNoticeListItem[] = [{ ...dummyItem, bookmark: 1, latest: 1 }];
-      expect(itemsStateReducer(prevState, { type: 'set', items })).toEqual<ItemsState>({
-        items,
+      const result = itemsStateReducer(prevState, { type: 'set', items });
+      expect(result).toEqual<ItemsState>({
+        items: [{ ...items[0], bewareNew: false }],
         numNewItems: 0,
         selectedIndex: -1,
         defaultIndex: -1,
+        clearedBewareItems: new Map(),
       });
     })
 
     test('one unread item', () => {
       const items: IsNoticeListItem[] = [{ ...dummyItem, bookmark: 1, latest: 2 }];
-      expect(itemsStateReducer(prevState, { type: 'set', items })).toEqual<ItemsState>({
-        items,
+      const result = itemsStateReducer(prevState, { type: 'set', items });
+      expect(result).toEqual<ItemsState>({
+        items: [{ ...items[0], bewareNew: false }],
         numNewItems: 1,
         selectedIndex: 0,
         defaultIndex: 0,
+        clearedBewareItems: new Map(),
       });
     })
 
@@ -68,7 +74,7 @@ describe('itemsStateReducer', () => {
       const unread2url1 = { ...unread2, base_url: '1' };
       const unread2url2 = { ...unread2, base_url: '2' };
 
-      expect(itemsStateReducer(prevState, {
+      const result = itemsStateReducer(prevState, {
         type: 'set',
         items: [
           unread0date1, unread0date2, unread0date3,
@@ -76,16 +82,23 @@ describe('itemsStateReducer', () => {
           unread2url2, unread2url1,
           unreadMinus,
         ],
-      })).toEqual<ItemsState>({
+      });
+      expect(result).toEqual<ItemsState>({
         items: [
-          unread1date1, unread1date2, unread1date3,
-          unread2url1, unread2url2,
-          unreadMinus,
-          unread0date3, unread0date2, unread0date1,
+          { ...unread1date1, bewareNew: false },
+          { ...unread1date2, bewareNew: false },
+          { ...unread1date3, bewareNew: false },
+          { ...unread2url1, bewareNew: false },
+          { ...unread2url2, bewareNew: false },
+          { ...unreadMinus, bewareNew: false },
+          { ...unread0date3, bewareNew: false },
+          { ...unread0date2, bewareNew: false },
+          { ...unread0date1, bewareNew: false },
         ],
         numNewItems: 5,
         selectedIndex: 0,
         defaultIndex: 0,
+        clearedBewareItems: new Map(),
       });
     })
   })
@@ -99,6 +112,7 @@ describe('itemsStateReducer', () => {
       numNewItems: 1,
       selectedIndex: -1,
       defaultIndex: -1,
+      clearedBewareItems: new Map(),
     };
 
     test.each<[number, number]>([
@@ -121,6 +135,7 @@ describe('itemsStateReducer', () => {
       numNewItems: 1,
       selectedIndex: -1,
       defaultIndex: -1,
+      clearedBewareItems: new Map(),
     };
 
     test.each<[SelectCommand, number, number]>([
@@ -141,5 +156,175 @@ describe('itemsStateReducer', () => {
       ).toBe(expected);
     });
   })
+
+  describe('clear-beware', () => {
+    test('clears bewareNew flag for matching item', () => {
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, bewareNew: true },
+          { ...dummyItem, base_url: 'url2', bookmark: 0, latest: 1, bewareNew: true },
+          { ...dummyItem, base_url: 'url3', bookmark: 0, latest: 1, bewareNew: false },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+        clearedBewareItems: new Map(),
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'clear-beware', baseUrl: 'url1' });
+
+      expect(result.items?.[0].bewareNew).toBe(false);
+      expect(result.items?.[1].bewareNew).toBe(true);
+      expect(result.items?.[2].bewareNew).toBe(false);
+      expect(result.clearedBewareItems.has('url1')).toBe(true);
+    });
+
+    test('does not update state when bewareNew is already false', () => {
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, bewareNew: false },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+        clearedBewareItems: new Map(),
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'clear-beware', baseUrl: 'url1' });
+
+      // Should return same state reference (no change)
+      expect(result).toBe(prevState);
+    });
+
+    test('does not update state when item not found', () => {
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, bewareNew: true },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+        clearedBewareItems: new Map(),
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'clear-beware', baseUrl: 'url2' });
+
+      // Should return same state reference (no change)
+      expect(result).toBe(prevState);
+    });
+  });
+
+  describe('refresh-beware', () => {
+    test('updates bewareNew based on current time', () => {
+      const now = Date.now();
+      const recentTime = new Date(now - 1000); // 1 second ago
+      const oldTime = new Date(now - 4 * 60 * 1000); // 4 minutes ago
+
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, update_time: recentTime, bewareNew: true },
+          { ...dummyItem, base_url: 'url2', bookmark: 0, latest: 1, update_time: oldTime, bewareNew: true },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+        clearedBewareItems: new Map(),
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'refresh-beware' });
+
+      expect(result.items?.[0].bewareNew).toBe(true);  // Still within BEWARE_TIME
+      expect(result.items?.[1].bewareNew).toBe(false); // Beyond BEWARE_TIME
+    });
+
+    test('does not update state when no changes', () => {
+      const now = Date.now();
+      const recentTime = new Date(now - 1000); // 1 second ago
+
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, update_time: recentTime, bewareNew: true },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+        clearedBewareItems: new Map(),
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'refresh-beware' });
+
+      // Should return same state reference (no change)
+      expect(result).toBe(prevState);
+    });
+
+    test('updates state when bewareNew changes', () => {
+      const now = Date.now();
+      const oldTime = new Date(now - 4 * 60 * 1000); // 4 minutes ago
+
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, update_time: oldTime, bewareNew: true },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+        clearedBewareItems: new Map(),
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'refresh-beware' });
+
+      // Should return new state reference (changed)
+      expect(result).not.toBe(prevState);
+      expect(result.items?.[0].bewareNew).toBe(false);
+    });
+
+    test('keeps cleared items as false', () => {
+      const now = Date.now();
+      const recentTime = new Date(now - 1000); // 1 second ago (still within BEWARE_TIME)
+
+      const clearedBewareItems = new Map<string, number>();
+      clearedBewareItems.set('url1', now - 500); // Cleared 500ms ago
+
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, update_time: recentTime, bewareNew: false },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+        clearedBewareItems,
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'refresh-beware' });
+
+      // Should keep bewareNew=false even though timestamp is recent
+      expect(result.items?.[0].bewareNew).toBe(false);
+    });
+
+    test('removes expired cleared records', () => {
+      const now = Date.now();
+      const recentTime = new Date(now - 1000); // 1 second ago
+
+      const clearedBewareItems = new Map<string, number>();
+      clearedBewareItems.set('url1', now - 4 * 60 * 1000); // Cleared 4 minutes ago (expired)
+
+      const prevState: ItemsState = {
+        items: [
+          { ...dummyItem, base_url: 'url1', bookmark: 0, latest: 1, update_time: recentTime, bewareNew: false },
+        ],
+        numNewItems: 0,
+        selectedIndex: -1,
+        defaultIndex: -1,
+        clearedBewareItems,
+      };
+
+      const result = itemsStateReducer(prevState, { type: 'refresh-beware' });
+
+      // Should remove expired cleared record
+      expect(result.clearedBewareItems.has('url1')).toBe(false);
+      // Should recalculate bewareNew from timestamp
+      expect(result.items?.[0].bewareNew).toBe(true);
+    });
+  });
 });
 

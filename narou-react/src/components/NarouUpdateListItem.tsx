@@ -5,11 +5,9 @@ import {
   ListItemButton, ListItemText
 } from '@mui/material';
 import { format } from 'date-fns';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { IsNoticeListItem, itemSummary, nextLink, unread } from "../narouApi/IsNoticeListItem";
-
-export const BEWARE_TIME = 3 * 60 * 1000;
 
 export const NarouUpdateListItem = React.memo(NarouUpdateListItemRaw);
 function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onSecondaryAction, onWaitingAction, selectDefault, 'data-testid': testId }: {
@@ -30,8 +28,6 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
   }, []);
 
   const ref = useRef<HTMLLIElement | null>(null);
-  // Store current time in state to trigger re-render when beware period expires
-  const [currentTime, setCurrentTime] = useState(Date.now());
 
   useEffect(() => {
     if (isSelected) {
@@ -41,24 +37,7 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
     }
   }, [isSelected]);
 
-  // Auto-update when BEWARE_TIME expires
-  useEffect(() => {
-    const past = Date.now() - item.update_time.getTime();
-    if (past < BEWARE_TIME) {
-      const remainingTime = BEWARE_TIME - past;
-      const timer = setTimeout(() => {
-        setCurrentTime(Date.now());
-      }, remainingTime);
-
-      return () => {
-        clearTimeout(timer);
-      };
-    }
-    // Only recreate timer when item.update_time changes (not when currentTime updates)
-  }, [item.update_time]);
-
-  // Calculate bewareTooNew based on current time (recalculated on every render)
-  const bewareTooNew = currentTime - item.update_time.getTime() < BEWARE_TIME;
+  const bewareTooNew = item.bewareNew ?? false;
 
   const buttonProps = useMemo<ButtonTypeMap['props']>(() => {
     if (unread(item) > 0) {

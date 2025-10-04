@@ -22,10 +22,11 @@ interface NovelAccessResponse {
 }
 
 export const WaitingForNovelDialog = React.memo(WaitingForNovelDialogRaw);
-function WaitingForNovelDialogRaw({ api, item, onClose }: {
+function WaitingForNovelDialogRaw({ api, item, onClose, onAccessible }: {
   api: NarouApi;
   item?: IsNoticeListItem;
   onClose: () => void;
+  onAccessible?: (item: IsNoticeListItem) => void;
 }) {
   const [retryCount, setRetryCount] = useState(0);
   const [isChecking, setIsChecking] = useState(false);
@@ -76,6 +77,7 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
           intervalRef.current = null;
         }
         setNextCheckTime(null); // カウントダウン停止
+        onAccessible?.(item);
         openNovel(item);
         return;
       }
@@ -104,7 +106,7 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
     intervalRef.current = setInterval(() => {
       void poll();
     }, POLLING_INTERVAL);
-  }, [checkNovelAccess, openNovel]);
+  }, [checkNovelAccess, onAccessible, openNovel]);
 
   useEffect(() => {
     if (item) {
@@ -144,13 +146,14 @@ function WaitingForNovelDialogRaw({ api, item, onClose }: {
     void (async () => {
       const accessible = await checkNovelAccess(item);
       if (accessible) {
+        onAccessible?.(item);
         openNovel(item);
       } else {
         // 次回チェック時刻をリセット
         setNextCheckTime(new Date(Date.now() + POLLING_INTERVAL));
       }
     })();
-  }, [item, checkNovelAccess, openNovel]);
+  }, [item, checkNovelAccess, onAccessible, openNovel]);
 
   const isMaxRetriesReached = retryCount >= MAX_RETRY_COUNT;
 

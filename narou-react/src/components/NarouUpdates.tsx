@@ -17,7 +17,7 @@ import { useHotKeys } from '../hooks/useHotKeys';
 import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
 import { NarouApi } from '../narouApi/NarouApi';
 import { clearCache, useIsNoticeList } from '../narouApi/useIsNoticeList';
-import { InitialItemsState, itemsStateReducer, SelectCommand } from '../reducer/ItemsState';
+import { BEWARE_TIME, InitialItemsState, itemsStateReducer, SelectCommand } from '../reducer/ItemsState';
 import { AutoLinkText } from './AutoLinkText';
 import { BookmarkSelector } from './BookmarkSelector';
 import { NarouLoginForm } from './NarouLoginForm';
@@ -104,6 +104,33 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
 
   const onClose = useCallback(() => { setConfirm(undefined); }, []);
   const onWaitingClose = useCallback(() => { setWaiting(undefined); }, []);
+  const onNovelAccessible = useCallback((item: IsNoticeListItem) => {
+    dispatch({ type: 'clear-beware', baseUrl: item.base_url });
+  }, []);
+
+  // Manage beware timer
+  useEffect(() => {
+    if (!items) return;
+
+    const bewareItems = items.filter(item => item.bewareNew);
+    if (bewareItems.length === 0) return;
+
+    // Find the earliest beware end time
+    const earliestEndTime = Math.min(
+      ...bewareItems.map(item => item.update_time.getTime() + BEWARE_TIME)
+    );
+    const now = Date.now();
+    const delay = Math.max(0, earliestEndTime - now);
+
+    // Schedule refresh for next tick or later
+    const timer = setTimeout(() => {
+      dispatch({ type: 'refresh-beware' });
+    }, delay);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [items]);
 
   if (error) {
     console.log(`error = ${error.toString()}`);
@@ -125,7 +152,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
 
   return <>
     <OpenConfirmDialog api={server} item={confirm} onClose={onClose} />
-    <WaitingForNovelDialog api={server} item={waiting} onClose={onWaitingClose} />
+    <WaitingForNovelDialog api={server} item={waiting} onClose={onWaitingClose} onAccessible={onNovelAccessible} />
     <AppBar position="sticky">
       <Toolbar>
         <Box>
