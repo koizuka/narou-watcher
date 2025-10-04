@@ -1,5 +1,7 @@
 import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
 
+export const BEWARE_TIME = 3 * 60 * 1000;
+
 export interface ItemsState {
   items?: IsNoticeListItem[];
   numNewItems: number | null;
@@ -19,6 +21,8 @@ export type StateAction =
   | { type: 'set', items: IsNoticeListItem[] | undefined; bookmark?: boolean }
   | { type: 'select', index: number }
   | { type: 'select-command', command: SelectCommand }
+  | { type: 'clear-beware', baseUrl: string }
+  | { type: 'refresh-beware' }
 
 export function itemsStateReducer(state: ItemsState, action: StateAction): ItemsState {
   switch (action.type) {
@@ -28,6 +32,7 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
           return InitialItemsState;
         }
 
+        const now = Date.now();
         // 未読があって少ない順にし、未読がある場合、同じ未読数同士は更新日時昇順、未読がない場合は更新日時降順
         const items = (action.bookmark ? action.items : action.items.sort((a, b) => {
           return compare(a, b,
@@ -37,7 +42,11 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
               reverse(i => i.update_time.getTime()),
             i => i.base_url);
         }))
-          .slice(0, 30);
+          .slice(0, 30)
+          .map(item => ({
+            ...item,
+            bewareNew: now - item.update_time.getTime() < BEWARE_TIME
+          }));
 
         const head = items[0];
         const index = items[0] && head.bookmark < head.latest ? 0 : -1;
@@ -82,6 +91,28 @@ export function itemsStateReducer(state: ItemsState, action: StateAction): Items
         if (selectedIndex !== state.selectedIndex) {
           return { ...state, selectedIndex };
         }
+      }
+      return state;
+
+    case 'clear-beware':
+      if (state.items !== undefined) {
+        const items = state.items.map(item =>
+          item.base_url === action.baseUrl ? { ...item, bewareNew: false } : item
+        );
+        if (items !== state.items) {
+          return { ...state, items };
+        }
+      }
+      return state;
+
+    case 'refresh-beware':
+      if (state.items !== undefined) {
+        const now = Date.now();
+        const items = state.items.map(item => ({
+          ...item,
+          bewareNew: now - item.update_time.getTime() < BEWARE_TIME
+        }));
+        return { ...state, items };
       }
       return state;
   }

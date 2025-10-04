@@ -32,8 +32,9 @@ describe('itemsStateReducer', () => {
 
     test('one read item', () => {
       const items: IsNoticeListItem[] = [{ ...dummyItem, bookmark: 1, latest: 1 }];
-      expect(itemsStateReducer(prevState, { type: 'set', items })).toEqual<ItemsState>({
-        items,
+      const result = itemsStateReducer(prevState, { type: 'set', items });
+      expect(result).toEqual<ItemsState>({
+        items: [{ ...items[0], bewareNew: false }],
         numNewItems: 0,
         selectedIndex: -1,
         defaultIndex: -1,
@@ -42,8 +43,9 @@ describe('itemsStateReducer', () => {
 
     test('one unread item', () => {
       const items: IsNoticeListItem[] = [{ ...dummyItem, bookmark: 1, latest: 2 }];
-      expect(itemsStateReducer(prevState, { type: 'set', items })).toEqual<ItemsState>({
-        items,
+      const result = itemsStateReducer(prevState, { type: 'set', items });
+      expect(result).toEqual<ItemsState>({
+        items: [{ ...items[0], bewareNew: false }],
         numNewItems: 1,
         selectedIndex: 0,
         defaultIndex: 0,
@@ -68,7 +70,7 @@ describe('itemsStateReducer', () => {
       const unread2url1 = { ...unread2, base_url: '1' };
       const unread2url2 = { ...unread2, base_url: '2' };
 
-      expect(itemsStateReducer(prevState, {
+      const result = itemsStateReducer(prevState, {
         type: 'set',
         items: [
           unread0date1, unread0date2, unread0date3,
@@ -76,12 +78,18 @@ describe('itemsStateReducer', () => {
           unread2url2, unread2url1,
           unreadMinus,
         ],
-      })).toEqual<ItemsState>({
+      });
+      expect(result).toEqual<ItemsState>({
         items: [
-          unread1date1, unread1date2, unread1date3,
-          unread2url1, unread2url2,
-          unreadMinus,
-          unread0date3, unread0date2, unread0date1,
+          { ...unread1date1, bewareNew: false },
+          { ...unread1date2, bewareNew: false },
+          { ...unread1date3, bewareNew: false },
+          { ...unread2url1, bewareNew: false },
+          { ...unread2url2, bewareNew: false },
+          { ...unreadMinus, bewareNew: false },
+          { ...unread0date3, bewareNew: false },
+          { ...unread0date2, bewareNew: false },
+          { ...unread0date1, bewareNew: false },
         ],
         numNewItems: 5,
         selectedIndex: 0,

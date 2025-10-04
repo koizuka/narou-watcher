@@ -8,6 +8,7 @@ export interface IsNoticeListItem {
   completed?: boolean;
   memo?: string;
   isR18: boolean;
+  bewareNew?: boolean;
 }
 
 export function hasUnread(item: Pick<IsNoticeListItem, 'latest' | 'bookmark'>): boolean {
