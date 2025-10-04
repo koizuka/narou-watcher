@@ -34,7 +34,16 @@ go build                    # Build the server binary
 ./narou-watcher            # Run server on localhost:7676
 ./narou-watcher -open      # Run and open browser
 ./narou-watcher -debug     # Run with debug logging
+./narou-watcher -testdata  # Run with test data (no login required)
 ```
+
+**Test Data Mode:**
+
+- Use `-testdata` flag to run without accessing the actual Narou website
+- Returns predefined test data for all API endpoints
+- No login required - useful for frontend development and testing
+- Simulates various update times and time-based behavior (e.g., episodes appearing after 1 minute)
+- Test data includes: 10 novels with different update times, 4 bookmark categories, episode details
 
 ### Frontend Development
 
@@ -47,11 +56,13 @@ npm test                   # Run tests
 ```
 
 **Development Server Configuration:**
+
 - Vite listens on `0.0.0.0:3000` (accessible from network)
 - API requests (`/narou/*`, `/r18/*`) are proxied to `localhost:7676`
 - This allows mobile device testing without additional configuration
 
 **Mobile Access:**
+
 1. Start backend: `./narou-watcher`
 2. Start frontend: `cd narou-react && npm start`
 3. Access from mobile: `http://<PC_IP>:3000` (e.g., `http://192.168.0.60:3000`)
