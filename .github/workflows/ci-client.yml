@@ -6,7 +6,15 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/ci-client.yml"
-      - "narou-react/**"
+      - "narou-react/src/**"
+      - "narou-react/public/**"
+      - "narou-react/package.json"
+      - "narou-react/package-lock.json"
+      - "narou-react/tsconfig*.json"
+      - "narou-react/vite.config.ts"
+      - "narou-react/vitest.config.js"
+      - "narou-react/eslint.config.mts"
+      - "narou-react/index.html"
 
 defaults:
   run:
