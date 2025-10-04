@@ -5,6 +5,7 @@
     "luxon",
     "ncode",
     "peaceiris",
-    "Puerkito"
+    "Puerkito",
+    "testdata"
   ]
 }
