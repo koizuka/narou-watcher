@@ -21,6 +21,12 @@ export default defineConfig({
     'import.meta.env.BUILD_DATE': JSON.stringify(new Date().toISOString()),
   },
   server: {
-    open: true
+    host: '0.0.0.0',
+    port: 3000,
+    open: true,
+    proxy: {
+      '/narou': 'http://localhost:7676',
+      '/r18': 'http://localhost:7676'
+    }
   }
 });

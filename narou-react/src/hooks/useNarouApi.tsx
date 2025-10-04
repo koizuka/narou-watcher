@@ -7,7 +7,8 @@ function getServerAddress(location: Location): string {
     return server;
   }
   if (location.protocol === 'http:') {
-    return 'http://localhost:7676';
+    // 開発環境ではViteのproxyを使用するため、現在のホストを返す
+    return location.protocol + '//' + location.host;
   }
   // github.io であればAPIは置けないから除外
   if (!/.*\.github\.io$/.test(location.hostname)) {
