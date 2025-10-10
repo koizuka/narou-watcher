@@ -67,7 +67,7 @@ test('login page when not logged in', async () => {
 		fireEvent.click(screen.getByTestId('login'));
 		await sleep(0);
 	});
-	expect(mockLogin).toHaveBeenCalledWith('id', 'password');
+	expect(mockLogin).toHaveBeenCalledExactlyOnceWith('id', 'password');
 });
 
 test('empty', async () => {

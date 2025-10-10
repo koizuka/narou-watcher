@@ -137,8 +137,8 @@ describe('WaitingForNovelDialog', () => {
 
     // Wait for the API call and window.open to be called
     await waitFor(() => {
-      expect(mockCall).toHaveBeenCalledWith('/narou/check-novel-access/n1234aa/6');
-      expect(window.open).toHaveBeenCalledWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
+      expect(mockCall).toHaveBeenCalledExactlyOnceWith('/narou/check-novel-access/n1234aa/6');
+      expect(window.open).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
       expect(mockOnClose).toHaveBeenCalled();
     });
   });
@@ -173,7 +173,7 @@ describe('WaitingForNovelDialog', () => {
       expect(mockCall).toHaveBeenCalledTimes(2);
       expect(mockCall).toHaveBeenNthCalledWith(1, '/narou/check-novel-access/n1234aa/6');
       expect(mockCall).toHaveBeenNthCalledWith(2, '/narou/check-novel-access/n1234aa/6');
-      expect(window.open).toHaveBeenCalledWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
+      expect(window.open).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
       expect(mockOnClose).toHaveBeenCalled();
     });
   });
@@ -199,7 +199,7 @@ describe('WaitingForNovelDialog', () => {
     const openAnywayButton = screen.getByTestId('open-anyway-button');
     await user.click(openAnywayButton);
 
-    expect(window.open).toHaveBeenCalledWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
+    expect(window.open).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
     expect(mockOnClose).toHaveBeenCalled();
   });
 
@@ -220,7 +220,7 @@ describe('WaitingForNovelDialog', () => {
 
     // Wait for error to be handled
     await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('Failed to check novel access:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('Failed to check novel access:', expect.any(Error));
     });
 
     // Should not crash and should show retry options
@@ -248,8 +248,8 @@ describe('WaitingForNovelDialog', () => {
 
     // Should try to access episode 1 (bookmark + 1)
     await waitFor(() => {
-      expect(mockCall).toHaveBeenCalledWith('/narou/check-novel-access/n1234aa/1');
-      expect(window.open).toHaveBeenCalledWith('https://ncode.syosetu.com/n1234aa/1/', '_blank');
+      expect(mockCall).toHaveBeenCalledExactlyOnceWith('/narou/check-novel-access/n1234aa/1');
+      expect(window.open).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/1/', '_blank');
       expect(mockOnClose).toHaveBeenCalled();
     });
   });
@@ -272,8 +272,8 @@ describe('WaitingForNovelDialog', () => {
 
     // Should use R18 endpoint and open novel
     await waitFor(() => {
-      expect(mockCall).toHaveBeenCalledWith('/r18/check-novel-access/n1234aa/6');
-      expect(window.open).toHaveBeenCalledWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
+      expect(mockCall).toHaveBeenCalledExactlyOnceWith('/r18/check-novel-access/n1234aa/6');
+      expect(window.open).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
       expect(mockOnClose).toHaveBeenCalled();
     });
   });

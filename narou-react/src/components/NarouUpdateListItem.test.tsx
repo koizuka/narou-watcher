@@ -143,7 +143,7 @@ describe('NarouUpdateListItem', () => {
     fireEvent.click(mainButton);
 
     // Should call onWaitingAction when bewareNew is true
-    expect(mockOnWaitingAction).toHaveBeenCalledWith(item);
+    expect(mockOnWaitingAction).toHaveBeenCalledExactlyOnceWith(item);
     expect(mockSelectDefault).toHaveBeenCalled();
   });
 
