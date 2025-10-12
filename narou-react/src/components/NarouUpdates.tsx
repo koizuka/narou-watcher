@@ -14,6 +14,7 @@ import { useAppBadge } from '../hooks/useAppBadge';
 import { useClientBadge } from "../hooks/useClientBadge";
 import { useBookmark } from '../hooks/useBookmark';
 import { useHotKeys } from '../hooks/useHotKeys';
+import { useProactiveNovelCheck } from '../hooks/useProactiveNovelCheck';
 import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
 import { NarouApi } from '../narouApi/NarouApi';
 import { clearCache, useIsNoticeList } from '../narouApi/useIsNoticeList';
@@ -107,6 +108,13 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   const onNovelAccessible = useCallback((item: IsNoticeListItem) => {
     dispatch({ type: 'clear-beware', baseUrl: item.base_url });
   }, []);
+
+  // Proactively check the first beware item
+  const firstBewareItem = useMemo(() => {
+    return items?.find(item => item.bewareNew);
+  }, [items]);
+
+  useProactiveNovelCheck(server, firstBewareItem, onNovelAccessible);
 
   // Manage beware timer
   useEffect(() => {
