@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { IsNoticeListItem } from '../narouApi/IsNoticeListItem';
 import { NarouApi } from '../narouApi/NarouApi';
+import { extractNcodeAndEpisode } from '../utils/novelUtils';
 
 interface NovelAccessResponse {
   accessible: boolean;
@@ -32,16 +33,6 @@ export function useProactiveNovelCheck(
     // Create new abort controller for this check
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
-
-    // Extract ncode and episode from item
-    const extractNcodeAndEpisode = (item: IsNoticeListItem) => {
-      // Extract ncode from base_url (e.g., "https://ncode.syosetu.com/n1234aa/" -> "n1234aa")
-      const regex = /\/([^/]+)\/$/;
-      const match = regex.exec(item.base_url);
-      const ncode = match ? match[1] : '';
-      const episode = item.bookmark + 1; // Next episode to read
-      return { ncode, episode };
-    };
 
     // Perform the access check
     const checkAccess = async () => {

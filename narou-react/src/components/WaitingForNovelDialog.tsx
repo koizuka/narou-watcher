@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { IsNoticeListItem, nextLink } from '../narouApi/IsNoticeListItem';
 import { NarouApi } from '../narouApi/NarouApi';
 import { isIPhoneSafari } from '../utils/browser';
+import { extractNcodeAndEpisode } from '../utils/novelUtils';
 import { CountdownTimer } from './CountdownTimer';
 
 const POLLING_INTERVAL = 30 * 1000; // 30 seconds
@@ -35,15 +36,6 @@ function WaitingForNovelDialogRaw({ api, item, onClose, onAccessible }: {
   const [isAccessible, setIsAccessible] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const extractNcodeAndEpisode = useCallback((item: IsNoticeListItem) => {
-    // Extract ncode from base_url (e.g., "https://ncode.syosetu.com/n1234aa/" -> "n1234aa")
-    const regex = /\/([^/]+)\/$/;
-    const match = regex.exec(item.base_url);
-    const ncode = match ? match[1] : '';
-    const episode = item.bookmark + 1; // Next episode to read
-    return { ncode, episode };
-  }, []);
-
   const checkNovelAccess = useCallback(async (item: IsNoticeListItem): Promise<boolean> => {
     const { ncode, episode } = extractNcodeAndEpisode(item);
     if (!ncode) return false;
@@ -60,7 +52,7 @@ function WaitingForNovelDialogRaw({ api, item, onClose, onAccessible }: {
     } finally {
       setIsChecking(false);
     }
-  }, [api, extractNcodeAndEpisode]);
+  }, [api]);
 
   const openNovel = useCallback((item: IsNoticeListItem) => {
     window.open(nextLink(item), '_blank');
