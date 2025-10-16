@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { NarouApi } from "../narouApi/NarouApi";
 
 function getServerAddress(location: Location): string {
@@ -19,16 +19,14 @@ function getServerAddress(location: Location): string {
 }
 
 export function useNarouApi(): [NarouApi | null, boolean] {
-  const [api, setApi] = useState<NarouApi | null>(null);
-  const [hostError, setHostError] = useState(false);
-  useEffect(() => {
+  const [api] = useState<NarouApi | null>(() => {
     const host = getServerAddress(document.location);
-    if (host) {
-      setApi(new NarouApi(host));
-    } else {
-      setHostError(true);
-    }
-  }, [])
+    return host ? new NarouApi(host) : null;
+  });
+  const [hostError] = useState(() => {
+    const host = getServerAddress(document.location);
+    return !host;
+  });
 
   return [api, hostError];
 }
