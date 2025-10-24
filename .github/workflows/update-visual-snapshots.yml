@@ -66,24 +66,30 @@ jobs:
       - name: Update Visual Snapshots
         run: npm run test:visual:update
 
-      - name: Check for changes
-        id: verify-changed-files
-        run: |
-          if git diff --quiet src/**/__screenshots__; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
+        with:
+          commit-message: "chore: update visual regression snapshots (manual)"
+          branch: update-visual-snapshots-manual
+          delete-branch: true
+          title: "chore: update visual regression snapshots (manual)"
+          body: |
+            ## Visual Regression Snapshot Update (Manual)
 
-      - name: Commit and Push
-        if: steps.verify-changed-files.outputs.changed == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/**/__screenshots__
-          git commit -m "chore: update visual regression snapshots [skip ci]"
-          git push
+            This PR contains manually triggered visual regression test snapshot updates.
 
-      - name: No changes
-        if: steps.verify-changed-files.outputs.changed == 'false'
-        run: echo "No snapshot changes detected"
+            ### What changed
+            - Visual regression snapshots were manually regenerated
+
+            ### How to review
+            1. Check the changed snapshot images in the Files tab
+            2. Verify that the visual changes are expected
+            3. Merge if the snapshots look correct
+
+            🤖 Manually triggered by @${{ github.actor }}
+
+            [Workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          labels: |
+            automated
+            snapshots
+            manual
