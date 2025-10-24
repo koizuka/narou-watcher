@@ -34,8 +34,25 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Get Playwright version
+        id: playwright-version
+        working-directory: narou-react
+        run: echo "version=$(npm list playwright --json | jq -r '.dependencies.playwright.version')" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium --only-shell
+
+      - name: Install Playwright dependencies only
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Update Visual Snapshots
         run: npm run test:visual:update
