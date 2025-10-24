@@ -96,6 +96,12 @@ function NarouUpdateListItemRaw({ item, index, isSelected, setSelectedIndex, onS
           <Info />
         </IconButton>
       }
+      sx={{
+        paddingRight: 0,
+        '& .MuiListItemSecondaryAction-root': {
+          right: 8,
+        }
+      }}
       {...(isSelected ? { selected: true, ref: scrollIn } : {})}
     >
       <ListItemButton
