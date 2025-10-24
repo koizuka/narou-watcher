@@ -16,6 +16,10 @@ on:
       - "narou-react/eslint.config.mts"
       - "narou-react/index.html"
 
+permissions:
+  contents: write
+  pull-requests: write
+
 defaults:
   run:
     working-directory: narou-react
@@ -30,6 +34,9 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: setup-node
         uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
@@ -41,8 +48,64 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Test
+      - name: Unit Tests
         run: npm run test:ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Check for existing snapshots
+        id: check-snapshots
+        run: |
+          if [ -d "src/components/__screenshots__" ] && [ "$(find src/components/__screenshots__ -name '*-linux.png' | wc -l)" -gt 0 ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Visual Regression Tests (PR - Report Only)
+        if: steps.check-snapshots.outputs.exists == 'true' && github.event_name == 'pull_request'
+        continue-on-error: true
+        id: visual-test-pr
+        run: npm run test:visual:ci
+
+      - name: Upload Visual Test Diff (PR)
+        if: steps.visual-test-pr.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-test-diff
+          path: |
+            narou-react/src/**/__screenshots__/**/*-diff.png
+            narou-react/src/**/__screenshots__/**/*-actual.png
+          retention-days: 7
+
+      - name: Comment on PR about visual changes
+        if: steps.visual-test-pr.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ **Visual changes detected**\n\nVisual regression tests found differences. After merging, snapshots will be automatically updated on the main branch.\n\nYou can review the diff images in the [workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).'
+            })
+
+      - name: Generate Initial Snapshots (First PR)
+        if: steps.check-snapshots.outputs.exists == 'false'
+        run: npm run test:visual:update
+
+      - name: Commit Generated Snapshots (First PR)
+        if: steps.check-snapshots.outputs.exists == 'false' && github.event_name == 'pull_request'
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain narou-react/src/**/__screenshots__)" ]; then
+            git add narou-react/src/**/__screenshots__
+            git commit -m "chore: generate initial visual regression snapshots [skip ci]"
+            git push
+          fi
 
       - name: Build
         run: npm run build

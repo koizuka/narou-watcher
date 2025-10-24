@@ -73,13 +73,54 @@ npm test                   # Run tests
 # Backend tests
 go test ./...
 
-# Frontend tests
+# Frontend tests (unit tests only)
 cd narou-react
 npm test
+
+# Visual regression tests (local - macOS snapshots, not committed)
+npm run test:visual
 
 # Full check (runs from project root)
 ./check.sh
 ```
+
+#### Visual Regression Testing
+
+Visual regression tests use Vitest Browser Mode with Playwright to detect UI changes after MUI updates.
+
+**Important**: Only Linux (CI) snapshots are committed to the repository. Local macOS/Windows snapshots are ignored.
+
+**Workflow:**
+
+1. **First PR (Initial Setup)**:
+   - CI automatically generates Linux snapshots and commits them to your PR
+   - After the auto-commit, CI re-runs and tests pass
+
+2. **Normal Development with UI Changes**:
+   - Push your changes to PR
+   - CI detects visual differences but **doesn't fail**
+   - You get a PR comment: "⚠️ Visual changes detected"
+   - Diff images are uploaded as artifacts for review
+   - Merge when ready
+
+3. **After Merge to Main**:
+   - Snapshots are **automatically updated** on main branch
+   - New baseline is committed with `[skip ci]`
+   - Future PRs will compare against this new baseline
+
+4. **Manual Update (if needed)**:
+   - Go to Actions → "Update Visual Snapshots (Manual)"
+   - Select branch and run
+   - Useful for emergency fixes or branch-specific updates
+
+5. **Local Testing** (optional):
+   - `npm run test:visual` runs tests locally but generates macOS snapshots
+   - These are gitignored and not used in CI
+
+**Files:**
+- Test files: `src/**/*.browser.test.tsx`
+- Snapshots: `src/**/__screenshots__/**/*-linux.png` (committed)
+- Snapshots: `src/**/__screenshots__/**/*-darwin.png` (gitignored)
 
 ## API Endpoints
 
