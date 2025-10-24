@@ -8,6 +8,9 @@ on:
       - "narou-react/src/**/*.ts"
       - "!narou-react/src/**/*.test.tsx"
       - "!narou-react/src/**/*.test.ts"
+      - "narou-react/src/**/*.browser.test.tsx"  # Include browser tests (snapshot definitions)
+      - "narou-react/vitest.config.js"  # Include test configuration
+      - ".github/workflows/update-snapshots-on-merge.yml"  # Include this workflow itself
 
 permissions:
   contents: write
