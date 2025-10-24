@@ -7,6 +7,7 @@ import {
   DialogTitle,
   Link, Typography
 } from '@mui/material';
+import { Bookmark } from '@mui/icons-material';
 import React, { useMemo } from 'react';
 import { IsNoticeListItem, nextLink } from '../narouApi/IsNoticeListItem';
 import { NarouApi } from '../narouApi/NarouApi';
@@ -55,11 +56,18 @@ function OpenConfirmDialogRaw({ api, item, onClose }: {
             window.open(item.base_url, '_blank');
           onClose();
         }}>小説ページ</Button>
-        <Button size="small" variant="contained" onClick={() => {
-          if (item)
-            window.open(nextLink(item), '_blank');
-          onClose();
-        }}>最新{item?.latest}部分</Button>
+        {item?.bookmark ? (
+          <Button size="small" variant="contained" onClick={() => {
+            window.open(item.base_url + String(item.bookmark) + '/', '_blank');
+            onClose();
+          }} startIcon={<Bookmark />}>{item.bookmark}部分</Button>
+        ) : (
+          <Button size="small" variant="contained" onClick={() => {
+            if (item)
+              window.open(nextLink(item), '_blank');
+            onClose();
+          }}>最新{item?.latest}部分</Button>
+        )}
         <Button size="small" variant="contained" onClick={() => { onClose(); }}>キャンセル</Button>
       </DialogActions>
     </Dialog>
