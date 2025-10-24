@@ -7,6 +7,11 @@
 
 # testing
 /coverage
+.vitest-attachments
+
+# visual regression tests - only keep Linux (CI) snapshots
+**/*-darwin.png
+**/*-win32.png
 
 # production
 /build

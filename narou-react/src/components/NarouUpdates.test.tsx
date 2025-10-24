@@ -21,7 +21,7 @@ function setup() {
 		return Promise.resolve(new Response());
 	});
 
-	NarouApiMock.mockImplementation(() => {
+	NarouApiMock.mockImplementation(function() {
 		return {
 			call: mockCall,
 			login: mockLogin,
