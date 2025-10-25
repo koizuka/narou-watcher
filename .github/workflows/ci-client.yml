@@ -50,7 +50,6 @@ jobs:
 
       - name: setup-node
         if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
-        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
         uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
           node-version: "22.x"
@@ -75,15 +74,13 @@ jobs:
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
 
       - name: Install Playwright Browsers
-        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
         env:
           DEBIAN_FRONTEND: noninteractive
 
       - name: Install Playwright dependencies only
-        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.playwright-cache.outputs.cache-hit == 'true'
         run: |
           sudo apt-get update -qq
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
@@ -108,15 +105,13 @@ jobs:
           fi
 
       - name: Visual Regression Tests (PR - Report Only)
-        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
-        if: steps.check-snapshots.outputs.exists == 'true' && github.event_name == 'pull_request'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.check-snapshots.outputs.exists == 'true' && github.event_name == 'pull_request'
         continue-on-error: true
         id: visual-test-pr
         run: npm run test:visual:ci
 
       - name: Upload Visual Test Diff (PR)
-        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
-        if: steps.visual-test-pr.outcome == 'failure'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.visual-test-pr.outcome == 'failure'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: visual-test-diff
@@ -142,8 +137,7 @@ jobs:
           fi
 
       - name: Comment on PR about visual changes
-        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
-        if: steps.visual-test-pr.outcome == 'failure'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.visual-test-pr.outcome == 'failure'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
@@ -155,13 +149,11 @@ jobs:
             })
 
       - name: Generate Initial Snapshots (First PR)
-        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
-        if: steps.check-snapshots.outputs.exists == 'false'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.check-snapshots.outputs.exists == 'false'
         run: npm run test:visual:update
 
       - name: Commit Generated Snapshots (First PR)
-        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
-        if: steps.check-snapshots.outputs.exists == 'false' && github.event_name == 'pull_request'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.check-snapshots.outputs.exists == 'false' && github.event_name == 'pull_request'
         working-directory: .
         run: |
           git config user.name "github-actions[bot]"
