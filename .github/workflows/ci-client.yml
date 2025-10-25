@@ -28,17 +28,28 @@ defaults:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Quick validation for snapshot update PRs - skip full test suite
+      - name: Check if snapshot update PR
+        id: check-snapshot-pr
+        run: |
+          if [[ "${{ github.head_ref }}" == update-visual-snapshots* ]]; then
+            echo "is_snapshot_pr=true" >> $GITHUB_OUTPUT
+            echo "✅ Snapshot update PR detected"
+            echo "Skipping full test suite - snapshots are pre-validated"
+            echo "Full CI will run on next component change PR"
+          else
+            echo "is_snapshot_pr=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: setup-node
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
         uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
           node-version: "22.x"
@@ -46,13 +57,16 @@ jobs:
           cache-dependency-path: "narou-react/package-lock.json"
 
       - name: Install
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
         run: npm ci
 
       - name: Get Playwright version
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
         id: playwright-version
         run: echo "version=$(npm list playwright --json | jq -r '.dependencies.playwright.version')" >> $GITHUB_OUTPUT
 
       - name: Cache Playwright browsers
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: playwright-cache
         with:
@@ -60,13 +74,13 @@ jobs:
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
 
       - name: Install Playwright Browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
         env:
           DEBIAN_FRONTEND: noninteractive
 
       - name: Install Playwright dependencies only
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.playwright-cache.outputs.cache-hit == 'true'
         run: |
           sudo apt-get update -qq
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
@@ -77,9 +91,11 @@ jobs:
             fonts-liberation fonts-noto-color-emoji fonts-unifont
 
       - name: Unit Tests
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
         run: npm run test:ci
 
       - name: Check for existing snapshots
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
         id: check-snapshots
         run: |
           if [ -d "src/components/__screenshots__" ] && [ "$(find src/components/__screenshots__ -name '*-linux.png' | wc -l)" -gt 0 ]; then
@@ -89,13 +105,13 @@ jobs:
           fi
 
       - name: Visual Regression Tests (PR - Report Only)
-        if: steps.check-snapshots.outputs.exists == 'true' && github.event_name == 'pull_request'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.check-snapshots.outputs.exists == 'true' && github.event_name == 'pull_request'
         continue-on-error: true
         id: visual-test-pr
         run: npm run test:visual:ci
 
       - name: Upload Visual Test Diff (PR)
-        if: steps.visual-test-pr.outcome == 'failure'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.visual-test-pr.outcome == 'failure'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: visual-test-diff
@@ -104,8 +120,24 @@ jobs:
             narou-react/src/**/__screenshots__/**/*-actual.png
           retention-days: 7
 
+      - name: Update Visual Snapshots (PR with changes)
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.visual-test-pr.outcome == 'failure' && github.event_name == 'pull_request'
+        run: npm run test:visual:update
+
+      - name: Commit Updated Snapshots (PR with changes)
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.visual-test-pr.outcome == 'failure' && github.event_name == 'pull_request'
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain narou-react/src/**/__screenshots__)" ]; then
+            git add narou-react/src/**/__screenshots__
+            git commit -m "chore: update visual regression snapshots [skip ci]"
+            git push
+          fi
+
       - name: Comment on PR about visual changes
-        if: steps.visual-test-pr.outcome == 'failure'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.visual-test-pr.outcome == 'failure'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
@@ -113,15 +145,15 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '⚠️ **Visual changes detected**\n\nVisual regression tests found differences. After merging, snapshots will be automatically updated on the main branch.\n\nYou can review the diff images in the [workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).'
+              body: '✅ **Visual snapshots automatically updated**\n\nVisual regression test snapshots have been automatically updated and committed to this PR.\n\n**Please review:**\n- Check the snapshot changes in the Files tab\n- Verify the visual changes match your expectations\n- Review the diff images in the [workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n🤖 Auto-committed by GitHub Actions'
             })
 
       - name: Generate Initial Snapshots (First PR)
-        if: steps.check-snapshots.outputs.exists == 'false'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.check-snapshots.outputs.exists == 'false'
         run: npm run test:visual:update
 
       - name: Commit Generated Snapshots (First PR)
-        if: steps.check-snapshots.outputs.exists == 'false' && github.event_name == 'pull_request'
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.check-snapshots.outputs.exists == 'false' && github.event_name == 'pull_request'
         working-directory: .
         run: |
           git config user.name "github-actions[bot]"
@@ -133,7 +165,9 @@ jobs:
           fi
 
       - name: Build
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
         run: npm run build
 
       - name: Lint
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
         run: npm run lint

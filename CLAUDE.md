@@ -99,21 +99,18 @@ Visual regression tests use Vitest Browser Mode with Playwright to detect UI cha
 2. **Normal Development with UI Changes**:
    - Push your changes to PR
    - CI detects visual differences but **doesn't fail**
-   - You get a PR comment: "⚠️ Visual changes detected"
+   - Snapshots are **automatically updated and committed** to your PR branch
+   - You get a PR comment: "✅ Visual snapshots automatically updated"
    - Diff images are uploaded as artifacts for review
+   - Review the snapshot changes in the Files tab
    - Merge when ready
 
-3. **After Merge to Main**:
-   - Snapshots are **automatically updated** on main branch
-   - New baseline is committed with `[skip ci]`
-   - Future PRs will compare against this new baseline
-
-4. **Manual Update (if needed)**:
+3. **Manual Update (if needed)**:
    - Go to Actions → "Update Visual Snapshots (Manual)"
    - Select branch and run
    - Useful for emergency fixes or branch-specific updates
 
-5. **Local Testing** (optional):
+4. **Local Testing** (optional):
    - `npm run test:visual` runs tests locally but generates macOS snapshots
    - These are gitignored and not used in CI
 
