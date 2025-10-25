@@ -233,11 +233,11 @@ npm run start
 
 #### 技術スタック
 
-- React 19.1.1
-- TypeScript 5.9.2
-- Vite 7.1.7 (ビルドツール)
+- React 19.2.0
+- TypeScript 5.9.3
+- Vite 7.1.11 (ビルドツール)
 - Material-UI 7.1.0
-- Vitest 3.2.4 (テスト)
+- Vitest 4.0.3 (テスト)
 - SWR 2.3.6 (データフェッチ)
 - date-fns 4.1.0 (日時処理)
 

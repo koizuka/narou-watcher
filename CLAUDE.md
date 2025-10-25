@@ -199,17 +199,17 @@ Then configure nginx/Apache to reverse proxy to localhost:7676
 ### Backend
 
 - `github.com/PuerkitoBio/goquery` v1.10.3 - HTML parsing
-- `github.com/koizuka/scraper` v0.0.46 - Web scraping framework
+- `github.com/koizuka/scraper` v0.0.49 - Web scraping framework
 - `github.com/rs/cors` v1.11.1 - CORS middleware
 - Standard library for HTTP server
 
 ### Frontend
 
-- React 19.1.1
+- React 19.2.0
 - Material-UI 7.1.0
-- TypeScript 5.9.2
-- Vite 7.1.7 - Build tool and dev server
-- Vitest 3.2.4 - Testing framework
+- TypeScript 5.9.3
+- Vite 7.1.11 - Build tool and dev server
+- Vitest 4.0.3 - Testing framework
 - SWR 2.3.6 - Data fetching and caching
 - date-fns 4.1.0 - Date/time handling
 - Emotion 11.14.x - CSS-in-JS for Material-UI
