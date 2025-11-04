@@ -1,39 +1,44 @@
 version: 2
 updates:
-- package-ecosystem: gomod
-  directory: "/"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: npm
-  directory: "/narou-react"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-  cooldown:
-    default-days: 7
-  groups:
-    eslint-plugins:
-      patterns:
-      - "typescript-eslint"
-      - "eslint-*"
-    mui:
-      patterns:
-      - "@mui/*"
-    emotion:
-      patterns:
-      - "@emotion/*"
-    react:
-      patterns:
-      - "@types/react-*"
-      - "@types/react"
-      - "react-*"
-      - "react"
-    testing-library:
-      patterns:
-      - "@testing-library/*"
-- package-ecosystem: "github-actions"
-  directory: "/"
-  schedule:
-    # Check for updates to GitHub Actions every week
-    interval: "weekly"
+  - package-ecosystem: gomod
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: "/narou-react"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
+    groups:
+      eslint-plugins:
+        patterns:
+          - "typescript-eslint"
+          - "eslint-*"
+      mui:
+        patterns:
+          - "@mui/*"
+      emotion:
+        patterns:
+          - "@emotion/*"
+      react:
+        patterns:
+          - "@types/react-*"
+          - "@types/react"
+          - "react-*"
+          - "react"
+      testing-library:
+        patterns:
+          - "@testing-library/*"
+      vitest:
+        patterns:
+          - "vitest"
+          - "vitest-*"
+          - "@vitest/*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      # Check for updates to GitHub Actions every week
+      interval: "weekly"
