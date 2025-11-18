@@ -3,7 +3,7 @@ module narou-watcher
 go 1.24.0
 
 require (
-	github.com/PuerkitoBio/goquery v1.10.3
+	github.com/PuerkitoBio/goquery v1.11.0
 	github.com/google/go-cmp v0.7.0
 	github.com/koizuka/scraper v0.0.54
 	github.com/rs/cors v1.11.1
@@ -24,8 +24,8 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/orirawlings/persistent-cookiejar v0.3.2 // indirect
 	go4.org v0.0.0-20201209231011-d4a079459e60 // indirect
-	golang.org/x/net v0.39.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 	gopkg.in/retry.v1 v1.0.3 // indirect
 )
