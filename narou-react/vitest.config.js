@@ -9,6 +9,9 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["src/setupTests.ts"],
 
+    // Increase timeout for browser tests (screenshots can be slow)
+    testTimeout: process.env.BROWSER_TEST === "true" ? 60000 : 30000,
+
     // Browser mode configuration for visual regression tests
     browser: {
       enabled: process.env.BROWSER_TEST === "true",
