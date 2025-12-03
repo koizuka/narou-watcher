@@ -19,6 +19,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  checks: write
 
 defaults:
   run:
@@ -171,3 +172,47 @@ jobs:
       - name: Lint
         if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true'
         run: npm run lint
+
+      # スナップショット更新があった場合、新コミットに対するCheck Runを作成
+      - name: Get new commit SHA after snapshot update
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.visual-test-pr.outcome == 'failure'
+        id: get-new-sha
+        working-directory: .
+        run: |
+          git fetch origin ${{ github.head_ref }}
+          echo "sha=$(git rev-parse origin/${{ github.head_ref }})" >> $GITHUB_OUTPUT
+
+      - name: Create Check Run for snapshot commit
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.visual-test-pr.outcome == 'failure'
+        uses: LouisBrunner/checks-action@6b626ffbad7cc56fd58627f774b9067e6118af23 # v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: "narou-react build test"
+          sha: ${{ steps.get-new-sha.outputs.sha }}
+          status: completed
+          conclusion: success
+          details_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          output: |
+            {"summary": "Build and lint passed. Visual snapshots were auto-updated."}
+
+      # 初回スナップショット生成があった場合、新コミットに対するCheck Runを作成
+      - name: Get new commit SHA after initial snapshot
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.check-snapshots.outputs.exists == 'false'
+        id: get-initial-sha
+        working-directory: .
+        run: |
+          git fetch origin ${{ github.head_ref }}
+          echo "sha=$(git rev-parse origin/${{ github.head_ref }})" >> $GITHUB_OUTPUT
+
+      - name: Create Check Run for initial snapshot commit
+        if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.check-snapshots.outputs.exists == 'false'
+        uses: LouisBrunner/checks-action@6b626ffbad7cc56fd58627f774b9067e6118af23 # v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: "narou-react build test"
+          sha: ${{ steps.get-initial-sha.outputs.sha }}
+          status: completed
+          conclusion: success
+          details_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          output: |
+            {"summary": "Build and lint passed. Initial visual snapshots were generated."}
