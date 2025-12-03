@@ -25,6 +25,10 @@ export default defineConfig({
             // Allow up to 1% of pixels to be different
             allowedMismatchedPixelRatio: 0.01,
           },
+          // Include platform in screenshot filename for cross-platform testing
+          // This ensures macOS and Linux use different baseline files
+          resolveScreenshotPath: ({ arg, browserName, platform }) =>
+            `__screenshots__/${arg}-${browserName}-${platform}.png`,
         },
       },
     },
