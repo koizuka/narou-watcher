@@ -25,6 +25,12 @@ export default defineConfig({
             // Allow up to 1% of pixels to be different
             allowedMismatchedPixelRatio: 0.01,
           },
+          // Include platform in screenshot filename for cross-platform testing
+          // This ensures macOS and Linux use different baseline files
+          // Default vitest 4.0.x generates: testName-counter.png (no platform)
+          // We need: arg-browserName-platform.png for cross-platform baselines
+          resolveScreenshotPath: ({ root, testFileDirectory, testFileName, arg, browserName, platform, ext }) =>
+            `${root}/${testFileDirectory}/__screenshots__/${testFileName}/${arg}-${browserName}-${platform}${ext}`,
         },
       },
     },
