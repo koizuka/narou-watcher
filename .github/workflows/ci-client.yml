@@ -187,7 +187,7 @@ jobs:
         uses: LouisBrunner/checks-action@6b626ffbad7cc56fd58627f774b9067e6118af23 # v2.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          name: "narou-react build test"
+          name: build
           sha: ${{ steps.get-new-sha.outputs.sha }}
           status: completed
           conclusion: success
@@ -209,7 +209,7 @@ jobs:
         uses: LouisBrunner/checks-action@6b626ffbad7cc56fd58627f774b9067e6118af23 # v2.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          name: "narou-react build test"
+          name: build
           sha: ${{ steps.get-initial-sha.outputs.sha }}
           status: completed
           conclusion: success
