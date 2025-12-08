@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/ci-client.yml"
+      - ".github/workflows/update-visual-snapshots.yml"
       - "narou-react/src/**"
       - "narou-react/public/**"
       - "narou-react/package.json"
