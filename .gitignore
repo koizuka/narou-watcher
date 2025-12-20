@@ -8,3 +8,4 @@ narou-watcher.exe
 /cmd/standalone/standalone.exe
 login.txt
 .DS_Store
+.claude/settings.local.json

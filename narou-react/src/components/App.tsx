@@ -7,12 +7,14 @@ import { useNarouApi } from '../hooks/useNarouApi';
 import { BuildTimestamp } from './BuildTimestamp';
 import { NarouUpdates } from './NarouUpdates';
 import { useAutoDarkMode } from '../hooks/useAutoDarkMode';
+import { useSessionRestoreRevalidation } from '../hooks/useSessionRestoreRevalidation';
 
 const PollingInterval = 5 * 60 * 1000; // 5分ごとにポーリング
 
 function App() {
   const theme = useAutoDarkMode();
   const [api, hostError] = useNarouApi();
+  useSessionRestoreRevalidation();
 
   if (hostError) {
     return (
