@@ -53,10 +53,10 @@ export class NarouApi {
         return res.json() as T;
     }
 
-    static isnoticelist({ maxPage = 1 }: { maxPage: number }): NarouApiCallKey {
+    static isnoticelist({ maxPage = 1 }: { maxPage?: number }): NarouApiCallKey {
         return `/narou/isnoticelist?max_page=${maxPage}`;
     }
-    static isnoticelistR18({ maxPage = 1 }: { maxPage: number }): NarouApiCallKey {
+    static isnoticelistR18({ maxPage = 1 }: { maxPage?: number }): NarouApiCallKey {
         return `/r18/isnoticelist?max_page=${maxPage}`;
     }
 

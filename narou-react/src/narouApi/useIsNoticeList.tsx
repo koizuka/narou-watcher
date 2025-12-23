@@ -29,8 +29,8 @@ export function useIsNoticeList(
   { isR18, maxPage = 1, bookmark = 0 }:
     {
       isR18: boolean,
-      maxPage: number,
-      bookmark: number,
+      maxPage?: number,
+      bookmark?: number,
     }
 ) {
   const { data: raw_items, error } = useSWR<IsNoticeListRecord[], ApiError>(
