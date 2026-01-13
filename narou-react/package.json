@@ -67,8 +67,5 @@
     "vitest": "^4.0.3",
     "vitest-browser-react": "^2.0.2",
     "whatwg-fetch": "^3.6.20"
-  },
-  "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.54.0"
   }
 }
