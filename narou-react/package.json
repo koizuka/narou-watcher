@@ -51,7 +51,7 @@
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^5.1.2",
-    "@vitest/browser": "^4.0.16",
+    "@vitest/browser": "^4.0.17",
     "@vitest/browser-playwright": "^4.0.3",
     "@vitest/eslint-plugin": "^1.6.6",
     "cross-env": "^10.1.0",
