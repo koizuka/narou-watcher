@@ -13,8 +13,10 @@ updates:
     cooldown:
       default-days: 7
     groups:
-      eslint-plugins:
+      eslint:
         patterns:
+          - "eslint"
+          - "@eslint/*"
           - "typescript-eslint"
           - "eslint-*"
       mui:
