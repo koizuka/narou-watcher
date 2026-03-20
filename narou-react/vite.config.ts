@@ -1,5 +1,4 @@
 import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
@@ -7,16 +6,24 @@ export default defineConfig({
     outDir: "build",
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Vendor libraries
-          vendor: ['react', 'react-dom'],
-          mui: ['@mui/material', '@mui/icons-material', '@mui/system', '@emotion/react', '@emotion/styled'],
-          utils: ['date-fns', 'swr', 'scroll-into-view-if-needed']
+        manualChunks(id) {
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
+            return 'vendor';
+          }
+          if (id.includes('node_modules/@mui/') || id.includes('node_modules/@emotion/')) {
+            return 'mui';
+          }
+          if (id.includes('node_modules/date-fns') || id.includes('node_modules/swr') || id.includes('node_modules/scroll-into-view-if-needed')) {
+            return 'utils';
+          }
         }
       }
     }
   },
-  plugins: [tsconfigPaths(), react()],
+  plugins: [react()],
+  resolve: {
+    tsconfigPaths: true,
+  },
   define: {
     'import.meta.env.BUILD_DATE': JSON.stringify(new Date().toISOString()),
   },
