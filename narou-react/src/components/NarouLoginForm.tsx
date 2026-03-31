@@ -5,7 +5,7 @@ import { NarouApi } from '../narouApi/NarouApi';
 export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState('');
 
   const postLogin = useCallback(() => {
     void (async () => {
