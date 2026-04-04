@@ -5,6 +5,8 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
   - package-ecosystem: npm
     directory: "/narou-react"
     schedule:
@@ -50,3 +52,5 @@ updates:
     schedule:
       # Check for updates to GitHub Actions every week
       interval: "weekly"
+    cooldown:
+      default-days: 7
