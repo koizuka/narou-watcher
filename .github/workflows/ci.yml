@@ -228,7 +228,7 @@ jobs:
 
       - name: Create Check Run for snapshot commit
         if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.visual-test-pr.outcome == 'failure'
-        uses: LouisBrunner/checks-action@dfcbcf801bff1ea7f1414824fc28f2cd697b35da # v3.0.0
+        uses: LouisBrunner/checks-action@937cbbcde3259005b50746dc91cde29098aac2ff # v3.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: CI Summary
@@ -249,7 +249,7 @@ jobs:
 
       - name: Create Check Run for initial snapshot commit
         if: steps.check-snapshot-pr.outputs.is_snapshot_pr != 'true' && steps.check-snapshots.outputs.exists == 'false'
-        uses: LouisBrunner/checks-action@dfcbcf801bff1ea7f1414824fc28f2cd697b35da # v3.0.0
+        uses: LouisBrunner/checks-action@937cbbcde3259005b50746dc91cde29098aac2ff # v3.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: CI Summary
