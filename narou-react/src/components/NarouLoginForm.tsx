@@ -47,7 +47,7 @@ export function NarouLoginForm(props: { api: NarouApi; onLogin: () => void; }) {
         <CardHeader title="小説家になろうのログイン情報" data-testid="login-page">
         </CardHeader>
         <CardContent>
-          <Box display="flex" flexDirection="column" justifyContent="center">
+          <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <TextField id="id" name="id" label="ID or email" autoFocus
               value={userId} onChange={e => { setUserId(e.target.value); }}
               onKeyDown={e => {
