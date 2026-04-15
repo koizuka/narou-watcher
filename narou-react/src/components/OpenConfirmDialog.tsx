@@ -7,7 +7,7 @@ import {
   DialogTitle,
   Link, Typography
 } from '@mui/material';
-import { Bookmark } from '@mui/icons-material';
+import Bookmark from '@mui/icons-material/Bookmark';
 import React, { useMemo } from 'react';
 import { IsNoticeListItem, nextLink } from '../narouApi/IsNoticeListItem';
 import { NarouApi } from '../narouApi/NarouApi';

@@ -169,7 +169,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
         <Box>
           <BookmarkSelector bookmarks={bookmarks} bookmark={bookmark} onChangeBookmark={setBookmark} />
         </Box>
-        <Box m={2}>未読: {numNewItems ?? ''}</Box>
+        <Box sx={{ m: 2 }}>未読: {numNewItems ?? ''}</Box>
         <Button
           variant="contained"
           disabled={selectedIndex === 0}
@@ -178,8 +178,8 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
           onClick={selectDefault}>ESC</Button>
       </Toolbar>
     </AppBar>
-    <Box display="flex" alignItems="center" flexDirection="column" bgcolor="background.paper">
-      <Box maxWidth={600}>
+    <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', bgcolor: 'background.paper' }}>
+      <Box sx={{ maxWidth: 600 }}>
         <NarouUpdateList items={items}
           selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex}
           selectCommand={selectCommand}
@@ -187,7 +187,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
           onWaitingAction={setWaiting}
         />
       </Box>
-      <Box position="fixed" right="20px" bottom="20px">
+      <Box sx={{ position: 'fixed', right: '20px', bottom: '20px' }}>
         <Fab
           variant="extended"
           size="small"

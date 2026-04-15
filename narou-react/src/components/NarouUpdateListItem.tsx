@@ -1,4 +1,5 @@
-import { Book, Info } from '@mui/icons-material';
+import Book from '@mui/icons-material/Book';
+import Info from '@mui/icons-material/Info';
 import {
   Avatar, Badge, BadgeTypeMap, ButtonTypeMap, IconButton, ListItem,
   ListItemAvatar,
