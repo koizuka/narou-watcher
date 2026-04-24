@@ -113,12 +113,17 @@ function WaitingForNovelDialogRaw({ api, item, onClose, onAccessible }: {
     }, POLLING_INTERVAL);
   }, [checkNovelAccess, onAccessible, openNovel]);
 
+  const [prevItem, setPrevItem] = useState(item);
+  if (prevItem !== item) {
+    setPrevItem(item);
+    setRetryCount(0);
+    setIsChecking(false);
+    setIsAccessible(false);
+    setNextCheckTime(null);
+  }
+
   useEffect(() => {
     if (item) {
-      setRetryCount(0);
-      setIsChecking(false);
-      setIsAccessible(false);
-      setNextCheckTime(new Date(Date.now() + POLLING_INTERVAL)); // 初回の次回チェック時刻
       startPolling(item);
     }
 
@@ -127,7 +132,6 @@ function WaitingForNovelDialogRaw({ api, item, onClose, onAccessible }: {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-      setNextCheckTime(null);
     };
   }, [item, startPolling]);
 
