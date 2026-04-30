@@ -17,10 +17,10 @@ export function AutoLinkText({ text }: { text: string; }) {
   return (
     <>
       {items.map(
-        (item) => <>
+        (item, index) => <React.Fragment key={index}>
           {item.text}
           <a href={item.href}>{item.href}</a>
-        </>
+        </React.Fragment>
       )}
     </>
   );
