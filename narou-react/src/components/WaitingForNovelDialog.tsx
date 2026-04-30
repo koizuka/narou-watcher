@@ -35,6 +35,7 @@ function WaitingForNovelDialogRaw({ api, item, onClose, onAccessible }: {
   const [nextCheckTime, setNextCheckTime] = useState<Date | null>(null);
   const [isAccessible, setIsAccessible] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const retryCountRef = useRef(0);
 
   const checkNovelAccess = useCallback(async (item: IsNoticeListItem): Promise<boolean> => {
     const { ncode, episode } = extractNcodeAndEpisode(item);
@@ -87,21 +88,20 @@ function WaitingForNovelDialogRaw({ api, item, onClose, onAccessible }: {
         return;
       }
 
-      setRetryCount(prev => {
-        const newCount = prev + 1;
-        if (newCount >= MAX_RETRY_COUNT) {
-          // Max retries reached, stop polling
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-          setNextCheckTime(null); // カウントダウン停止
-          return newCount;
+      retryCountRef.current += 1;
+      const newCount = retryCountRef.current;
+      setRetryCount(newCount);
+      if (newCount >= MAX_RETRY_COUNT) {
+        // Max retries reached, stop polling
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
         }
+        setNextCheckTime(null); // カウントダウン停止
+      } else {
         // 次回チェック時刻を設定
         setNextCheckTime(new Date(Date.now() + POLLING_INTERVAL));
-        return newCount;
-      });
+      }
     };
 
     // 初回チェック
@@ -124,6 +124,7 @@ function WaitingForNovelDialogRaw({ api, item, onClose, onAccessible }: {
 
   useEffect(() => {
     if (item) {
+      retryCountRef.current = 0;
       startPolling(item);
     }
 

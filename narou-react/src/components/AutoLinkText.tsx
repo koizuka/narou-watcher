@@ -17,10 +17,11 @@ export function AutoLinkText({ text }: { text: string; }) {
   return (
     <>
       {items.map(
-        (item) => <>
+        // eslint-disable-next-line @eslint-react/no-array-index-key -- items are derived from a single text via regex; order is stable
+        (item, index) => <React.Fragment key={index}>
           {item.text}
           <a href={item.href}>{item.href}</a>
-        </>
+        </React.Fragment>
       )}
     </>
   );

@@ -10,31 +10,28 @@ export const CountdownTimer = React.memo(function CountdownTimer({
   targetTime,
   intervalMs
 }: CountdownTimerProps) {
-  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     if (!targetTime) {
       return;
     }
 
-    const updateCountdown = () => {
-      const now = new Date();
-      const diff = Math.max(0, Math.floor((targetTime.getTime() - now.getTime()) / 1000));
-      setRemainingSeconds(diff);
-    };
-
-    // 初回更新
-    updateCountdown();
-
-    // 1秒ごとに更新
-    const interval = setInterval(updateCountdown, 1000);
+    const interval = setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
 
     return () => {
       clearInterval(interval);
     };
   }, [targetTime]);
 
-  if (!targetTime || remainingSeconds <= 0) {
+  if (!targetTime) {
+    return null;
+  }
+
+  const remainingSeconds = Math.max(0, Math.floor((targetTime.getTime() - now) / 1000));
+  if (remainingSeconds <= 0) {
     return null;
   }
 

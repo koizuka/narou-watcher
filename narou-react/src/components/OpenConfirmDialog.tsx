@@ -47,6 +47,7 @@ function OpenConfirmDialogRaw({ api, item, onClose }: {
       <DialogContent>
         <Typography variant="h5">あらすじ</Typography>
         <div id="abstract">
+          {/* eslint-disable-next-line @eslint-react/no-array-index-key -- abstract is split lines from a fixed string; order is stable */}
           {abstract?.map((line, i) => <DialogContentText key={i}>{line}</DialogContentText>)}
         </div>
       </DialogContent>

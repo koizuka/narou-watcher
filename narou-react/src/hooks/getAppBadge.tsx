@@ -7,7 +7,7 @@ function isNavigatorWithAppBadge(navigator: Navigator): navigator is NavigatorWi
   return 'setAppBadge' in navigator && 'clearAppBadge' in navigator;
 }
 
-export function useAppBadge(): { setAppBadge: (count?: number) => Promise<void>; clearAppBadge: () => Promise<void>; } {
+export function getAppBadge(): { setAppBadge: (count?: number) => Promise<void>; clearAppBadge: () => Promise<void>; } {
   if (isNavigatorWithAppBadge(navigator)) {
     return {
       setAppBadge: (count) => navigator.setAppBadge(count),
