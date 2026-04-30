@@ -10,8 +10,8 @@ import {
   Toolbar
 } from '@mui/material';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { useAppBadge } from '../hooks/useAppBadge';
-import { useClientBadge } from "../hooks/useClientBadge";
+import { getAppBadge } from '../hooks/getAppBadge';
+import { getClientBadge } from "../hooks/getClientBadge";
 import { useBookmark } from '../hooks/useBookmark';
 import { useHotKeys } from '../hooks/useHotKeys';
 import { useProactiveNovelCheck } from '../hooks/useProactiveNovelCheck';
@@ -54,7 +54,7 @@ const R18Switch = React.memo(R18SwitchRaw);
 
 function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUnauthorized: () => void }) {
   const [enableR18, setEnableR18] = useState(false);
-  const [maxPage, setMaxPage] = useState(maxPageValue(false));
+  const [maxPage, setMaxPage] = useState(() => maxPageValue(false));
 
   const [bookmark, setBookmark, bookmarks] = useBookmark(server, enableR18);
   const { data: rawItems, error } = useIsNoticeList(server, { isR18: enableR18, maxPage, bookmark });
@@ -71,8 +71,8 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   const [confirm, setConfirm] = useState<IsNoticeListItem | undefined>(undefined);
   const [waiting, setWaiting] = useState<IsNoticeListItem | undefined>(undefined);
 
-  const { setAppBadge, clearAppBadge } = useAppBadge();
-  const { setClientBadge, clearClientBadge } = useClientBadge();
+  const { setAppBadge, clearAppBadge } = getAppBadge();
+  const { setClientBadge, clearClientBadge } = getClientBadge();
 
   const userTopURL = enableR18 ? R18UserTopURL : UserTopURL;
 

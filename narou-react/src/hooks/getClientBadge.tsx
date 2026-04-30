@@ -6,7 +6,7 @@ function isNavigatorWithClientBadge(navigator: Navigator): navigator is Navigato
   return 'setClientBadge' in navigator && 'clearClientBadge' in navigator;
 }
 
-export function useClientBadge(): { setClientBadge: (count?: number) => Promise<void>; clearClientBadge: () => Promise<void>; } {
+export function getClientBadge(): { setClientBadge: (count?: number) => Promise<void>; clearClientBadge: () => Promise<void>; } {
   if (isNavigatorWithClientBadge(navigator)) {
     const n = navigator;
     return {
