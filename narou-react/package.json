@@ -61,7 +61,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-testing-library": "^7.16.2",
     "jest-environment-jsdom": "^30.3.0",
-    "jiti": "^2.6.1",
+    "jiti": "^2.7.0",
     "playwright": "^1.59.1",
     "typescript-eslint": "^8.59.2",
     "vitest": "^4.0.3",
