@@ -5,9 +5,15 @@ on:
     branches: [ main ]
     paths:
     - '**.go'
-    - 'go.sub'
+    - 'go.sum'
     - 'go.mod'
     - '.github/workflows/deploy-server.yml'
+
+# Least-privilege default for GITHUB_TOKEN; this workflow deploys over SSH and
+# needs no GitHub API write access.
+permissions:
+  contents: read
+
 jobs:
 
   build:
