@@ -2,5 +2,5 @@
 
 set -e
 cd narou-react
-yarn
-yarn test
+npm ci
+npm run test:ci
