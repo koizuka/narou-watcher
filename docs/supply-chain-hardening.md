@@ -4,7 +4,7 @@ A reusable checklist of supply-chain security measures, with notes on how this
 repository (`narou-watcher`) currently satisfies each item. It can be copied to
 other Go / TypeScript projects as a starting point.
 
-Legend: `[x]` done in this repo · `[ ]` not applicable or left to repo settings.
+Legend: `[x]` done · `[ ]` optional or not applicable.
 
 ## GitHub Actions
 
@@ -52,13 +52,17 @@ Legend: `[x]` done in this repo · `[ ]` not applicable or left to repo settings
 
 ## Repository configuration
 
+These live in GitHub repository settings rather than in tracked files.
+
 - [x] **`SECURITY.md`** documents private vulnerability reporting.
 - [x] **`CODEOWNERS`** designates review responsibility.
-- [ ] **Branch protection** (configured in GitHub settings, not in the repo):
-  require PR review, require status checks (`CI Summary`), and optionally require
-  Code Owner review.
-- [ ] **Enable GitHub Private Vulnerability Reporting** and the Dependabot /
-  secret-scanning alerts in repository settings.
+- [x] **Branch protection on `main`.** The `CI Summary` status check must pass
+  before merging (`strict` off; admins may bypass). Pull-request review is
+  intentionally *not* required: this is a single-maintainer repository, so
+  requiring approvals would block the maintainer's own and Dependabot PRs.
+- [x] **Dependabot alerts and security updates** are enabled.
+- [x] **Secret scanning and push protection** are enabled.
+- [x] **GitHub Private Vulnerability Reporting** is enabled.
 
 ## Verifying locally
 
