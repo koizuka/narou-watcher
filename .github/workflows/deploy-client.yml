@@ -33,7 +33,9 @@ jobs:
         with:
           node-version-file: narou-react/.nvmrc
           cache: "npm"
-          cache-dependency-path: "narou-react/package-lock.json"
+          cache-dependency-path: |
+            narou-react/package-lock.json
+            narou-react/.nvmrc
 
       - name: Install
         run: npm ci
