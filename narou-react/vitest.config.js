@@ -9,6 +9,16 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["src/setupTests.ts"],
 
+    // MUI 9.1.0+ has Transition.mjs do a directory import of
+    // react-transition-group/TransitionGroupContext. react-transition-group has
+    // no `exports` field, so Node's native ESM loader can't resolve that
+    // directory import. Inline @mui/material so Vite resolves it instead.
+    server: {
+      deps: {
+        inline: ["@mui/material"],
+      },
+    },
+
     // Browser mode configuration for visual regression tests
     browser: {
       enabled: process.env.BROWSER_TEST === "true",
