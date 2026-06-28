@@ -18,7 +18,7 @@ type UserTopInfo struct {
 }
 
 func ParseUserTop(page *scraper.Page) (*UserTopInfo, error) {
-	const wantTitle = "ホーム｜ユーザページ"
+	const wantTitle = "ユーザホーム | ユーザページ | 小説家になろう"
 	title := page.Find("title").Text()
 	if title != wantTitle {
 		return nil, TitleMismatchError{title, wantTitle}
