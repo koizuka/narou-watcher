@@ -598,9 +598,8 @@ func isNoticeListHandler(url string, wantTitle string) NarouApiHandlerType {
 // リクエストクエリに token があればそれを使い、無ければユーザートップページを
 // 取得してトークンを抽出し、レスポンスヘッダにも反映する。
 func resolveUserTopApiURL(w http.Header, r *http.Request, watcher *narou.NarouWatcher, URL string) (string, error) {
-	query := r.URL.Query()
-	token, ok := query["token"]
-	if !ok {
+	token := r.URL.Query().Get("token")
+	if token == "" {
 		page, err := watcher.GetPage(narou.UserTopURL)
 		if err != nil {
 			return "", err
@@ -609,15 +608,15 @@ func resolveUserTopApiURL(w http.Header, r *http.Request, watcher *narou.NarouWa
 		if err != nil {
 			return "", err
 		}
-		token = []string{info.Logout.Token}
-		w.Set("token", token[0])
+		token = info.Logout.Token
+		w.Set("token", token)
 	}
 	u, err := url.Parse(URL)
 	if err != nil {
 		return "", err
 	}
 	q := u.Query()
-	q.Add("token", token[0])
+	q.Set("token", token)
 	u.RawQuery = q.Encode()
 	return u.String(), nil
 }

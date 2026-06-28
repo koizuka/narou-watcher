@@ -24,7 +24,7 @@ func ParseUserTopApiJson(JSON string) (*UserTopApiResult, error) {
 	var info UserTopApiResult
 	err := json.Unmarshal([]byte(JSON), &info)
 	if err != nil {
-		return nil, fmt.Errorf("ParseFavuserUpdatesJson: json.Unmarshal error %v", err)
+		return nil, fmt.Errorf("ParseUserTopApiJson: json.Unmarshal error %w", err)
 	}
 	return &info, nil
 }
