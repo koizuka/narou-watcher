@@ -152,3 +152,15 @@ func testDataFavUserUpdatesHandler(provider *narou.TestDataProvider) NarouApiHan
 		return ReturnJson(w, result)
 	}
 }
+
+// testDataNotificationHandler returns test data for the user top notification endpoint
+func testDataNotificationHandler(provider *narou.TestDataProvider) NarouApiHandlerType {
+	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+		info, err := provider.GetFavUserUpdates()
+		if err != nil {
+			return nil, err
+		}
+
+		return ReturnJson(w, newUserTopNotificationRecord(info))
+	}
+}

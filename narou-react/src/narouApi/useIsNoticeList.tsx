@@ -22,6 +22,7 @@ export function clearCache() {
   void mutate('/r18/isnoticelist');
   void mutate('/narou/bookmarks/');
   void mutate('/r18/bookmarks/');
+  void mutate(NarouApi.notification());
 }
 
 export function useIsNoticeList(

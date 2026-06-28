@@ -160,13 +160,18 @@ func GetIsNoticeList(watcher *narou.NarouWatcher, url string, wantTitle string, 
 	return result, nil
 }
 
-func GetFavUserUpdates(watcher *narou.NarouWatcher, URL string) (*model.FavUserUpdatesRecord, error) {
+// fetchUserTopApiResult はユーザートップ async API (JSONP) を取得してパースする。
+// fav-user-updates と notification の両ハンドラが共有する。
+func fetchUserTopApiResult(watcher *narou.NarouWatcher, URL string) (*narou.UserTopApiResult, error) {
 	j, err := watcher.GetJSONP(URL, "func")
 	if err != nil {
 		return nil, err
 	}
+	return narou.ParseUserTopApiJson(j)
+}
 
-	info, err := narou.ParseUserTopApiJson(j)
+func GetFavUserUpdates(watcher *narou.NarouWatcher, URL string) (*model.FavUserUpdatesRecord, error) {
+	info, err := fetchUserTopApiResult(watcher, URL)
 	if err != nil {
 		return nil, err
 	}
@@ -194,6 +199,24 @@ func GetFavUserUpdates(watcher *narou.NarouWatcher, URL string) (*model.FavUserU
 	}
 
 	return result, nil
+}
+
+// newUserTopNotificationRecord は usertop API 結果の news から通知レコードを組み立てる。
+// 本番(GetUserTopNotification)とテストデータ(testDataNotificationHandler)で共有する。
+func newUserTopNotificationRecord(info *narou.UserTopApiResult) *model.UserTopNotificationRecord {
+	hasNotification, count := narou.ParseUserTopNews(info.NewsHTML)
+	return &model.UserTopNotificationRecord{
+		HasNotification: hasNotification,
+		Count:           count,
+	}
+}
+
+func GetUserTopNotification(watcher *narou.NarouWatcher, URL string) (*model.UserTopNotificationRecord, error) {
+	info, err := fetchUserTopApiResult(watcher, URL)
+	if err != nil {
+		return nil, err
+	}
+	return newUserTopNotificationRecord(info), nil
 }
 
 func parseURLForCookie(url *url.URL) (isHttps bool, cookiePath string) {
@@ -570,30 +593,56 @@ func isNoticeListHandler(url string, wantTitle string) NarouApiHandlerType {
 	}
 }
 
+// resolveUserTopApiURL はユーザートップ async API のトークンを解決し、
+// URL にトークンクエリを付与した文字列を返す。
+// リクエストクエリに token があればそれを使い、無ければユーザートップページを
+// 取得してトークンを抽出し、レスポンスヘッダにも反映する。
+func resolveUserTopApiURL(w http.Header, r *http.Request, watcher *narou.NarouWatcher, URL string) (string, error) {
+	query := r.URL.Query()
+	token, ok := query["token"]
+	if !ok {
+		page, err := watcher.GetPage(narou.UserTopURL)
+		if err != nil {
+			return "", err
+		}
+		info, err := narou.ParseUserTop(page)
+		if err != nil {
+			return "", err
+		}
+		token = []string{info.Logout.Token}
+		w.Set("token", token[0])
+	}
+	u, err := url.Parse(URL)
+	if err != nil {
+		return "", err
+	}
+	q := u.Query()
+	q.Add("token", token[0])
+	u.RawQuery = q.Encode()
+	return u.String(), nil
+}
+
 func favUserUpdatesHandler(URL string) NarouApiHandlerType {
 	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
-		query := r.URL.Query()
-		token, ok := query["token"]
-		if !ok {
-			page, err := watcher.GetPage(narou.UserTopURL)
-			if err != nil {
-				return nil, err
-			}
-			info, err := narou.ParseUserTop(page)
-			if err != nil {
-				return nil, err
-			}
-			token = []string{info.Logout.Token}
-			w.Set("token", token[0])
-		}
-		u, err := url.Parse(URL)
+		apiURL, err := resolveUserTopApiURL(w, r, watcher, URL)
 		if err != nil {
 			return nil, err
 		}
-		q := u.Query()
-		q.Add("token", token[0])
-		u.RawQuery = q.Encode()
-		result, err := GetFavUserUpdates(watcher, u.String())
+		result, err := GetFavUserUpdates(watcher, apiURL)
+		if err != nil {
+			return nil, err
+		}
+		return ReturnJson(w, result)
+	}
+}
+
+func notificationHandler(URL string) NarouApiHandlerType {
+	return func(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+		apiURL, err := resolveUserTopApiURL(w, r, watcher, URL)
+		if err != nil {
+			return nil, err
+		}
+		result, err := GetUserTopNotification(watcher, apiURL)
 		if err != nil {
 			return nil, err
 		}
@@ -810,10 +859,12 @@ func main() {
 		setHandler("/narou/isnoticelist", testDataIsNoticeListHandler(testDataProvider))
 		setHandler("/r18/isnoticelist", testDataIsNoticeListHandler(testDataProvider))
 		setHandler("/narou/fav-user-updates", testDataFavUserUpdatesHandler(testDataProvider))
+		setHandler("/narou/notification", testDataNotificationHandler(testDataProvider))
 	} else {
 		setHandler("/narou/isnoticelist", isNoticeListHandler(narou.IsNoticeListURL, narou.IsNoticeListTitle))
 		setHandler("/r18/isnoticelist", isNoticeListHandler(narou.IsNoticeListR18URL, narou.IsNoticeListR18Title))
 		setHandler("/narou/fav-user-updates", favUserUpdatesHandler(narou.UserTopApiURL))
+		setHandler("/narou/notification", notificationHandler(narou.UserTopApiURL))
 	}
 
 	setHandler("/narou/login", NarouLoginHandler)

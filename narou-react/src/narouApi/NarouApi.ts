@@ -85,4 +85,8 @@ export class NarouApi {
         const prefix = r18 ? '/r18' : '/narou';
         return `${prefix}/check-novel-access/${ncode}/${episode}`;
     }
+
+    static notification(): NarouApiCallKey {
+        return `/narou/notification`;
+    }
 }
