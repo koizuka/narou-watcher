@@ -1,6 +1,6 @@
 module narou-watcher
 
-go 1.26.0
+go 1.26.4
 
 require (
 	github.com/PuerkitoBio/goquery v1.12.0
@@ -23,8 +23,8 @@ require (
 	github.com/gobwas/ws v1.4.0 // indirect
 	github.com/orirawlings/persistent-cookiejar v0.3.2 // indirect
 	go4.org v0.0.0-20201209231011-d4a079459e60 // indirect
-	golang.org/x/net v0.52.0 // indirect
-	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	gopkg.in/retry.v1 v1.0.3 // indirect
 )
