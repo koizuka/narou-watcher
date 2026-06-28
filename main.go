@@ -612,7 +612,7 @@ func resolveUserTopApiURL(w http.Header, r *http.Request, watcher *narou.NarouWa
 		if err != nil {
 			return "", err
 		}
-		token = info.Logout.Token
+		token = info.Token
 		w.Set("token", token)
 	}
 	u, err := url.Parse(URL)

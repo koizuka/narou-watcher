@@ -168,12 +168,8 @@ func (narou *NarouWatcher) Logout() error {
 	if err != nil {
 		return err
 	}
-	form := &scraper.Form{
-		Action: info.Logout.URL,
-		Method: "post",
-	}
-	_ = form.Set("token", info.Logout.Token)
-	_, err = narou.session.Submit(form)
+	// 現行デザインのログアウトはトークン無しの GET リンク。
+	_, err = narou.session.GetPage(info.LogoutURL)
 	if err != nil {
 		return err
 	}
