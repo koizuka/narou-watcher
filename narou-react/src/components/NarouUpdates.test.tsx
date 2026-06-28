@@ -28,6 +28,7 @@ function setup() {
 		} as unknown as NarouApi;
 	})
 	NarouApi.isnoticelist = vi.fn(() => 'isnoticelist');
+	NarouApi.notification = vi.fn(() => '/narou/notification');
 	NarouApi.checkNovelAccess = vi.fn((ncode: string, episode: number, r18: boolean) =>
 		`${r18 ? '/r18' : '/narou'}/check-novel-access/${ncode}/${episode}`
 	);
@@ -97,6 +98,72 @@ test('empty', async () => {
 	// TODO
 });
 
+test('shows notification badge on user home button when has_notification is true', async () => {
+	const { mockCall, api } = setup();
+	mockCall.mockImplementation((key: string) => {
+		if (key === 'isnoticelist') {
+			return Promise.resolve([]);
+		}
+		if (key === '/narou/notification') {
+			return Promise.resolve({ has_notification: true, count: 1 });
+		}
+		return Promise.reject(new Error(`Unexpected API call: ${key}`));
+	});
+
+	let container: HTMLElement = document.createElement('div');
+	await act(async () => {
+		container = render(
+			<ThemeProvider theme={theme}>
+				<SWRConfig value={{ provider: () => new Map() }}>
+					<NarouUpdates api={api} />
+				</SWRConfig>
+			</ThemeProvider>
+		).container;
+		return Promise.resolve();
+	});
+
+	// variant="dot" のバッジは通知ボタン専用なので一意に取得できる
+	await waitFor(() => {
+		const dot = container.querySelector('.MuiBadge-dot');
+		expect(dot).toBeTruthy();
+		expect(dot?.classList.contains('MuiBadge-invisible')).toBe(false);
+	});
+});
+
+test('hides notification badge on user home button when has_notification is false', async () => {
+	const { mockCall, api } = setup();
+	mockCall.mockImplementation((key: string) => {
+		if (key === 'isnoticelist') {
+			return Promise.resolve([]);
+		}
+		if (key === '/narou/notification') {
+			return Promise.resolve({ has_notification: false, count: 0 });
+		}
+		return Promise.reject(new Error(`Unexpected API call: ${key}`));
+	});
+
+	let container: HTMLElement = document.createElement('div');
+	await act(async () => {
+		container = render(
+			<ThemeProvider theme={theme}>
+				<SWRConfig value={{ provider: () => new Map() }}>
+					<NarouUpdates api={api} />
+				</SWRConfig>
+			</ThemeProvider>
+		).container;
+		return Promise.resolve();
+	});
+
+	// notification を取得した後もバッジは invisible のまま
+	await waitFor(() => {
+		const calls = mockCall.mock.calls;
+		expect(calls.some(call => call[0] === '/narou/notification')).toBe(true);
+	});
+	const dot = container.querySelector('.MuiBadge-dot');
+	expect(dot).toBeTruthy();
+	expect(dot?.classList.contains('MuiBadge-invisible')).toBe(true);
+});
+
 test('proactively checks first beware novel accessibility', async () => {
 	const { mockCall, api } = setup();
 
@@ -131,6 +198,9 @@ test('proactively checks first beware novel accessibility', async () => {
 	mockCall.mockImplementation((key: string) => {
 		if (key === 'isnoticelist') {
 			return Promise.resolve(mockItems);
+		}
+		if (key === '/narou/notification') {
+			return Promise.resolve({ has_notification: false, count: 0 });
 		}
 		// Proactive check for the first beware novel
 		if (key === '/narou/check-novel-access/n1111aa/6') {
@@ -179,6 +249,9 @@ test('does not check if no beware novels exist', async () => {
 	mockCall.mockImplementation((key: string) => {
 		if (key === 'isnoticelist') {
 			return Promise.resolve(mockItems);
+		}
+		if (key === '/narou/notification') {
+			return Promise.resolve({ has_notification: false, count: 0 });
 		}
 		return Promise.reject(new Error(`Unexpected API call: ${key}`));
 	});

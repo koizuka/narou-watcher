@@ -326,5 +326,6 @@ func (t *TestDataProvider) GetFavUserUpdates() (*UserTopApiResult, error) {
 		R18PassiveCount: 1,
 		BlogListHTML:    "<h3>活動報告</h3><ul><li><a href='#'>テスト活動報告</a> by <a href='#'>テスト作者A</a></li></ul>",
 		NovelListHTML:   fmt.Sprintf("<h3>お気に入りユーザの更新</h3><div id='fanusernovel_list'><div id='fanusernovel_title'><a href='#'>更新したばかりのお気に入りユーザ作品</a></div><div id='fanusernovel_type'><div id='fanusernovel_info'>%s</div><a href='#'>テスト作者A</a></div></div>", t.startTime.Format("01月02日 15時04分")),
+		NewsHTML:        "<div class=\"p-up-home-notification__item\"><a href=\"/ranknovel18log/search/\">R18作品がランクインしました</a></div>",
 	}, nil
 }

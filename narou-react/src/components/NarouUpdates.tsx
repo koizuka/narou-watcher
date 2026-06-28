@@ -1,6 +1,7 @@
 import {
   AppBar,
   Backdrop,
+  Badge,
   Box,
   Button,
   CircularProgress,
@@ -18,6 +19,7 @@ import { useProactiveNovelCheck } from '../hooks/useProactiveNovelCheck';
 import { IsNoticeListItem } from "../narouApi/IsNoticeListItem";
 import { NarouApi } from '../narouApi/NarouApi';
 import { clearCache, useIsNoticeList } from '../narouApi/useIsNoticeList';
+import { useNotification } from '../narouApi/useNotification';
 import { BEWARE_TIME, InitialItemsState, itemsStateReducer, SelectCommand } from '../reducer/ItemsState';
 import { AutoLinkText } from './AutoLinkText';
 import { BookmarkSelector } from './BookmarkSelector';
@@ -75,6 +77,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   const { setClientBadge, clearClientBadge } = getClientBadge();
 
   const userTopURL = enableR18 ? R18UserTopURL : UserTopURL;
+  const { hasNotification } = useNotification(server);
 
   useEffect(() => {
     if (numNewItems !== null) {
@@ -188,13 +191,26 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
         />
       </Box>
       <Box sx={{ position: 'fixed', right: '20px', bottom: '20px' }}>
-        <Fab
-          variant="extended"
-          size="small"
-          component="a"
-          href={userTopURL}
-          target="_blank"
-        >{enableR18 ? R18UserTopName : UserTopName}</Fab>
+        <Badge
+          color="error"
+          variant="dot"
+          invisible={!hasNotification}
+          sx={{
+            '& .MuiBadge-badge': {
+              transform: 'translate(-25%, 25%)',
+              zIndex: (theme) => theme.zIndex.fab + 1,
+            },
+          }}
+        >
+          <Fab
+            variant="extended"
+            size="small"
+            component="a"
+            href={userTopURL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >{enableR18 ? R18UserTopName : UserTopName}</Fab>
+        </Badge>
       </Box>
     </Box>
   </>;
