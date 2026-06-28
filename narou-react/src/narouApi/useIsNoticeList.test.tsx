@@ -10,6 +10,7 @@ describe('isClearableCacheKey', () => {
     '/r18/bookmarks/1?order=new',
     // クエリ無しのキー
     '/narou/isnoticelist',
+    '/r18/isnoticelist',
     '/narou/bookmarks/',
     '/r18/bookmarks/',
     '/narou/notification',

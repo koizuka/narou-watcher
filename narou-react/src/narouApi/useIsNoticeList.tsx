@@ -29,9 +29,12 @@ export function isClearableCacheKey(key: unknown): boolean {
   );
 }
 
-// login / logout したらキャッシュをすぐに消す
+// login / logout したらキャッシュをすぐに消す。
+// revalidate: false でキャッシュ値を undefined に更新するだけ(再検証はしない)。
+// logout 直後はログイン画面に遷移し、login 後は画面が再マウントして取得し直すため、
+// ここで再検証すると logout 中に不要な 401 リクエストが走ってしまう。
 export function clearCache() {
-  void mutate(isClearableCacheKey);
+  void mutate(isClearableCacheKey, undefined, { revalidate: false });
 }
 
 export function useIsNoticeList(
