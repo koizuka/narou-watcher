@@ -5,15 +5,23 @@ import (
 	"testing"
 )
 
-// TestParseUserTop は、ユーザートップページのタイトル検証とトークン抽出を固定する。
-// なろうがページタイトルを変更すると token 取得経路(notification / fav-user-updates)が
-// 500 になるため、現行タイトルを回帰テストとして固定しておく。
+// TestParseUserTop は、ユーザートップページのタイトル検証・トークン抽出・
+// ログアウトURL抽出を固定する。
+// なろうがページタイトルや構造を変更すると token 取得経路
+// (notification / fav-user-updates) やログアウトが壊れるため、現行構造を
+// 回帰テストとして固定しておく。トークンは旧デザインの a#logout[data-token] から
+// インラインスクリプトの var usertop_url = "...?token=XXX" へ移動した。
 func TestParseUserTop(t *testing.T) {
 	const wantTitle = "ユーザホーム | ユーザページ | 小説家になろう"
 
-	t.Run("正常: 現行タイトルでトークンを抽出", func(t *testing.T) {
+	t.Run("正常: スクリプトからトークン、リンクからログアウトURLを抽出", func(t *testing.T) {
 		html := `<html><head><title>` + wantTitle + `</title></head>` +
-			`<body><div id="header"><a id="logout" href="/logout/?token=abc123" data-token="abc123">ログアウト</a></div></body></html>`
+			`<body>` +
+			`<li><a href="https://syosetu.com/login/logout/"><span class="p-icon p-icon--logout"></span>ログアウト</a></li>` +
+			`<script>` + "\n" +
+			`var usertop_url = "https://api.syosetu.com/async/usertop/?token=abc123";` + "\n" +
+			`</script>` +
+			`</body></html>`
 		page, err := NewPageFromText(html)
 		if err != nil {
 			t.Fatalf("NewPageFromText error: %v", err)
@@ -22,8 +30,11 @@ func TestParseUserTop(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ParseUserTop error: %v", err)
 		}
-		if info.Logout.Token != "abc123" {
-			t.Errorf("Token = %q, want %q", info.Logout.Token, "abc123")
+		if info.Token != "abc123" {
+			t.Errorf("Token = %q, want %q", info.Token, "abc123")
+		}
+		if info.LogoutURL != "https://syosetu.com/login/logout/" {
+			t.Errorf("LogoutURL = %q, want %q", info.LogoutURL, "https://syosetu.com/login/logout/")
 		}
 	})
 
@@ -37,6 +48,18 @@ func TestParseUserTop(t *testing.T) {
 		wantErr := TitleMismatchError{"ホーム｜ユーザページ", wantTitle}
 		if !reflect.DeepEqual(err, wantErr) {
 			t.Errorf("error = %v, want %v", err, wantErr)
+		}
+	})
+
+	t.Run("トークンが無ければエラー", func(t *testing.T) {
+		html := `<html><head><title>` + wantTitle + `</title></head>` +
+			`<body><a href="https://syosetu.com/login/logout/">ログアウト</a></body></html>`
+		page, err := NewPageFromText(html)
+		if err != nil {
+			t.Fatalf("NewPageFromText error: %v", err)
+		}
+		if _, err := ParseUserTop(page); err == nil {
+			t.Error("expected error when token is missing, got nil")
 		}
 	})
 }

@@ -1,6 +1,9 @@
 package narou
 
 import (
+	"fmt"
+	"regexp"
+
 	"github.com/koizuka/scraper"
 )
 
@@ -8,14 +11,22 @@ const (
 	UserTopURL = "https://syosetu.com/user/top/"
 )
 
-type LogoutInfo struct {
-	URL   string `attr:"href"`
-	Token string `attr:"data-token"`
+type UserTopInfo struct {
+	// Token はユーザートップのインラインスクリプトに埋め込まれた
+	// async API 用トークン。
+	Token string
+	// LogoutURL はログアウトリンクの URL。
+	LogoutURL string
 }
 
-type UserTopInfo struct {
-	Logout LogoutInfo `find:"div#header a#logout"`
-}
+// usertopTokenRe はユーザートップページのインラインスクリプトに埋め込まれた
+// async API URL からトークンを抽出する。
+//
+//	var usertop_url = "https://api.syosetu.com/async/usertop/?token=XXXX";
+//
+// 旧デザインでは a#logout の data-token 属性にトークンがあったが、
+// 現行デザインではこのスクリプト変数に移動している。
+var usertopTokenRe = regexp.MustCompile(`usertop_url\s*=\s*"[^"]*[?&]token=([^"&]+)`)
 
 func ParseUserTop(page *scraper.Page) (*UserTopInfo, error) {
 	const wantTitle = "ユーザホーム | ユーザページ | 小説家になろう"
@@ -24,11 +35,15 @@ func ParseUserTop(page *scraper.Page) (*UserTopInfo, error) {
 		return nil, TitleMismatchError{title, wantTitle}
 	}
 
-	var userTopInfo UserTopInfo
-	err := scraper.Unmarshal(&userTopInfo, page.Find("body"), scraper.UnmarshalOption{})
-	if err != nil {
-		return nil, UnmarshalError{err}
+	m := usertopTokenRe.FindStringSubmatch(page.Find("script").Text())
+	if len(m) < 2 {
+		return nil, fmt.Errorf("ParseUserTop: token not found in usertop_url script")
 	}
 
-	return &userTopInfo, nil
+	logoutURL, ok := page.Find("a[href*='/login/logout/']").Attr("href")
+	if !ok {
+		return nil, fmt.Errorf("ParseUserTop: logout link not found")
+	}
+
+	return &UserTopInfo{Token: m[1], LogoutURL: logoutURL}, nil
 }
