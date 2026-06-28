@@ -1,6 +1,45 @@
 package narou
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
+
+// TestParseUserTop は、ユーザートップページのタイトル検証とトークン抽出を固定する。
+// なろうがページタイトルを変更すると token 取得経路(notification / fav-user-updates)が
+// 500 になるため、現行タイトルを回帰テストとして固定しておく。
+func TestParseUserTop(t *testing.T) {
+	const wantTitle = "ユーザホーム | ユーザページ | 小説家になろう"
+
+	t.Run("正常: 現行タイトルでトークンを抽出", func(t *testing.T) {
+		html := `<html><head><title>` + wantTitle + `</title></head>` +
+			`<body><div id="header"><a id="logout" href="/logout/?token=abc123" data-token="abc123">ログアウト</a></div></body></html>`
+		page, err := NewPageFromText(html)
+		if err != nil {
+			t.Fatalf("NewPageFromText error: %v", err)
+		}
+		info, err := ParseUserTop(page)
+		if err != nil {
+			t.Fatalf("ParseUserTop error: %v", err)
+		}
+		if info.Logout.Token != "abc123" {
+			t.Errorf("Token = %q, want %q", info.Logout.Token, "abc123")
+		}
+	})
+
+	t.Run("タイトル不一致はエラー", func(t *testing.T) {
+		html := `<html><head><title>ホーム｜ユーザページ</title></head><body></body></html>`
+		page, err := NewPageFromText(html)
+		if err != nil {
+			t.Fatalf("NewPageFromText error: %v", err)
+		}
+		_, err = ParseUserTop(page)
+		wantErr := TitleMismatchError{"ホーム｜ユーザページ", wantTitle}
+		if !reflect.DeepEqual(err, wantErr) {
+			t.Errorf("error = %v, want %v", err, wantErr)
+		}
+	})
+}
 
 func TestParseUserTopNews(t *testing.T) {
 	tests := []struct {
