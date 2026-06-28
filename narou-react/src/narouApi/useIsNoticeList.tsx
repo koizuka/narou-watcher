@@ -16,13 +16,22 @@ interface IsNoticeListRecord {
   is_notice?: boolean; // only in bookmark
 }
 
+// login / logout 時に無効化するキャッシュキーか判定する。
+// SWR の実キーはクエリ文字列付き(例: `/narou/isnoticelist?max_page=1`,
+// `/narou/bookmarks/3?order=updated_at`)のため、完全一致ではなくプレフィックスで判定する。
+export function isClearableCacheKey(key: unknown): boolean {
+  return typeof key === 'string' && (
+    key.startsWith('/narou/isnoticelist') ||
+    key.startsWith('/r18/isnoticelist') ||
+    key.startsWith('/narou/bookmarks/') ||
+    key.startsWith('/r18/bookmarks/') ||
+    key === NarouApi.notification()
+  );
+}
+
 // login / logout したらキャッシュをすぐに消す
 export function clearCache() {
-  void mutate('/narou/isnoticelist');
-  void mutate('/r18/isnoticelist');
-  void mutate('/narou/bookmarks/');
-  void mutate('/r18/bookmarks/');
-  void mutate(NarouApi.notification());
+  void mutate(isClearableCacheKey);
 }
 
 export function useIsNoticeList(
