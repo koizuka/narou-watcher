@@ -276,6 +276,10 @@ func (e BadRequestError) Error() string {
 
 func (apiService *NarouApiService) HandlerFunc(handler NarouApiHandlerType) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// API レスポンスは動的データなので、ブラウザ・中間キャッシュに保持させない。
+		// 全 API エンドポイント共通の経路でまとめて設定する。
+		SetNoCacheHeaders(w.Header())
+
 		watcher, err := narou.NewNarouWatcher(narou.Options{
 			SessionName: apiService.sessionName,
 			FilePrefix:  apiService.logDir + "/",
@@ -697,7 +701,6 @@ func checkNovelAccessHandler(baseUrl string, r18 bool) NarouApiHandlerType {
 			StatusCode: resp.StatusCode,
 		}
 
-		SetNoCacheHeaders(w)
 		return ReturnJson(w, result)
 	}
 }
