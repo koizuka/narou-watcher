@@ -208,6 +208,7 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
             component="a"
             href={userTopURL}
             target="_blank"
+            rel="noopener noreferrer"
           >{enableR18 ? R18UserTopName : UserTopName}</Fab>
         </Badge>
       </Box>
