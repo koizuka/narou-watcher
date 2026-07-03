@@ -51,11 +51,11 @@
 
 #### API
 
-- `POST /login`
+- `POST /narou/login`
   - form post形式で、 `id` にIDまたはメールアドレス、`password` にパスワードを入れて POSTすると、「小説家になろう」にログインを試みます。
     - 成功したら HTTP status=200, レスポンスボディは true を返すとともに、セッションキーをクッキーで返します(後述)。このため、ログイン情報はサーバーに保持せず、ユーザーのブラウザに覚えさせます。
     - 失敗したら HTTP status=401 を返します。
-- `GET /logout`
+- `GET /narou/logout`
   - 「小説家になろう」からログアウトし、こちらのセッションクッキーも削除します。
 - `GET /narou/isnoticelist` `GET /r18/isnoticelist`
   - ログイン状態でなければ HTTP status=401 を返します。
@@ -142,6 +142,14 @@
 | blog_list_html   | string | WIP(現在はHTML) |
 | novel_list_html  | string | WIP(現在はHTML) |
 | passive_count    | int    | 不明           |
+
+- `GET /narou/notification`
+  - ユーザートップの「新着通知」の有無と件数を返す。中身はユーザー自身がユーザーホームを開いて確認する想定。
+
+| key              | type    | 説明        |
+|------------------|---------|-----------|
+| has_notification | boolean | 新着通知があればtrue |
+| count            | int     | 通知件数      |
 
 - `GET /narou/check-novel-access/:ncode/:episode` `GET /r18/check-novel-access/:ncode/:episode`
   - 指定した小説の特定エピソードにアクセス可能かどうかを確認する（ログイン不要）
@@ -233,13 +241,15 @@ npm run start
 
 #### 技術スタック
 
-- React 19.2.0
-- TypeScript 5.9.3
-- Vite 7.1.11 (ビルドツール)
-- Material-UI 7.1.0
-- Vitest 4.0.3 (テスト)
-- SWR 2.3.6 (データフェッチ)
-- date-fns 4.1.0 (日時処理)
+バージョンは `narou-react/package.json` を参照してください。
+
+- React
+- TypeScript
+- Vite (ビルドツール)
+- Material-UI
+- Vitest (テスト)
+- SWR (データフェッチ)
+- date-fns (日時処理)
 
 #### その他のコマンド
 

@@ -17,7 +17,7 @@ Description: create a pull request
 
 1. **プリチェック(現在のブランチで実行)**:
    - Go: プロジェクトルートで `go fmt ./...` `go vet ./...` `go test ./...` `go build` を並列実行
-   - Frontend: narou-reactディレクトリに移動してから `npm run lint` `npm test:ci` `npm run build` を並列実行
+   - Frontend: narou-reactディレクトリに移動してから `npm run lint` `npm run test:ci` `npm run build` を並列実行
 
    ※エラーがあった場合のみ、ユーザーに報告して中断してください。
 
