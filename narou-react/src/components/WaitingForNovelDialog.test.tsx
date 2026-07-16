@@ -220,8 +220,10 @@ describe('WaitingForNovelDialog', () => {
 
     // Wait for error to be handled
     await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('Failed to check novel access:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledTimes(1);
     });
+    expect(consoleSpy.mock.calls[0][0]).toBe('Failed to check novel access:');
+    expect(consoleSpy.mock.calls[0][1]).toBeInstanceOf(Error);
 
     // Should not crash and should show retry options
     expect(screen.getByTestId('manual-retry-button')).toBeInTheDocument();
