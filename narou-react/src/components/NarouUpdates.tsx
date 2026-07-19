@@ -77,7 +77,8 @@ function NarouUpdateScreen({ server, onUnauthorized }: { server: NarouApi, onUna
   const { setClientBadge, clearClientBadge } = getClientBadge();
 
   const userTopURL = enableR18 ? R18UserTopURL : UserTopURL;
-  const { hasNotification } = useNotification(server);
+  // 一覧の取得が終わるまで通知の取得を始めない(起動時の同時接続数を抑える)
+  const { hasNotification } = useNotification(server, rawItems !== undefined);
 
   useEffect(() => {
     if (numNewItems !== null) {
