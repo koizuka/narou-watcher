@@ -7,9 +7,10 @@ import { NarouApi } from '../narouApi/NarouApi';
 import { WaitingForNovelDialog } from './WaitingForNovelDialog';
 
 // Mock window.open
+const mockWindowOpen = vi.fn();
 Object.defineProperty(window, 'open', {
   writable: true,
-  value: vi.fn(),
+  value: mockWindowOpen,
 });
 
 // Don't mock the entire module, we need the static methods
@@ -138,7 +139,7 @@ describe('WaitingForNovelDialog', () => {
     // Wait for the API call and window.open to be called
     await waitFor(() => {
       expect(mockCall).toHaveBeenCalledExactlyOnceWith('/narou/check-novel-access/n1234aa/6');
-      expect(window.open).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
+      expect(mockWindowOpen).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
       expect(mockOnClose).toHaveBeenCalled();
     });
   });
@@ -173,7 +174,7 @@ describe('WaitingForNovelDialog', () => {
       expect(mockCall).toHaveBeenCalledTimes(2);
       expect(mockCall).toHaveBeenNthCalledWith(1, '/narou/check-novel-access/n1234aa/6');
       expect(mockCall).toHaveBeenNthCalledWith(2, '/narou/check-novel-access/n1234aa/6');
-      expect(window.open).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
+      expect(mockWindowOpen).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
       expect(mockOnClose).toHaveBeenCalled();
     });
   });
@@ -199,7 +200,7 @@ describe('WaitingForNovelDialog', () => {
     const openAnywayButton = screen.getByTestId('open-anyway-button');
     await user.click(openAnywayButton);
 
-    expect(window.open).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
+    expect(mockWindowOpen).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
     expect(mockOnClose).toHaveBeenCalled();
   });
 
@@ -251,7 +252,7 @@ describe('WaitingForNovelDialog', () => {
     // Should try to access episode 1 (bookmark + 1)
     await waitFor(() => {
       expect(mockCall).toHaveBeenCalledExactlyOnceWith('/narou/check-novel-access/n1234aa/1');
-      expect(window.open).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/1/', '_blank');
+      expect(mockWindowOpen).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/1/', '_blank');
       expect(mockOnClose).toHaveBeenCalled();
     });
   });
@@ -275,7 +276,7 @@ describe('WaitingForNovelDialog', () => {
     // Should use R18 endpoint and open novel
     await waitFor(() => {
       expect(mockCall).toHaveBeenCalledExactlyOnceWith('/r18/check-novel-access/n1234aa/6');
-      expect(window.open).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
+      expect(mockWindowOpen).toHaveBeenCalledExactlyOnceWith('https://ncode.syosetu.com/n1234aa/6/', '_blank');
       expect(mockOnClose).toHaveBeenCalled();
     });
   });
