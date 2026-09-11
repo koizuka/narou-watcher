@@ -188,6 +188,7 @@ jobs:
           path: |
             narou-react/src/**/__screenshots__/**/*-diff.png
             narou-react/src/**/__screenshots__/**/*-actual.png
+            narou-react/.vitest/attachments/**
           retention-days: 7
 
       - name: Update Visual Snapshots (PR with changes)
