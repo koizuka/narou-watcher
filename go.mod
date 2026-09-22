@@ -5,7 +5,7 @@ go 1.26.4
 require (
 	github.com/PuerkitoBio/goquery v1.13.0
 	github.com/google/go-cmp v0.7.0
-	github.com/koizuka/scraper v0.0.60
+	github.com/koizuka/scraper v0.0.61
 	github.com/rs/cors v1.11.1
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 )
