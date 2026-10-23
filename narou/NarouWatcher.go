@@ -24,6 +24,15 @@ func (e LoginError) Error() string {
 	return fmt.Sprintf("login Error: %v", e.LoginErrorMessage)
 }
 
+// TwoStepAuthRequired はログインに二段階認証コードが必要なことを表す。
+type TwoStepAuthRequired struct {
+	Token string
+}
+
+func (e TwoStepAuthRequired) Error() string {
+	return "login Error: two-step authentication required"
+}
+
 type Options struct {
 	SessionName         string
 	FilePrefix          string
@@ -99,6 +108,20 @@ func isNarouLoginPage(page *scraper.Page) bool {
 	return forms.Length() > 0
 }
 
+const NarouTOTPFormSelector = "form[action*='/user2stepauth/totpauth/']"
+
+var twoStepAuthTokenPattern = regexp.MustCompile(`^[A-Za-z0-9]+$`)
+var twoStepAuthPathPattern = regexp.MustCompile(`^/user2stepauth/[^/]+/authtoken/([A-Za-z0-9]+)/`)
+
+// twoStepAuthToken は二段階認証ページなら authtoken を、そうでなければ "" を返す。
+func twoStepAuthToken(page *scraper.Page) string {
+	m := twoStepAuthPathPattern.FindStringSubmatch(page.Url.Path)
+	if m == nil {
+		return ""
+	}
+	return m[1]
+}
+
 func isNarouUserPage(page *scraper.Page) bool {
 	return page.Url.Path == "/user/top/"
 }
@@ -142,17 +165,57 @@ func (narou *NarouWatcher) Login(credentials *Credentials) error {
 		return err
 	}
 
+	return narou.finishLogin(page)
+}
+
+// finishLogin はログイン送信後のページを判定する。
+// 二段階認証が必要なら TwoStepAuthRequired を返す。
+func (narou *NarouWatcher) finishLogin(page *scraper.Page) error {
+	if token := twoStepAuthToken(page); token != "" {
+		return TwoStepAuthRequired{Token: token}
+	}
 	if !isNarouUserPage(page) {
 		return LoginError{"login failed"}
 	}
 
 	// cookie を保存
-	err = narou.session.SaveCookie()
+	err := narou.session.SaveCookie()
 	if err != nil {
 		return fmt.Errorf("SaveCookie failed: %v", err)
 	}
 
 	return nil
+}
+
+// LoginTOTP は二段階認証(認証アプリ)のコードを送信してログインを完了する。
+func (narou *NarouWatcher) LoginTOTP(token, code string) error {
+	if !twoStepAuthTokenPattern.MatchString(token) {
+		return LoginError{"invalid authtoken"}
+	}
+	page, err := narou.session.GetPage("https://syosetu.com/user2stepauth/totpinput/authtoken/" + token + "/")
+	if err != nil {
+		return err
+	}
+
+	form, err := page.Form(NarouTOTPFormSelector)
+	if err != nil {
+		return LoginError{"totp form not found (authtoken expired?)"}
+	}
+	_ = form.Set("totp_code", code)
+	resp, err := narou.session.Submit(form)
+	if err != nil {
+		return fmt.Errorf("session.Submit() failed: %v", err)
+	}
+	page, err = resp.Page()
+	if err != nil {
+		return fmt.Errorf("resp.Page() failed: %v", err)
+	}
+
+	err = narou.finishLogin(page)
+	if _, ok := err.(TwoStepAuthRequired); ok {
+		return LoginError{"invalid totp code"}
+	}
+	return err
 }
 
 func (narou *NarouWatcher) Logout() error {

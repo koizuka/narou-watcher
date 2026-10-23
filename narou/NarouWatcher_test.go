@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 )
 
@@ -286,6 +287,31 @@ func TestNarouWatcher_GetJSONP(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("GetJSONP() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_twoStepAuthToken(t *testing.T) {
+	tests := []struct {
+		path string
+		want string
+	}{
+		{"/user2stepauth/input/authtoken/VZtVgT0G2y/", "VZtVgT0G2y"},
+		{"/user2stepauth/totpinput/authtoken/VZtVgT0G2y/", "VZtVgT0G2y"},
+		{"/user2stepauth/totpauth/authtoken/VZtVgT0G2y/", "VZtVgT0G2y"},
+		{"/user/top/", ""},
+		{"/login/input/", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			page, err := NewPageFromText("<html></html>")
+			if err != nil {
+				t.Fatal(err)
+			}
+			page.Url = &url.URL{Path: tt.path}
+			if got := twoStepAuthToken(page); got != tt.want {
+				t.Errorf("twoStepAuthToken() = %q, want %q", got, tt.want)
 			}
 		})
 	}

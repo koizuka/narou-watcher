@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/koizuka/scraper"
@@ -385,6 +386,20 @@ func NarouLoginHandler(w http.Header, r *http.Request, watcher *narou.NarouWatch
 		Password: r.PostFormValue("password"),
 	}
 	err := watcher.Login(&credentials)
+	if err != nil {
+		var twoStep narou.TwoStepAuthRequired
+		if errors.As(err, &twoStep) {
+			// 二段階認証待ちのセッションcookieを中継するため、エラーにせず 200 で返す
+			return ReturnJson(w, map[string]interface{}{"totp_required": true, "authtoken": twoStep.Token})
+		}
+		return nil, err
+	}
+
+	return ReturnJson(w, true)
+}
+
+func NarouLoginTOTPHandler(w http.Header, r *http.Request, watcher *narou.NarouWatcher) ([]byte, error) {
+	err := watcher.LoginTOTP(r.PostFormValue("authtoken"), r.PostFormValue("code"))
 	if err != nil {
 		return nil, err
 	}
@@ -870,6 +885,7 @@ func main() {
 	}
 
 	setHandler("/narou/login", NarouLoginHandler)
+	setHandler("/narou/login/totp", NarouLoginTOTPHandler)
 	setHandler("/narou/logout", NarouLogoutHandler)
 
 	remote, err := url.Parse(*reverseProxyAddress)
