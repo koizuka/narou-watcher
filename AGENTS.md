@@ -89,7 +89,8 @@ Visual regression tests use Vitest Browser Mode with Playwright to detect UI cha
 
 Routes are defined in `main.go`. See README.md for full request/response specifications.
 
-- `POST /narou/login` — Login with credentials
+- `POST /narou/login` — Login with credentials (returns `totp_required` + `authtoken` when two-step auth is needed)
+- `POST /narou/login/totp` — Submit the TOTP code to complete login
 - `GET /narou/logout` — Logout
 - `GET /narou/isnoticelist`, `GET /r18/isnoticelist` — Update notifications
 - `GET /narou/bookmarks/`, `GET /r18/bookmarks/` — List bookmark categories

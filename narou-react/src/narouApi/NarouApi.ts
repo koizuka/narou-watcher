@@ -41,6 +41,18 @@ export class NarouApi {
         return res;
     }
 
+    async loginTOTP(authtoken: string, code: string): Promise<Response> {
+        const formData = new FormData();
+        formData.append('authtoken', authtoken);
+        formData.append('code', code);
+        const res: Response = await fetch(`${this.server}/narou/login/totp`, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include',
+        });
+        return res;
+    }
+
     async logout(): Promise<void> {
         await this.fetch('/narou/logout');
     }

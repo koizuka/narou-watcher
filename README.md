@@ -55,6 +55,11 @@
   - form post形式で、 `id` にIDまたはメールアドレス、`password` にパスワードを入れて POSTすると、「小説家になろう」にログインを試みます。
     - 成功したら HTTP status=200, レスポンスボディは true を返すとともに、セッションキーをクッキーで返します(後述)。このため、ログイン情報はサーバーに保持せず、ユーザーのブラウザに覚えさせます。
     - 失敗したら HTTP status=401 を返します。
+    - 二段階認証が必要な場合は HTTP status=200 で `{"totp_required": true, "authtoken": "..."}` を返します（認証待ちのセッションクッキーも返します）。続けて `POST /narou/login/totp` を呼んでください。
+- `POST /narou/login/totp`
+  - form post形式で、`authtoken` に上記で返された値、`code` に認証アプリ(Google Authenticator)の認証コードを入れて POST します。
+    - 成功したら HTTP status=200, レスポンスボディは true を返し、ログイン済みのセッションクッキーを返します。
+    - コードが違う、または authtoken が失効している場合は HTTP status=401 を返します。
 - `GET /narou/logout`
   - 「小説家になろう」からログアウトし、こちらのセッションクッキーも削除します。
 - `GET /narou/isnoticelist` `GET /r18/isnoticelist`
