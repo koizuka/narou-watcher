@@ -8,11 +8,19 @@ on:
     - 'go.sum'
     - 'go.mod'
     - '.github/workflows/deploy-server.yml'
+  # Manual redeploy (e.g. after server-side changes). The deploy-server
+  # environment only accepts runs from main.
+  workflow_dispatch:
 
 # Least-privilege default for GITHUB_TOKEN; this workflow deploys over SSH and
 # needs no GitHub API write access.
 permissions:
   contents: read
+
+# Never run two deploys at once; queue instead of cancelling a half-done deploy.
+concurrency:
+  group: deploy-server
+  cancel-in-progress: false
 
 jobs:
 
@@ -30,49 +38,52 @@ jobs:
       run: go test -v ./...
 
     - name: Build
-      run: go build -v
+      run: go build -v -trimpath
       env:
         GOOS: "linux"
         GOARCH: "amd64"
         CGO_ENABLED: "0"
 
-    - name: Setup SSH
-      uses: kielabokkie/ssh-key-and-known-hosts-action@ff80dac93ba2346f20dbc7f331286c400f0109f7 # v1.6.0
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        ssh-host: ${{ secrets.SSH_HOST }}
-        ssh-port: ${{ secrets.SSH_PORT }}
-    
+        name: narou-watcher
+        path: narou-watcher
+        retention-days: 7
+        if-no-files-found: error
+
+  # Only this job sees the SSH key. It runs no repository code: it uploads the
+  # binary built above to the server's deploy gate, which validates it, swaps it
+  # in, restarts the service and rolls back if it does not come up.
+  # The key is restricted on the server to that single command
+  # (authorized_keys: restrict,command="/usr/local/bin/narou-watcher-deploy").
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: deploy-server
+    steps:
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: narou-watcher
+
+    - name: Set up SSH
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_KNOWN_HOSTS: ${{ vars.SSH_KNOWN_HOSTS }}
+      run: |
+        install -d -m 700 ~/.ssh
+        printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        # Pinned host key (no ssh-keyscan trust-on-first-use)
+        printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
     - name: Deploy
       env:
-        REMOTE: "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}"
-        BINARY: "narou-watcher"
-        TARGET_DIR: "~/"
-        RESTART_COMMAND: "./start.sh"
-        SSH: "ssh -p ${{ secrets.SSH_PORT }}"
-        SCP: "scp -P ${{ secrets.SSH_PORT }}"
+        REMOTE: "${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}"
       run: |
-        # fix break the file (workaround for ssh-key-and-known-hosts-action)
-        echo >> ~/.ssh/known_hosts 
+        echo "sha256: $(sha256sum narou-watcher | cut -d' ' -f1)" | tee -a "$GITHUB_STEP_SUMMARY"
+        ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+          "$REMOTE" narou-watcher-deploy deploy < narou-watcher
 
-        echo "rename old file"
-        $SSH $REMOTE "[ -f $TARGET_DIR$BINARY ] && mv -f $TARGET_DIR$BINARY $TARGET_DIR$BINARY.old"
-
-        echo "scp new file"
-        $SCP $BINARY $REMOTE:$TARGET_DIR$BINARY
-
-        echo "restart"
-        $SSH $REMOTE ${RESTART_COMMAND}
-
-        echo "verify service is running"
-        sleep 5
-        if ! $SSH $REMOTE "systemctl is-active --quiet narou-watcher.service"; then
-          echo "Service failed to start, checking logs..."
-          $SSH $REMOTE "systemctl status narou-watcher.service"
-          $SSH $REMOTE "journalctl -u narou-watcher.service --no-pager -n 20"
-          exit 1
-        fi
-
-        echo "service is running successfully"
-        echo "delete old file"
-        $SSH $REMOTE rm -f $TARGET_DIR$BINARY.old
+    - name: Remove SSH key
+      if: always()
+      run: rm -f ~/.ssh/deploy_key
