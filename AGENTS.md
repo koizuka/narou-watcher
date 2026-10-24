@@ -140,6 +140,23 @@ Routes are defined in `main.go`. See README.md for full request/response specifi
 
 Then configure nginx/Apache to reverse proxy to localhost:7676
 
+### Automated Server Deploy (`.github/workflows/deploy-server.yml`)
+
+Pushing Go changes to `main` (or running the workflow manually) deploys the server binary:
+
+1. `build` job: `go test`, then a static linux/amd64 build uploaded as an artifact.
+2. `deploy` job (environment `deploy-server`, `main` only): pipes the binary to
+   `ssh <host> narou-watcher-deploy deploy`. No repository code runs in this job.
+
+The server-side gate `narou-watcher-deploy` checks that the upload is a linux/amd64 ELF, swaps it in,
+restarts `narou-watcher.service` and rolls back to the previous binary if the service does not come up.
+The SSH key is restricted to that one command (`restrict,command=...` in `authorized_keys`), so it cannot
+open a shell, scp/sftp, or forward ports. The gate and its setup script are managed outside this
+repository (the server administration repo).
+
+Environment `deploy-server` settings: secret `SSH_PRIVATE_KEY`; variables `SSH_HOST`, `SSH_USER`,
+`SSH_KNOWN_HOSTS` (pinned host key line, no `ssh-keyscan`).
+
 ## Common Tasks
 
 ### Adding a New API Endpoint
