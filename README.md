@@ -9,7 +9,7 @@
 場所: `./`
 
 「小説家になろう」の新着チェック中小説ページ(isnoticelist)をパースしてJSONにして返すAPIおよび、login/logout、ログインセッションクッキーを中継する仕組みを提供します。
-デフォルトで port 7676 を listen します。
+デフォルトで 127.0.0.1 の port 7676 を listen します。
 
 実行中に SIGINT (キーであれば CTRL+C ) を送ると正常にシャットダウンします。
 
@@ -18,6 +18,7 @@
 |option|default|説明|
 |---|---|---|
 |-port 数値|7676|HTTPリッスンポート|
+|-bind 文字列|127.0.0.1|待ち受けアドレス。リバースプロキシ経由で使う場合は 127.0.0.1 のままにする。LAN などから直接つなぐ場合のみ `0.0.0.0` (全アドレスなら空文字列 `""`) を指定|
 |-reverse-proxy 文字列|<https://koizuka.github.io/narou-watcher/>|フロントエンドを読み込むアドレス|
 |-log-dir 文字列|githubの作業ディレクトリのトップ/log/narou|開発ログの保存先|
 |-public-url 文字列|""|公開サーバーからreverse proxyするときの外に見えるアドレス(httpsにするときは必須)。パスは `/` より下も可能。|
@@ -265,7 +266,7 @@ npm run test    # テスト実行
 
 ### サーバーの公開
 
-サーバー上でGitHubから git clone, go buildした `narou-watcher` に `-public-url` を設定して起動し、 nginxなどで `localhost:7676` (デフォルト) にリバースプロキシすることでhttpsな自分のサーバーで公開することができます。フロントエンドのコードも自作にする場合は `-reverse-proxy` 引数に置き場所のURLを与えます。
+サーバー上でGitHubから git clone, go buildした `narou-watcher` に `-public-url` を設定して起動し、 nginxやApacheなどで `127.0.0.1:7676` (デフォルト。外部から直接つながらないよう `-bind` は変更しない) にリバースプロキシすることでhttpsな自分のサーバーで公開することができます。フロントエンドのコードも自作にする場合は `-reverse-proxy` 引数に置き場所のURLを与えます。
 
 ## メモ
 

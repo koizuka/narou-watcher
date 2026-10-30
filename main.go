@@ -738,6 +738,7 @@ func main() {
 	}
 
 	listenPort := flag.Uint("port", 7676, "listen port")
+	bindAddress := flag.String("bind", "127.0.0.1", "listen address (空文字列で全アドレス)")
 	openFlag := flag.Bool("open", false, "ブラウザを自動で開く")
 	reverseProxyAddress := flag.String("reverse-proxy", "https://koizuka.github.io/narou-watcher/", "reverse proxy to")
 	logDirectory := flag.String("log-dir", path.Join(projectDir, "log"), "debug log directory(-debug 指定時)")
@@ -898,8 +899,12 @@ func main() {
 		proxy.ServeHTTP(w, r)
 	})
 
-	log.Printf("Listening port %v...", *listenPort)
-	l, err := net.Listen("tcp", fmt.Sprintf(":%v", *listenPort))
+	listenAddress := net.JoinHostPort(*bindAddress, fmt.Sprint(*listenPort))
+	log.Printf("Listening %v...", listenAddress)
+	// MPTCP は不要なので明示的に通常の TCP で待ち受ける
+	var lc net.ListenConfig
+	lc.SetMultipathTCP(false)
+	l, err := lc.Listen(context.Background(), "tcp", listenAddress)
 	if err != nil {
 		log.Fatalf("Listen Error: %v", err)
 	}
