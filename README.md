@@ -266,7 +266,7 @@ npm run test    # テスト実行
 
 ### サーバーの公開
 
-サーバー上でGitHubから git clone, go buildした `narou-watcher` に `-public-url` を設定して起動し、 nginxなどで `localhost:7676` (デフォルト。外部から直接つながらないよう `-bind` は変更しない) にリバースプロキシすることでhttpsな自分のサーバーで公開することができます。フロントエンドのコードも自作にする場合は `-reverse-proxy` 引数に置き場所のURLを与えます。
+サーバー上でGitHubから git clone, go buildした `narou-watcher` に `-public-url` を設定して起動し、 nginxやApacheなどで `127.0.0.1:7676` (デフォルト。外部から直接つながらないよう `-bind` は変更しない) にリバースプロキシすることでhttpsな自分のサーバーで公開することができます。フロントエンドのコードも自作にする場合は `-reverse-proxy` 引数に置き場所のURLを与えます。
 
 ## メモ
 
