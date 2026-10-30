@@ -33,7 +33,7 @@ access control are expected to be enforced at the proxy layer. Exposing the
 server directly to untrusted networks or the public internet without such
 protection risks session hijacking and is strongly discouraged.
 
-The server listens on `localhost` only by default (`-bind`), so a reverse proxy
+The server listens on `127.0.0.1` only by default (`-bind`), so a reverse proxy
 on the same host is the only way in. Do not change `-bind` to `0.0.0.0` or an
 empty string unless you also restrict access with a firewall.
 

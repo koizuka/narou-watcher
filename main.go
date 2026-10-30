@@ -738,7 +738,7 @@ func main() {
 	}
 
 	listenPort := flag.Uint("port", 7676, "listen port")
-	bindAddress := flag.String("bind", "localhost", "listen address (空文字列で全アドレス)")
+	bindAddress := flag.String("bind", "127.0.0.1", "listen address (空文字列で全アドレス)")
 	openFlag := flag.Bool("open", false, "ブラウザを自動で開く")
 	reverseProxyAddress := flag.String("reverse-proxy", "https://koizuka.github.io/narou-watcher/", "reverse proxy to")
 	logDirectory := flag.String("log-dir", path.Join(projectDir, "log"), "debug log directory(-debug 指定時)")
