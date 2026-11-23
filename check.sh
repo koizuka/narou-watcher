@@ -10,5 +10,6 @@ go build ./...
 # React frontend
 cd narou-react
 npm ci
+npm run typecheck
 npm run lint
 npm run test:ci

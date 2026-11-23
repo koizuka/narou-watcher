@@ -48,7 +48,7 @@ jobs:
               - 'narou-react/tsconfig*.json'
               - 'narou-react/vite.config.ts'
               - 'narou-react/vitest.config.js'
-              - 'narou-react/eslint.config.mts'
+              - 'narou-react/.oxlintrc.json'
               - 'narou-react/index.html'
 
   go-test:
@@ -102,6 +102,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Typecheck
+        run: npm run typecheck
 
       - name: Lint
         run: npm run lint
