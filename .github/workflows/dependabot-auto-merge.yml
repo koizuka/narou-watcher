@@ -8,7 +8,9 @@ name: Dependabot auto-merge
 # push workflows, so deploy-client / deploy-server would not run.
 # Required Dependabot secrets (Settings > Secrets and variables > Dependabot):
 #   AUTOMERGE_APP_CLIENT_ID   - Client ID of the GitHub App
-#                               (Contents: write, Pull requests: write)
+#                               (Contents, Pull requests, Workflows: write;
+#                               Workflows is needed to merge github-actions
+#                               updates that touch .github/workflows/)
 #   AUTOMERGE_APP_PRIVATE_KEY - Private key of the GitHub App
 
 on:
@@ -34,6 +36,7 @@ jobs:
           private-key: ${{ secrets.AUTOMERGE_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
+          permission-workflows: write
 
       - name: Enable auto-merge
         if: steps.meta.outputs.update-type != 'version-update:semver-major'
