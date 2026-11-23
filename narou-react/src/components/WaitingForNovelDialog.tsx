@@ -180,12 +180,14 @@ function WaitingForNovelDialogRaw({ api, item, onClose, onAccessible }: {
   return (
     <Dialog
       open={!!item}
-      onClose={(event, reason) => {
+      onClose={(_event, reason) => {
+        // Ignore backdrop clicks: on iPhone Safari the tap that opened the
+        // dialog bubbled to the backdrop and closed it immediately.
+        // Escape closes the dialog like the cancel button.
         if (reason !== 'backdropClick') {
           handleCancel();
         }
       }}
-      disableEscapeKeyDown
     >
       <DialogTitle>
         {isAccessible ? '✅ 小説が公開されました！' : '小説の公開を待っています...'}

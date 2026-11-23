@@ -23,11 +23,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "downlevelIteration": true,
     "jsx": "react-jsx"
   },
   "include": [
-    "src",
-    "eslint.config.mts"
+    "src"
   ]
 }

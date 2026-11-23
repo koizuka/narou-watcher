@@ -7,7 +7,7 @@ narou-watcher is a web application for tracking novel updates on "小説家に�
 ## Project Structure & Module Organization
 
 - **Go backend (server/API)**: root `main.go` (entry point and route definitions), parsing/scraping packages under `narou/` (tests live beside sources as `*_test.go`), data models in `cmd/model/`, and binaries under `cmd/` (`client/`, `standalone/`). Default port: 7676.
-- **React frontend**: `narou-react/` with `src/components/`, `src/hooks/`, `src/reducer/`, `src/narouApi/`, app entry `src/index.tsx`, assets in `public/`. Config: `vite.config.ts`, `vitest.config.js`, `eslint.config.mts`, `tsconfig.json`. Build tool: Vite. UI framework: Material-UI.
+- **React frontend**: `narou-react/` with `src/components/`, `src/hooks/`, `src/reducer/`, `src/narouApi/`, app entry `src/index.tsx`, assets in `public/`. Config: `vite.config.ts`, `vitest.config.js`, `.oxlintrc.json`, `tsconfig.json`. Build tool: Vite. UI framework: Material-UI.
 
 ### Important Files
 
@@ -41,7 +41,8 @@ cd narou-react
 npm install                # Install dependencies
 npm start                  # Start dev server on port 3000
 npm run build              # Build for production
-npm run lint               # Lint
+npm run typecheck          # Type check (tsc, TypeScript 7)
+npm run lint               # Lint (oxlint, type-aware)
 npm test                   # Run tests (watch mode)
 npm run test:ci            # Run tests once (CI mode)
 ```
@@ -60,12 +61,12 @@ npm run test:ci            # Run tests once (CI mode)
 
 ### Full Check
 
-`./check.sh` (from project root) runs the full check: Go vet/test/build plus frontend lint and tests.
+`./check.sh` (from project root) runs the full check: Go vet/test/build plus frontend typecheck, lint and tests.
 
 ## Testing Guidelines
 
 - Backend: add table-driven tests in `*_test.go`; run `go test ./narou -v` for package tests. Prefer `go-cmp` and quicktest-style assertions already used in repo.
-- Frontend: use Vitest + Testing Library; respect ESLint async query rules. Aim to cover API hooks and critical components.
+- Frontend: use Vitest + Testing Library; always await async Testing Library queries/utilities (`no-floating-promises` catches most misses). Aim to cover API hooks and critical components.
 
 ### Visual Regression Testing
 
@@ -103,7 +104,7 @@ Routes are defined in `main.go`. See README.md for full request/response specifi
 ## Coding Style & Naming Conventions
 
 - Go: formatted with `gofmt`; package names lower-case; exported identifiers `PascalCase`, unexported `camelCase`.
-- TypeScript/React: ESLint flat config is enforced (`eslint.config.mts`) with React, Hooks, Testing Library, and Vitest rules. Use 2-space indent.
+- TypeScript/React: oxlint is enforced (`.oxlintrc.json`, type-aware via `oxlint-tsgolint`) with TypeScript, React (incl. Hooks / React Compiler rules), and Vitest rules. Use 2-space indent.
   - Components: `PascalCase` in `src/components/` (e.g., `NarouUpdates.tsx`).
   - Hooks: prefix with `use` in `src/hooks/` (e.g., `useHotKeys.tsx`).
   - Tests: name `*.test.tsx/ts` next to sources.
