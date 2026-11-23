@@ -178,10 +178,17 @@ function WaitingForNovelDialogRaw({ api, item, onClose, onAccessible }: {
   const isMaxRetriesReached = retryCount >= MAX_RETRY_COUNT;
 
   return (
-    // No onClose: only the explicit cancel button closes this dialog.
-    // (Backdrop taps bubbled on iPhone Safari and closed it immediately;
-    // MUI 9 removed disableEscapeKeyDown, so Escape is ignored this way too.)
-    <Dialog open={!!item}>
+    <Dialog
+      open={!!item}
+      onClose={(_event, reason) => {
+        // Ignore backdrop clicks: on iPhone Safari the tap that opened the
+        // dialog bubbled to the backdrop and closed it immediately.
+        // Escape closes the dialog like the cancel button.
+        if (reason !== 'backdropClick') {
+          handleCancel();
+        }
+      }}
+    >
       <DialogTitle>
         {isAccessible ? '✅ 小説が公開されました！' : '小説の公開を待っています...'}
       </DialogTitle>

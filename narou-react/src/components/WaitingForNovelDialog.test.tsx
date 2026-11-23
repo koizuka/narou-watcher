@@ -103,6 +103,52 @@ describe('WaitingForNovelDialog', () => {
     expect(mockOnClose).toHaveBeenCalled();
   });
 
+  test('calls onClose when Escape is pressed', async () => {
+    const user = userEvent.setup();
+    mockCall.mockResolvedValue({ accessible: false });
+
+    render(
+      <WaitingForNovelDialog
+        api={mockApi}
+        item={mockItem}
+        onClose={mockOnClose}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockCall).toHaveBeenCalledTimes(1);
+    });
+
+    await user.keyboard('{Escape}');
+
+    expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  test('does not close on backdrop click', async () => {
+    const user = userEvent.setup();
+    mockCall.mockResolvedValue({ accessible: false });
+
+    render(
+      <WaitingForNovelDialog
+        api={mockApi}
+        item={mockItem}
+        onClose={mockOnClose}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockCall).toHaveBeenCalledTimes(1);
+    });
+
+    // MUI detects backdrop clicks on the dialog container (outside the paper)
+    const container = document.querySelector('.MuiDialog-container');
+    expect(container).not.toBeNull();
+    await user.click(container as Element);
+
+    expect(mockOnClose).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
   test('has manual retry button', async () => {
     mockCall.mockResolvedValue({ accessible: false });
 
