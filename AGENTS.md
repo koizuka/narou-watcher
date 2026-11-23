@@ -181,6 +181,13 @@ Versions are managed by dependabot — always check `go.mod` and `narou-react/pa
 - Backend: `goquery` (HTML parsing), `koizuka/scraper` (web scraping framework), `rs/cors` (CORS middleware), standard library HTTP server
 - Frontend: React, Material-UI (+ Emotion), TypeScript, Vite, Vitest, SWR, date-fns
 
+### Dependency Updates (Dependabot)
+
+- Dependabot runs with a 7-day cooldown (`github.com/koizuka/*` Go modules are excluded from the cooldown).
+- `.github/workflows/dependabot-auto-merge.yml` enables auto-merge (squash) on **every** Dependabot PR except semver-major updates — including UI libraries — because UI regressions are caught by the Playwright visual regression tests in CI. The PR merges once the required checks (`CI Summary`) pass.
+- Auto-merge uses a GitHub App token (not `GITHUB_TOKEN`) so the merge triggers the push-based deploy workflows (`deploy-client.yml` / `deploy-server.yml`).
+- semver-major updates are reviewed and merged manually.
+
 ## Security & Configuration Tips
 
 - Do not commit secrets, cookies, or captured logs. Use `-debug` only locally; logs write under `log/narou/<session>`.
