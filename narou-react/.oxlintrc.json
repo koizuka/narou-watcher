@@ -14,25 +14,6 @@
   "env": {
     "builtin": true
   },
-  "globals": {
-    "suite": "writable",
-    "test": "writable",
-    "describe": "writable",
-    "it": "writable",
-    "expectTypeOf": "writable",
-    "assertType": "writable",
-    "expect": "writable",
-    "assert": "writable",
-    "chai": "writable",
-    "vitest": "writable",
-    "vi": "writable",
-    "beforeAll": "writable",
-    "afterAll": "writable",
-    "beforeEach": "writable",
-    "afterEach": "writable",
-    "onTestFailed": "writable",
-    "onTestFinished": "writable"
-  },
   "settings": {
     "react-x": {
       "version": "detect",
