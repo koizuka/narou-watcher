@@ -7,6 +7,9 @@ updates:
     open-pull-requests-limit: 10
     cooldown:
       default-days: 7
+      exclude:
+        # 自分で公開しているモジュール (scraper 等) は cooldown 不要
+        - "github.com/koizuka/*"
   - package-ecosystem: npm
     directory: "/narou-react"
     schedule:
