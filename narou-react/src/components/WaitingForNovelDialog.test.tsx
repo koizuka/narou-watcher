@@ -142,8 +142,8 @@ describe('WaitingForNovelDialog', () => {
 
     // MUI detects backdrop clicks on the dialog container (outside the paper)
     const container = document.querySelector('.MuiDialog-container');
-    expect(container).not.toBeNull();
-    await user.click(container as Element);
+    if (container === null) throw new Error('dialog container not found');
+    await user.click(container);
 
     expect(mockOnClose).not.toHaveBeenCalled();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
